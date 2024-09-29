@@ -1,28 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import './App.css';
+import NavBar from './components/NavBar';
 
 function App() {
 
-  const [backendData, setBackendData] = useState([{}])
-
-  useEffect(() => {
-    fetch("/api").then(
-      response => response.json()
-    ).then(
-      data => {
-        setBackendData(data)
-      }
-    ).catch(error => console.error("Error fetching data:", error));
-  }, []);
-
+  const title = "Welcome to CivicConnect";
+  const users = 0;
   return (
-    <div>
-      {(typeof backendData.members === 'undefined') ? (
-        <p> Names loading... </p>
-      ) : (
-        backendData.members.map((member, i) => (
-          <p key={i}>{member}</p>
-        ))
-      )}
+    <div className='App'>
+      <NavBar />
+      <div className='content'>
+        <h1>{title}</h1>      
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ describe('signupUser', () => {
         users.length = 0;
     });
 
+    // checks if signup is successfull
     it('should register a new user successfully', async () => {
         const message = await signupUser('heidiTeng', 'securePass123');
         expect(message).toBe('User registered successfully.');
@@ -13,11 +14,13 @@ describe('signupUser', () => {
         expect(users[0].username).toBe('heidiTeng');
     });
 
+    // if certain fields are missing
     it('should throw an error when username or password is missing', async () => {
         await expect(signupUser('aysuSaglam', '')).rejects.toThrow('Make sure to fill out both username and password.');
         await expect(signupUser('', 'password123')).rejects.toThrow('Make sure to fill out both username and password.');
     });
 
+    // if user already exists
     it('should throw an error when the user already exists', async () => {
         await signupUser('avishiGoyal', 'securePass123');
         await expect(signupUser('avishiGoyal', 'securePass123')).rejects.toThrow('User already exists.');

@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import './Signup.css';
+import './Login.css';
 
-const Signup = ({ onSwitchToLogin }) => {
+const Login = ({ onSwitchToSignup }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
 
-  const handleSignup = async (e) => {
-    e.preventDefault(); // prevent page refresh
+  const handleLogin = async (e) => {
+    e.preventDefault(); // prevent the page from refreshing
 
     try {
-      const response = await fetch('http://localhost:5010/signup', {
+      const response = await fetch('http://localhost:5010/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -19,8 +19,10 @@ const Signup = ({ onSwitchToLogin }) => {
       });
 
       const data = await response.json();
+
       if (response.ok) {
         setResponseMessage(data.message);
+        localStorage.setItem('authToken', data.token); // store token in local storage
       } else {
         setResponseMessage(`Error: ${data.error}`);
       }
@@ -30,38 +32,39 @@ const Signup = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="signup">
-      <h2 className="signup-title"> SignUp</h2>
-      <form className="signup-form" onSubmit={handleSignup}>
+    <div className="login">
+      <h2 className="login-title">Login</h2>
+      <form className="login-form" onSubmit={handleLogin}>
         <div className="form-group">
-          <label className='form-label'>Username:</label>
+          <label className="form-label">Username:</label>
           <input
-            className='form-input'
+            className="form-input"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
-        <div className='form-group'>
-          <label className='form-label'>Password:</label>
+        <div className="form-group">
+          <label className="form-label">Password:</label>
           <input
-            className='form-input'
+            className="form-input"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        <button className="signup-button" type="submit">
-            Sign Up</button>
+        <button className="login-button" type="submit">
+          Login
+        </button>
       </form>
       {responseMessage && <p className="response-message">{responseMessage}</p>}
-        <button className="switch-button" onClick={onSwitchToLogin}>
-        Already have an account? Login
+      <button className="switch-button" onClick={onSwitchToSignup}>
+        Don't have an account? Sign Up
       </button>
     </div>
   );
 };
 
-export default Signup;
+export default Login;

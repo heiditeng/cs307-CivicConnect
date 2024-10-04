@@ -1,5 +1,6 @@
 import './App.css';
 import NavBar from './components/NavBar';
+import Signup from './components/Signup';
 
 function App() {
 
@@ -9,7 +10,8 @@ function App() {
     <div className='App'>
       <NavBar />
       <div className='content'>
-        <h1>{title}</h1>      
+        <h1>{title}</h1> 
+        <Signup />     
       </div>
     </div>
   );

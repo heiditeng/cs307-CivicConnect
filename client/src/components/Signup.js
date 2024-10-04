@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import './Signup.css';
 
-const Signup = () => {
+const Signup = ({ onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
@@ -30,29 +31,35 @@ const Signup = () => {
 
   return (
     <div className="signup">
-      <h2>Signup</h2>
-      <form onSubmit={handleSignup}>
-        <div>
-          <label>Username: </label>
+      <h2 className="signup-title"> SignUp</h2>
+      <form className="signup-form" onSubmit={handleSignup}>
+        <div className="form-group">
+          <label className='form-label'>Username:</label>
           <input
+            className='form-input'
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
-        <div>
-          <label>Password: </label>
+        <div className='form-group'>
+          <label className='form-label'>Password:</label>
           <input
+            className='form-input'
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        <button type="submit">Sign Up</button>
+        <button className="signup-button" type="submit">
+            Sign Up</button>
       </form>
-      {responseMessage && <p>{responseMessage}</p>}
+      {responseMessage && <p className="response-message">{responseMessage}</p>}
+        <button className="switch-button" onClick={onSwitchToLogin}>
+        Already have an account? Login
+      </button>
     </div>
   );
 };

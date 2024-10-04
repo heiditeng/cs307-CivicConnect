@@ -11,6 +11,7 @@ app.use(express.json());
 let users = [];
 
 app.post('/signup', async (req, res) => {
+    // req is parsed into JSON, take username and password variable
     const { username, password } = req.body;
 
     // check if all required fields are provided

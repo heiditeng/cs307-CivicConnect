@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Signup.css';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
@@ -30,10 +31,10 @@ const Signup = () => {
 
   return (
     <div className="signup">
-      <h2>Signup</h2>
+      <h2>SignUp</h2>
       <form onSubmit={handleSignup}>
         <div>
-          <label>Username: </label>
+          <label>Username:</label>
           <input
             type="text"
             value={username}
@@ -42,7 +43,7 @@ const Signup = () => {
           />
         </div>
         <div>
-          <label>Password: </label>
+          <label>Password:</label>
           <input
             type="password"
             value={password}
@@ -52,7 +53,11 @@ const Signup = () => {
         </div>
         <button type="submit">Sign Up</button>
       </form>
-      {responseMessage && <p>{responseMessage}</p>}
+      {responseMessage && (
+        <p className={responseMessage.startsWith('Error') ? '' : 'success'}>
+          {responseMessage}
+        </p>
+      )}
     </div>
   );
 };

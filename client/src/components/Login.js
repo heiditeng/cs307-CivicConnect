@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = ({ onSwitchToSignup }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
+  const navigate = useNavigate(); // react router to navigate to other pages
 
   const handleLogin = async (e) => {
     e.preventDefault(); // prevent the page from refreshing
@@ -62,6 +64,11 @@ const Login = ({ onSwitchToSignup }) => {
       {responseMessage && <p className="response-message">{responseMessage}</p>}
       <button className="switch-button" onClick={onSwitchToSignup}>
         Don't have an account? Sign Up
+      </button>
+      <button
+        className="forgot-password-link"
+        onClick={() => navigate('/forgot-password')}>
+        Forgot Password?
       </button>
     </div>
   );

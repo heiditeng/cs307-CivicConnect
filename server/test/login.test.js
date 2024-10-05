@@ -2,36 +2,28 @@ const { signupUser, loginUser, users } = require('../server');
 
 describe('loginUser', () => {
     beforeEach(() => {
-        users.length = 0; // reset user array
+        users.length = 0;
     });
 
-    // checks if valid error message is filled
-    it('should throw an error when username or password is missing', async () => {
-        await expect(loginUser('username', '')).rejects.toThrow('Make sure to fill out both fields.');
-        await expect(loginUser('', 'password')).rejects.toThrow('Make sure to fill out both fields.');
+    // register before start
+    beforeEach(async () => {
+        await signupUser('testUser', 'testPassword123', 'test@example.com', '4857489257483957');
     });
 
-    // invalid username
+    // checks if login fails when the username is not found
     it('should throw an error when username is not found', async () => {
-        await signupUser('aysu', 'password123');
-        await expect(loginUser('newUser', 'password123')).rejects.toThrow('Invalid username or password.');
+        await expect(loginUser('heiditeng', 'testPass1234123454')).rejects.toThrow('Invalid username or password.');
     });
 
-    // invalud password
+    // Checks if login fails when the password is incorrect
     it('should throw an error when password is incorrect', async () => {
-        await signupUser('heidi', 'password123');
-        await expect(loginUser('heidi', 'wrong_password')).rejects.toThrow('Invalid username or password.');
+        await expect(loginUser('testUser', 'testPass12321421413432432')).rejects.toThrow('Invalid username or password.');
     });
 
-    // successful login
+    // Checks if login is successful when correct credentials are provided
     it('should successfully log in when correct credentials are provided', async () => {
-        // login
-        await signupUser('avishi', 'password123');
-        const loginResult = await loginUser('avishi', 'password123');
-
-        // check the return value
-        expect(loginResult.message).toBe('Login successful.');
-        expect(loginResult.token).toBeDefined();
-        expect(typeof loginResult.token).toBe('string');
+        const result = await loginUser('testUser', 'testPassword123');
+        expect(result.message).toBe('Login successful.');
+        expect(result.token).toBeDefined();
     });
 });

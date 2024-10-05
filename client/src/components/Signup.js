@@ -4,6 +4,8 @@ import './Signup.css';
 const Signup = ({ onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
 
   const handleSignup = async (e) => {
@@ -15,7 +17,7 @@ const Signup = ({ onSwitchToLogin }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, email, phoneNumber }),
       });
 
       const data = await response.json();
@@ -50,6 +52,26 @@ const Signup = ({ onSwitchToLogin }) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Email:</label>
+          <input
+            className="form-input"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Phone Number:</label>
+          <input
+            className="form-input"
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             required
           />
         </div>

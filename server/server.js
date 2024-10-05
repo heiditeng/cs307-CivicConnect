@@ -11,30 +11,30 @@ app.use(express.json());
 let users = [];
 const secretKey = 'key'; 
 
-async function signupUser(username, password) {
-    if (!username || !password) {
-        throw new Error('Make sure to fill out both username and password.');
+async function signupUser(username, password, email, phoneNumber) {
+    if (!username || !password || !email || !phoneNumber) {
+        throw new Error('Make sure to fill out all fields.');
     }
 
-    // check if the user already exists
-    const existingUser = users.find(user => user.username === username);
+    // check if the user already exists through email + username
+    const existingUser = users.find(user => user.username === username || user.email === email);
     if (existingUser) {
-        throw new Error('User already exists.');
+        throw new Error('User with this username or email already exists.');
     }
 
     // hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // store user in the list
-    users.push({ username, password: hashedPassword });
+    users.push({ username, password: hashedPassword, email, phoneNumber});
 
     return 'User registered successfully.';
 }
 
 app.post('/signup', async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const message = await signupUser(username, password);
+        const {username, password, email, phoneNumber } = req.body;
+        const message = await signupUser(username, password, email, phoneNumber);
         res.status(201).json({ message });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -44,7 +44,7 @@ app.post('/signup', async (req, res) => {
 async function loginUser(username, password) {
     // check if the fields are filled in
     if (!username || !password) {
-        throw new Error('Make sure to fill out both fields.');
+        throw new Error('Make sure to fill out all fields.');
     }
 
     // find user by username

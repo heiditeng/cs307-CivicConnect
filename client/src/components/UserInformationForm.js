@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const UserInformationForm = () => {
 
@@ -11,6 +11,33 @@ const UserInformationForm = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
+
+    // fetch profile data to pre-populate form
+    useEffect(() => {
+      const fetchProfileData = async () => {
+        try {
+          const res = await fetch('http://localhost:5010/api/profiles/profile/aysu'); // currently hardcoded to aysu will change
+
+          // if response is valid/successful
+          if (res.ok) {
+            const data = await res.json();
+            setAvailability(data.availability);
+            setLocation(data.location);
+            setOccupation(data.occupation);
+            setInterests(data.interests);
+            setHobbies(data.hobbies);
+          } else {
+            setErrorMessage('Error fetching profile data');
+          } 
+        } catch (error) {
+          setErrorMessage('Error fetching profile data');
+        }
+      };
+
+      fetchProfileData();
+    }, []); // [] only will run once when component initialized
+    
+    
     // handling form submission
     const handleSubmit = async (e) => {
         // tells browser to stop the default action action associated w event

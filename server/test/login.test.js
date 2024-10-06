@@ -1,4 +1,47 @@
-const { signupUser, loginUser, users } = require('../server');
+const {app, signupUser, loginUser, users} = require('../server');
+// mock data for google authentication
+const request = require('supertest');
+const sinon = require('sinon');
+const passport = require('passport');
+
+describe('Google OAuth Authentication', () => {
+    beforeEach(() => {
+        users.length = 0; // clear users array
+    });
+
+    // mock passport.js Google OAuth Strategy
+    beforeEach(() => {
+        sinon.stub(passport, 'authenticate').callsFake((strategy) => {
+            if (strategy === 'google') {
+                return (req, res, next) => {
+                    if (req.url.includes('/auth/google/callback')) {
+                        // simulate google user with fake info
+                        req.user = {
+                            googleId: 'testGoogleId123',
+                            username: 'Test Google User',
+                            email: 'testuser@gmail.com'
+                        };
+                        users.push(req.user);
+                        return res.redirect('http://localhost:3000'); // simulate redirect to the home page after successful login
+                    } else {
+                        // simulate redirect to Google login page
+                        res.redirect('https://accounts.google.com/o/oauth2/v2/auth');
+                    }
+                };
+            }
+        });
+    });
+
+    afterEach(() => {
+        sinon.restore(); // restore original passport authenticate function after each test
+    });
+
+    it('should redirect to Google login page', async () => {
+        const response = await request(app).get('/auth/google');
+        expect(response.statusCode).toBe(302); // expect a 302 redirect (send user to diff page)
+        expect(response.headers.location).toContain('accounts.google.com'); // check redirection to google login
+    });
+});
 
 describe('loginUser', () => {
     beforeEach(() => {

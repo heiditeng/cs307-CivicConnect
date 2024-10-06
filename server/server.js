@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt'); // used for hashing passwords
 const jwt = require('jsonwebtoken'); // create and verify JWT
 const cors = require('cors'); // import cors
 const nodemailer = require('nodemailer'); // allow for emails to be sent
+const profileRoutes = require('./profileRoutes'); // import profile routes
 
 
 const app = express()
@@ -127,13 +128,8 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
-app.get("/api", (req, res) => {
-    res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })
-})
-
-// using port 5010 bc 5000 taken
-// app.listen(5010, () => {console.log("Server has started on port 5010")})
+// using the profile routes
+app.use('/api/profiles', profileRoutes);
 
 // start the server only if not in a test environment
 if (process.env.NODE_ENV !== 'test') {
@@ -141,5 +137,6 @@ if (process.env.NODE_ENV !== 'test') {
         console.log("Server has started on port 5010");
     });
 }
+
 
 module.exports = { app, signupUser, loginUser, users };

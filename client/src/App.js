@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // na
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
+import AvailabilityForm from './components/AvailabilityForm';
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
         <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/availability-form" element={<AvailabilityForm />} />
         </Routes>
       </div>
     </div>

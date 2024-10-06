@@ -1,4 +1,6 @@
 // Remember - a component is just a function that returns a JSX template!
+import { Link } from 'react-router-dom'; 
+
 const NavBar = () => {
     return (
       <div className="navbar bg-base-100">
@@ -25,7 +27,7 @@ const NavBar = () => {
                 <a>my profile</a>
               </li>
               <li>
-                <a>user forms</a>
+                <Link to="/availability-form">availability form</Link>
               </li>
               <li>
                 <a>log out</a>

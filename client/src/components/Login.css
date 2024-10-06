@@ -73,7 +73,21 @@
   display: block;
   text-align: center;
 }
-  
+
+.switch-button,
+.google-login-button {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #97c9ff;
+  cursor: pointer;
+  font-size: 8px;
+  text-decoration: underline;
+  padding: 0;
+  display: block;
+  text-align: center;
+}
+
 .login button:hover {
     background-color: #0056b3;
 }

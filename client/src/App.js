@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // na
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
-import AvailabilityForm from './components/AvailabilityForm';
-
+import UserInformationForm from './components/UserInformationForm';
 function App() {
 
   const title = "Welcome to CivicConnect!";
@@ -18,7 +17,7 @@ function App() {
         <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
-            <Route path="/availability-form" element={<AvailabilityForm />} />
+            <Route path="/info-form" element={<UserInformationForm />} />
         </Routes>
       </div>
     </div>

@@ -6,21 +6,29 @@ let communityMembers = [
     {
         username: 'aysu',
         availability: 'Weekdays, 9 AM - 5 PM',
-        location: 'San Diego, CA'
+        location: 'San Diego, CA',
+        occupation: 'Student',
+        interests: 'Food',
+        hobbies: 'Cooking'
+
     },
     {
         username: 'heidi',
         availability: 'Weekends',
-        location: 'Los Angeles, CA'
+        location: 'Los Angeles, CA',
+        occupation: 'Student',
+        interests: 'Art',
+        hobbies: 'Running'
+
     }
 ];
 
 // route to update availability & location for community members
 router.post('/update-profile', (req, res) => {
-    const { username, availability, location } = req.body;
+    const { username, availability, location, occupation, interests, hobbies } = req.body;
 
     // validate request data
-    if (!username || !availability || !location) {
+    if (!username || !availability || !location || !occupation || !interests || !hobbies) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -33,6 +41,9 @@ router.post('/update-profile', (req, res) => {
     // update the user's availability and location
     member.availability = availability;
     member.location = location;
+    member.occupation = occupation;
+    member.interests = interests;
+    member.hobbies = hobbies;
 
     return res.status(200).json({ message: 'Profile updated successfully!' });
 });

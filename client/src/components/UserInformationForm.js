@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 
-const AvailabilityForm = () => {
+const UserInformationForm = () => {
 
     // useState hooks to store form input and any feedback messages
     const [availability, setAvailability] = useState('');
     const [location, setLocation] = useState('');
+    const [occupation, setOccupation] = useState('');
+    const [interests, setInterests] = useState('');
+    const [hobbies, setHobbies] = useState('')
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -27,7 +30,7 @@ const AvailabilityForm = () => {
                 },
                 // user name should be tracked when a user has logged in
                 // for now, it will be hard-coded to aysu
-                body: JSON.stringify({ username: "aysu", availability, location }), // The data being sent
+                body: JSON.stringify({ username: "aysu", availability, location, occupation, interests, hobbies, location }), // The data being sent
             });
 
             // parse the JSON response from server
@@ -48,7 +51,7 @@ const AvailabilityForm = () => {
     return (
         <div className="flex justify-center items-center h-screen">
           <div className="w-full max-w-md p-6 bg-base-200 rounded-lg shadow-xl">
-            <h2 className="text-2xl font-bold mb-6 text-center">Update Your Availability!</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">Update Your Information!</h2>
             
             <form onSubmit={handleSubmit}>
               <div className="form-control mb-4">
@@ -76,6 +79,46 @@ const AvailabilityForm = () => {
                   placeholder="City or neighborhood" 
                 />
               </div>
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Occupation</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  type="text"
+                  value={occupation} 
+                  onChange={(e) => setOccupation(e.target.value)} // update
+                  placeholder="e.g., Student, Teacher" 
+                />
+              </div>
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Interests</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  type="text"
+                  value={interests} 
+                  onChange={(e) => setInterests(e.target.value)} // update
+                  placeholder="e.g., Art, Animals" 
+                />
+              </div>
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Hobbies</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  type="text"
+                  value={hobbies} 
+                  onChange={(e) => setHobbies(e.target.value)} // update
+                  placeholder="e.g., Painting, Running" 
+                />
+              </div>
+              
               
               <div className="form-control mt-6">
                 <button type="submit" className="btn btn-primary w-full">
@@ -102,4 +145,4 @@ const AvailabilityForm = () => {
 
 };
 
-export default AvailabilityForm;
+export default UserInformationForm;

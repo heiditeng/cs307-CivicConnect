@@ -25,7 +25,7 @@ const NavBar = () => {
                 <a>my profile</a>
               </li>
               <li>
-                <a>about CivicConnect</a>
+                <a>user forms</a>
               </li>
               <li>
                 <a>log out</a>

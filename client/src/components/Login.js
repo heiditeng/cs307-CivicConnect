@@ -33,6 +33,11 @@ const Login = ({ onSwitchToSignup }) => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    // redirect the user to the Google authentication route
+    window.location.href = 'http://localhost:5010/auth/google';
+  };
+
   return (
     <div className="login">
       <h2 className="login-title">Login</h2>
@@ -69,6 +74,9 @@ const Login = ({ onSwitchToSignup }) => {
         className="forgot-password-link"
         onClick={() => navigate('/forgot-password')}>
         Forgot Password?
+      </button>
+      <button className="google-login-button" onClick={handleGoogleLogin}>
+        Sign in with Google
       </button>
     </div>
   );

@@ -15,7 +15,7 @@ CivicConnect is a social network platform focused on community service recommend
 ```npm install```
 3. Run the application in the server folder: ```node server.js```
 - You should see the message "Server has started on port 5010"
-4. Open a seperate terminal and navigate to the clinet folder and run: ```npm start``` to get the local host.
+4. Open a seperate terminal and navigate to the client folder and run: ```npm start``` to get the local host to start.
 - You can access the application on the browser: http://localhost:3000
 
 The server wil be running on port 5010, and you can interact with the client on local host 3000.

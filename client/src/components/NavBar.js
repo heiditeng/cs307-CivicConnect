@@ -27,7 +27,7 @@ const NavBar = () => {
                 <a>my profile</a>
               </li>
               <li>
-                <Link to="/availability-form">availability form</Link>
+                <Link to="/info-form">user info form</Link>
               </li>
               <li>
                 <a>log out</a>

@@ -8,6 +8,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session'); // handle sessions
 const profileRoutes = require('./profileRoutes'); // import profile routes
 
+
 // express needs to be in front of passport for google auth to work !!!
 const app = express()
 
@@ -235,8 +236,16 @@ app.post('/login', async (req, res) => {
     }
 });
 
+
 // using the profile routes
 app.use('/api/profiles', profileRoutes);
+
+app.get("/api", (req, res) => {
+    res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })
+})
+
+// using port 5010 bc 5000 taken
+// app.listen(5010, () => {console.log("Server has started on port 5010")})
 
 // start the server only if not in a test environment
 if (process.env.NODE_ENV !== 'test') {

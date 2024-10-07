@@ -11,7 +11,7 @@ const ResetPassword = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5010/reset-password', {
+      const response = await fetch('http://localhost:5010/request-password-reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,6 +27,21 @@ const ResetPassword = () => {
         setMessage(`Error: ${data.error}`);
       }
     } catch (error) {
+      console.error('Error sending email:', error);
+      setMessage('Error: Unable to connect to the server.');
+    }
+  };
+
+  const handleTestEmail = async () => {
+    try {
+      const response = await fetch('http://localhost:5010/send-test-email');
+      if (response.ok) {
+        setMessage('Test email sent successfully.');
+      } else {
+        setMessage('Error sending test email.');
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error);
       setMessage('Error: Unable to connect to the server.');
     }
   };
@@ -48,6 +63,9 @@ const ResetPassword = () => {
         <button type="submit" className="reset-button">
           Send Reset Link
         </button>
+        <button onClick={handleTestEmail} className="test-button">
+        Send Test Email
+      </button>
       </form>
       {message && <p className="response-message">{message}</p>}
     </div>

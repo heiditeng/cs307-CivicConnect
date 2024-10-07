@@ -1,29 +1,35 @@
-import React, { useEffect, useState } from 'react'
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // navigation between pages
+import NavBar from './components/NavBar';
+import AuthPage from './components/AuthPage';
+import ResetPassword from './components/ResetPassword';
+import UserInformationForm from './components/UserInformationForm';
+
+import UserProfile from './components/UserProfile';
+import Login from './components/Login';
+import MyProfileCM from './components/MyProfileCM';
 
 function App() {
 
-  const [backendData, setBackendData] = useState([{}])
-
-  useEffect(() => {
-    fetch("/api").then(
-      response => response.json()
-    ).then(
-      data => {
-        setBackendData(data)
-      }
-    ).catch(error => console.error("Error fetching data:", error));
-  }, []);
-
+  const title = "Welcome to CivicConnect!";
+  // const users = 0;
   return (
-    <div>
-      {(typeof backendData.members === 'undefined') ? (
-        <p> Names loading... </p>
-      ) : (
-        backendData.members.map((member, i) => (
-          <p key={i}>{member}</p>
-        ))
-      )}
+    <Router>
+    <div className='App'>
+      <NavBar />
+      <div className='content'>
+        <h1 style={{ textAlign: 'center', marginBottom: '20px'}}>{title}</h1>
+        <Routes>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/info-form" element={<UserInformationForm />} />
+            <Route path="/profile" element={<UserProfile/>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/myprofile" element={<MyProfileCM />} />
+        </Routes>
+      </div>
     </div>
+    </Router>
   );
 }
 

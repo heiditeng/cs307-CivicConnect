@@ -1,0 +1,98 @@
+.auth-page {
+    max-width: 400px;
+    margin: auto;
+}
+
+/* login form */
+.login {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+/* login heading */
+.login h2 {
+    text-align: center;
+}
+
+/* form */
+.login form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+  
+.login label {
+    font-weight: bold;
+}
+  
+.login input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-left: 10px;
+}
+  
+.login button {
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+/* switch button */
+.switch-button {
+    margin-top: 15px;
+    background: none;
+    border: none;
+    color: #97c9ff;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 10px;
+}
+
+.switch-button,
+.forgot-password-link {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #97c9ff;
+  cursor: pointer;
+  font-size: 8px;
+  text-decoration: underline;
+  padding: 0;
+  display: block;
+  text-align: center;
+}
+
+.switch-button,
+.google-login-button {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: #97c9ff;
+  cursor: pointer;
+  font-size: 8px;
+  text-decoration: underline;
+  padding: 0;
+  display: block;
+  text-align: center;
+}
+
+.login button:hover {
+    background-color: #0056b3;
+}
+  
+.login p {
+    text-align: center;
+    color: green;
+}  

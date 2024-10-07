@@ -1,3 +1,4 @@
+import React from 'react';
 // Remember - a component is just a function that returns a JSX template!
 const NavBar = () => {
     return (

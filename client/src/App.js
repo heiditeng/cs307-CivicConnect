@@ -4,6 +4,9 @@ import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
 import UserInformationForm from './components/UserInformationForm';
+import UserProfile from './components/UserProfile';
+import Login from './components/Login';
+
 function App() {
 
   const title = "Welcome to CivicConnect!";
@@ -18,6 +21,8 @@ function App() {
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
             <Route path="/info-form" element={<UserInformationForm />} />
+            <Route path="/profile" element={<UserProfile/>} />
+            <Route path="/login" element={<Login />} />
         </Routes>
       </div>
     </div>

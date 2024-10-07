@@ -4,6 +4,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // na
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
+import CreateEvent from './components/CreateEvent';
+import MyEvents from './components/MyEvents';
+import EventDetails from './components/EventDetails';
 
 function App() {
 
@@ -18,6 +21,9 @@ function App() {
         <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/my-events" element={<MyEvents />} />
+            <Route path="/event-details/:id" element={<EventDetails />} />
         </Routes>
       </div>
     </div>

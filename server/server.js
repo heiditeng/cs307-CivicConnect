@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer'); // allow for emails to be sent
 const session = require('express-session'); // handle sessions
 const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
-
+const profileRoutes = require('./profileRoutes'); // import profile routes
 
 
 // express needs to be in front of passport for google auth to work !!!

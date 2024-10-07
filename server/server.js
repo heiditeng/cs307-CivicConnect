@@ -3,96 +3,34 @@ const bcrypt = require('bcrypt'); // used for hashing passwords
 const jwt = require('jsonwebtoken'); // create and verify JWT
 const cors = require('cors'); // import cors
 const nodemailer = require('nodemailer'); // allow for emails to be sent
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+// const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session'); // handle sessions
 
 // express needs to be in front of passport for google auth to work !!!
-const app = express()
+const { passport, users } = require('./googleAuth');
+const secretKey = 'key'
+
+const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000', // allow requests from this front-end origin
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 
-app.use(express.json()); 
-
-let users = [];
-const secretKey = 'key'; 
-
-// nodemailer (sends email)
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, 
-    auth: {
-        user: 'civicconnect075@gmail.com',
-        pass: 'CS307Project2024!' 
-    }
-});
-
-// transporter.verify((error, success) => {
-//     if (error) {
-//         console.error('SMTP Configuration Error:', error);
-//     } else {
-//         console.log('SMTP Server is ready to send messages.');
-//     }
-// });
-
-app.use(cors({
-    origin: 'http://localhost:3000', // allow requests from this front-end origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
-app.use(express.json()); 
+app.use(express.json());
 
 // express-session setup
 app.use(session({
-    secret: 'secret', // sign the session
-    resave: false, // session won't be saved
-    saveUninitialized: true // new intialized sessions
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: true
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// passport.js Google OAuth setup
-// clientID and clientSecret can be found in google console cloud -> API services -> credentials -> OAuth 2.0 ClientID
-// google strategy allwows for google signup
-passport.use(new GoogleStrategy({
-    clientID: '1058244633617-ko8kjjl51lb15pcfqv5mrdf51ik3mb82.apps.googleusercontent.com',
-    clientSecret: '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',
-    callbackURL: 'http://localhost:5010/auth/google/callback'
-}, 
-// after google authenticates ...
-(accessToken, refreshToken, profile, done) => {
-    // creates new user object if not found
-    let user = users.find(u => u.googleId === profile.id);
-    if (!user) {
-        user = {
-            googleId: profile.id,
-            username: profile.displayName,
-            email: profile.emails[0].value
-        };
-        users.push(user);
-    }
-    // sign in successful
-    return done(null, user);
-}));
-
-// googleID stored
-passport.serializeUser((user, done) => {
-    done(null, user.googleId);
-});
-
-// retrieves data based on session
-passport.deserializeUser((id, done) => {
-    const user = users.find(u => u.googleId === id);
-    done(null, user);
-});
-
-// google OAuth routes
+// Google OAuth routes
 app.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
@@ -105,10 +43,22 @@ app.get('/auth/google/callback', passport.authenticate('google', {
     res.redirect('http://localhost:3000');
 });
 
+// nodemailer (sends email)
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'civicconnect075@gmail.com',
+        pass: 'CS307Project2024!'
+    }
+});
+
+// Sample email route
 app.get('/send-test-email', async (req, res) => {
     const mailOptions = {
         from: 'civicconnect075@gmail.com',
-        to: 'heiditeng22@gmail.com', 
+        to: 'heiditeng22@gmail.com',
         subject: 'Test Email',
         text: 'This is a test email from CivicConnect.'
     };

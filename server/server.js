@@ -4,6 +4,10 @@ const jwt = require('jsonwebtoken'); // create and verify JWT
 const cors = require('cors'); // import cors
 const nodemailer = require('nodemailer'); // allow for emails to be sent
 const session = require('express-session'); // handle sessions
+const passwordRoutes = require('./passwordRoutes'); // password routes
+const { emailTemplates, errorMessages, successMessages } = require('./messages');
+
+
 
 // express needs to be in front of passport for google auth to work !!!
 const {passport, users} = require('./googleAuth');
@@ -38,8 +42,9 @@ app.get('/auth/google/callback', passport.authenticate('google', {
     failureRedirect: '/login'
 }),
 (req, res) => {
-    // Successful authentication, redirect to home page
+    // successful authentication, redirect to home page
     res.redirect('http://localhost:3000');
+    
 });
 
 // nodemailer (sends email)
@@ -53,61 +58,9 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// sample email route
-app.get('/send-test-email', async (req, res) => {
-    const mailOptions = {
-        from: 'civicconnect075@gmail.com',
-        to: 'heiditeng22@gmail.com',
-        subject: emailTemplates.testEmail.subject,
-        text: emailTemplates.testEmail.text
-    };
+// Use password routes
+app.use('/', passwordRoutes);
 
-    console.log("Before sending...");
-    try {
-        console.log("Sending test email...");
-        await transporter.sendMail(mailOptions);
-        console.log(successMessages.emailSent);
-        res.status(200).send(successMessages.emailSent);
-    } catch (error) {
-        console.error('Error sending test email:', error);
-        res.status(500).send('Error sending test email.');
-    }
-});
-
-// password reset request route
-app.post('/request-password-reset', async (req, res) => {
-    const { email } = req.body;
-    console.log("Received password reset request for email:", email);
-
-    if (!email) {
-        return res.status(400).json({ error: errorMessages.missingFields });
-    }
-
-    const user = users.find(user => user.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-        console.log("User not found for email:", email);
-        return res.status(200).json({ message: errorMessages.emailNotFound });
-    }
-
-    const resetToken = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
-    const resetLink = `http://localhost:5010/reset-password?token=${resetToken}`;
-
-    const mailOptions = {
-        from: 'civicconnect075@gmail.com',
-        to: user.email,
-        subject: 'Password Reset Request',
-        html: emailTemplates.passwordReset(user.username, resetLink)
-    };
-
-    try {
-        console.log("Sending email...");
-        await transporter.sendMail(mailOptions);
-        console.log(successMessages.passwordResetSent);
-        res.status(200).json({ message: successMessages.passwordResetSent });
-    } catch (error) {
-        res.status(500).json({ error: 'Error sending email. Please try again later.' });
-    }
-});
 
 async function signupUser(username, password, email, phoneNumber) {
     if (!username || !password || !email || !phoneNumber) {

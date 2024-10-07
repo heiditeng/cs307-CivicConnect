@@ -3,11 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // na
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
+import NewPassword from './components/NewPassword';
+
 
 function App() {
 
   const title = "Welcome to CivicConnect!";
-  // const users = 0;
+
+  
   return (
     <Router>
     <div className='App'>
@@ -17,6 +20,7 @@ function App() {
         <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/reset-password" element={<NewPassword />} /> 
         </Routes>
       </div>
     </div>

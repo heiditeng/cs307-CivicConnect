@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken'); // create and verify JWT
 const cors = require('cors'); // import cors
 const nodemailer = require('nodemailer'); // allow for emails to be sent
 const session = require('express-session'); // handle sessions
+const profileRoutes = require('./profileRoutes'); // import profile routes
 const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 
@@ -125,6 +126,9 @@ app.post('/login', async (req, res) => {
     }
 });
 
+
+// using the profile routes
+app.use('/api/profiles', profileRoutes);
 
 app.get("/api", (req, res) => {
     res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })

@@ -3,7 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // na
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
+import UserInformationForm from './components/UserInformationForm';
+import UserProfile from './components/UserProfile';
+import Login from './components/Login';
+import MyProfileCM from './components/MyProfileCM';
+
 import NewPassword from './components/NewPassword';
+
 
 function App() {
 
@@ -19,7 +25,12 @@ function App() {
         <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/info-form" element={<UserInformationForm />} />
+            <Route path="/profile" element={<UserProfile/>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} /> 
+
         </Routes>
       </div>
     </div>

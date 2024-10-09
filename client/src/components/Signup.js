@@ -4,6 +4,7 @@ import './Signup.css';
 const Signup = ({ onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
@@ -17,7 +18,7 @@ const Signup = ({ onSwitchToLogin }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, email, phoneNumber }),
+        body: JSON.stringify({ username, password, confirmPassword, email, phoneNumber }),
       });
 
       const data = await response.json();
@@ -52,6 +53,16 @@ const Signup = ({ onSwitchToLogin }) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Confirm Password:</label>
+          <input
+            className="form-input"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
         </div>

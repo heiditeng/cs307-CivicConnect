@@ -11,7 +11,7 @@ describe('Password Reset Routes', () => {
 
     // requesting a password reset link
     it('should generate a password reset link for a valid email', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'heiditeng22@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'heiditeng22@gmail.com', '123456789');
 
         const response = await request(app)
             .post('/request-password-reset')
@@ -34,7 +34,7 @@ describe('Password Reset Routes', () => {
 
     // valid token
     it('should reset the password successfully with a valid token', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'heiditeng22@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'heiditeng22@gmail.com', '123456789');
 
         const resetToken = jwt.sign({ email: 'heiditeng22@gmail.com' }, secretKey, { expiresIn: '1h' });
 

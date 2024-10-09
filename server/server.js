@@ -62,9 +62,14 @@ const transporter = nodemailer.createTransport({
 app.use('/', passwordRoutes);
 
 
-async function signupUser(username, password, email, phoneNumber) {
-    if (!username || !password || !email || !phoneNumber) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber) {
+    if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
+    }
+
+    // check if password matches
+    if (password !== confirmPassword) {
+        throw new Error('Passwords do not match.');
     }
 
     // check if the user already exists through email + username
@@ -84,11 +89,11 @@ async function signupUser(username, password, email, phoneNumber) {
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, email, phoneNumber } = req.body;
-        const message = await signupUser(username, password, email, phoneNumber);
-        res.status(201).json({ message });
+        const {username, password, confirmPassword, email, phoneNumber } = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber);
+        res.status(201).json({message});
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({error: error.message});
     }
 });
 

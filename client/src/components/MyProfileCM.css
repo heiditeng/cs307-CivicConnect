@@ -51,4 +51,46 @@
   .create-post-button:hover {
     background-color: #0056b3;
   }
+
+  edit-profile-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Form styles */
+.create-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.create-post-form input[type="text"],
+.create-post-form input[type="file"] {
+  padding: 10px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.create-post-form button {
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.create-post-form button[type="button"] {
+  background-color: grey;
+}
+
+.create-post-form button:hover {
+  background-color: darkgrey;
+}
+
+.create-post-form button[type="button"]:hover {
+  background-color: darkgrey;
+}
   

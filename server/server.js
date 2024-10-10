@@ -96,6 +96,7 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
 app.post('/signup', async (req, res) => {
     try {
         const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone} = req.body;
+        console.log('Received signup data:', req.body);
         const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone);
         res.status(201).json({message});
     } catch (error) {
@@ -142,15 +143,16 @@ app.post('/login', async (req, res) => {
             throw new Error('Invalid username or password.');
         }
 
-        let otp, otpSendResult;
+        console.log("before");
+
+        let otp;
         // check if MFA via email is enabled
-        if (user.enableMFAEmail) {otp = generateOTP();
+        if (user.enableMFAEmail) {
+            otp = generateOTP();
             otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
-            otpSendResult = await sendOTPEmail(user.email, otp);
-            if (!otpSendResult.success) {
-                throw new Error('Failed to send OTP to your email.');
-            }
+            console.log("sending email ...");
+            await sendOTPEmail(user.email, otp);
 
             res.status(200).json({ message: 'OTP sent to your email.' });
         } 
@@ -158,15 +160,13 @@ app.post('/login', async (req, res) => {
         else if (user.enableMFAPhone) {
             otp = generateOTP();
             otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
-
-            otpSendResult = await sendOTPSMS(user.phoneNumber, otp);
-            if (!otpSendResult.success) {
-                throw new Error('Failed to send OTP SMS.');
-            }
+           
+            await sendOTPSMS(user.phoneNumber, otp);
             res.status(200).json({ message: 'OTP sent to your phone.' });
         } 
         // no MFA enabled
         else {
+            console.log("no MFA");
             const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
             res.status(200).json({ message: 'Login successful.', token });
         }

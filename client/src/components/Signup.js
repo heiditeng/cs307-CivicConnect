@@ -8,7 +8,7 @@ const Signup = ({ onSwitchToLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [enableMFA, setEnableMFA] = useState(false);
+  const [enableMFAEmail, setEnableMFAEmail] = useState(false);
   const [enableMFAPhone, setEnableMFAPhone] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
 
@@ -27,7 +27,7 @@ const Signup = ({ onSwitchToLogin }) => {
           confirmPassword, 
           email, 
           phoneNumber,
-          enableMFA,
+          enableMFAEmail,
           enableMFAPhone
         }),
       });
@@ -101,8 +101,8 @@ const Signup = ({ onSwitchToLogin }) => {
           <label className="form-label">
             <input
               type="checkbox"
-              checked={enableMFA}
-              onChange={(e) => setEnableMFA(e.target.checked)}
+              checked={enableMFAEmail}
+              onChange={(e) => setEnableMFAEmail(e.target.checked)}
             />
             Email: Enable Multi-Factor Authentication
           </label>

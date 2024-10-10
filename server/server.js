@@ -50,8 +50,7 @@ app.get('/auth/google/callback', passport.authenticate('google', {
 }),
 (req, res) => {
     // successful authentication, redirect to home page
-    res.redirect('http://localhost:3000');
-    
+    res.redirect('http://localhost:3000/profile');
 });
 
 // nodemailer (sends email)

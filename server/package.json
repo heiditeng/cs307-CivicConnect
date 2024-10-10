@@ -21,6 +21,7 @@
     "js-cookie": "^3.0.5",
     "nodemailer": "^6.9.15",
     "sinon": "^19.0.2",
+    "textbelt": "^0.0.4",
     "twilio": "^5.3.3"
   },
   "devDependencies": {

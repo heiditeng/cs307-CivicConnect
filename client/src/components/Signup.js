@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Signup.css';
 
 const Signup = ({ onSwitchToLogin }) => {
@@ -107,14 +108,14 @@ const Signup = ({ onSwitchToLogin }) => {
           </label>
         </div>
         <div className="form-group">
-          {/* <label className="form-label">
+          <label className="form-label">
             <input
               type="checkbox"
               checked={enableMFAPhone}
               onChange={(e) => setEnableMFAPhone(e.target.checked)}
             />
             Phone: Enable Multi-Factor Authentication
-          </label> */}
+          </label>
         </div>
         <button className="signup-button" type="submit">
           Sign Up

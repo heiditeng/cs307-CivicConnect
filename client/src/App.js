@@ -30,7 +30,6 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} /> 
-
         </Routes>
       </div>
     </div>

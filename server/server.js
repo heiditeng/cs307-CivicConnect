@@ -8,8 +8,7 @@ const profileRoutes = require('./profileRoutes'); // import profile routes
 const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const { sendOTPEmail } = require('./emailService'); // email
-const { sendOTPSMS } = require('./twilioService'); // SMS 
-
+const { sendOTPSMS } = require('./smsTest'); // SMS
 
 // express needs to be in front of passport for google auth to work !!!
 const {passport, users} = require('./googleAuth');
@@ -70,7 +69,7 @@ const transporter = nodemailer.createTransport({
 app.use('/', passwordRoutes);
 
 
-async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFA, enableMFAPhone) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone) {
     if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
     }
@@ -89,16 +88,16 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     // hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // store user in the list
-    users.push({username, password: hashedPassword, email, phoneNumber, enableMFA, enableMFAPhone});
+    // store user in the list with MFA settings
+    users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
 
     return 'User registered successfully.';
 }
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, confirmPassword, email, phoneNumber, enableMFA, enableMFAPhone} = req.body;
-        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFA, enableMFAPhone);
+        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone} = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone);
         res.status(201).json({message});
     } catch (error) {
         res.status(400).json({error: error.message});
@@ -144,17 +143,33 @@ app.post('/login', async (req, res) => {
             throw new Error('Invalid username or password.');
         }
 
-       // check if MFA is enabled (either via email or phone)
-       if (user.enableMFAEmail) {
-        const otp = generateOTP();
-        otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+        let otp, otpSendResult;
+        // check if MFA via email is enabled
+        if (user.enableMFAEmail) {otp = generateOTP();
+            otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
-        await sendOTPEmail(user.email, otp);
-        res.status(200).json({message: 'OTP sent to your email.'});
-        } else {
-        // standard login if MFA is not enabled
-        const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
-        res.status(200).json({ message: 'Login successful.', token });
+            otpSendResult = await sendOTPEmail(user.email, otp);
+            if (!otpSendResult.success) {
+                throw new Error('Failed to send OTP to your email.');
+            }
+
+            res.status(200).json({ message: 'OTP sent to your email.' });
+        } 
+        // check if MFA via phone is enabled
+        else if (user.enableMFAPhone) {
+            otp = generateOTP();
+            otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+
+            otpSendResult = await sendOTPSMS(user.phoneNumber, otp);
+            if (!otpSendResult.success) {
+                throw new Error('Failed to send OTP SMS.');
+            }
+            res.status(200).json({ message: 'OTP sent to your phone.' });
+        } 
+        // no MFA enabled
+        else {
+            const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
+            res.status(200).json({ message: 'Login successful.', token });
         }
     } catch (error) {
         res.status(400).json({ error: error.message });

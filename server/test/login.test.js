@@ -3,6 +3,9 @@ const {app, signupUser, loginUser, users} = require('../server');
 const request = require('supertest');
 const sinon = require('sinon');
 const passport = require('passport');
+const {sendOTPEmail} = require('../messages.js');
+const bcrypt = require('bcrypt');
+
 
 describe('Google OAuth Authentication', () => {
     beforeEach(() => {
@@ -43,6 +46,49 @@ describe('Google OAuth Authentication', () => {
     });
 });
 
+describe('MFA Login Tests', () => {
+    let otpStore = {};
+
+    beforeEach(() => {
+        users.length = 0; 
+        otpStore = {}; // clear OTP store
+    });
+
+    beforeEach(async () => {
+        // ensure user creation with correct data
+        const hashedPassword = await bcrypt.hash('testPassword123', 10);
+        users.push({
+            username: 'testUser',
+            password: hashedPassword, 
+            email: 'test@example.com',
+            enableMFA: true, 
+        });
+    });
+
+    beforeEach(() => {
+        sinon.stub(sendOTPEmail).callsFake((email, otp) => {
+            otpStore[email] = otp; 
+            return Promise.resolve(); // simulate success
+        });
+    });
+
+    afterEach(() => {
+        sinon.restore(); 
+    });
+
+    it('should send OTP when MFA login is initiated', async () => {
+        const response = await request(app)
+            .post('/login')
+            .send({ username: 'testUser', password: 'testPassword123' });
+    
+        console.log('Response body:', response.body); 
+        console.log('OTP Store after login:', otpStore); 
+    
+        expect(response.statusCode).toBe(200);
+        expect(response.body.message).toBe('OTP sent to your email.');
+    });
+});
+
 describe('loginUser', () => {
     beforeEach(() => {
         users.length = 0;
@@ -50,7 +96,7 @@ describe('loginUser', () => {
 
     // register before start
     beforeEach(async () => {
-        await signupUser('testUser', 'testPassword123', 'test@example.com', '4857489257483957');
+        await signupUser('testUser', 'testPassword123', 'testPassword123', 'test@example.com', '4857489257483957');
     });
 
     // checks if login fails when the username is not found

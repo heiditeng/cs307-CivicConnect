@@ -101,7 +101,7 @@ const Signup = ({ onSwitchToLogin }) => {
               checked={enableMFA}
               onChange={(e) => setEnableMFA(e.target.checked)}
             />
-            Enable Multi-Factor Authentication (MFA)
+            Enable Multi-Factor Authentication (MFA) for Email
           </label>
         </div>
         <button className="signup-button" type="submit">

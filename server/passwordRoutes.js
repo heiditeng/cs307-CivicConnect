@@ -1,8 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { users } = require('./googleAuth');
+const {users} = require('./googleAuth');
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
+const {sendPasswordResetEmail} = require('./emailService'); // import the email service from emailService.js
 
 const router = express.Router();
 const secretKey = 'key';
@@ -39,7 +40,16 @@ router.post('/request-password-reset', async (req, res) => {
 
     console.log("Generated reset link:", resetLink);
 
-    res.status(200).json({ message: 'Password reset link generated successfully.', resetLink });
+    // send the reset link via email
+    try {
+        await sendPasswordResetEmail(user.email, resetLink);  // use the sendPasswordResetEmail function
+        res.status(200).json({ message: 'Password reset link sent successfully.' });
+    } catch (error) {
+        console.error('Error sending password reset email:', error);
+        res.status(500).json({ error: 'Failed to send reset email.' });
+    }
+
+    // res.status(200).json({ message: 'Password reset link generated successfully.', resetLink });
 });
 
 // Reset password

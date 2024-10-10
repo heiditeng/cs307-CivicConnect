@@ -50,7 +50,7 @@ describe('loginUser', () => {
 
     // register before start
     beforeEach(async () => {
-        await signupUser('testUser', 'testPassword123', 'test@example.com', '4857489257483957');
+        await signupUser('testUser', 'testPassword123', 'testPassword123', 'test@example.com', '4857489257483957');
     });
 
     // checks if login fails when the username is not found

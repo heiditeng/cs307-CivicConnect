@@ -3,6 +3,8 @@ const { app, signupUser, users } = require('../server');
 const jwt = require('jsonwebtoken'); 
 const bcrypt = require('bcrypt');
 const secretKey = 'key';
+const {sendPasswordResetEmail} = require('../emailService'); // Import the email service
+
 
 describe('Password Reset Routes', () => {
     beforeEach(() => {
@@ -11,15 +13,14 @@ describe('Password Reset Routes', () => {
 
     // requesting a password reset link
     it('should generate a password reset link for a valid email', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'heiditeng22@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'heiditeng22@gmail.com', '123456789');
 
         const response = await request(app)
             .post('/request-password-reset')
-            .send({ email: 'heiditeng22@gmail.com' });
+            .send({email: 'heiditeng22@gmail.com'});
 
         expect(response.statusCode).toBe(200);
-        expect(response.body.message).toBe('Password reset link generated successfully.');
-        expect(response.body.resetLink).toBeDefined(); // link should be present
+        expect(response.body.message).toBe('Password reset link sent successfully.');
     });
 
     // requesting a password reset link with an invalid email
@@ -34,7 +35,7 @@ describe('Password Reset Routes', () => {
 
     // valid token
     it('should reset the password successfully with a valid token', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'heiditeng22@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'heiditeng22@gmail.com', '123456789');
 
         const resetToken = jwt.sign({ email: 'heiditeng22@gmail.com' }, secretKey, { expiresIn: '1h' });
 

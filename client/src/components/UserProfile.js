@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const UserProfile = () => {
   const [profileData, setProfileData] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [mlSuggestions, setMlSuggestions] = useState("");
+  // tracking route changes to update suggestion
+  const routeLocation = useLocation();
 
   // fetch user data
   useEffect(() => {
@@ -17,6 +20,7 @@ const UserProfile = () => {
         if (res.ok) {
           const data = await res.json();
           setProfileData(data);
+          fetchMlSuggestions(data);
         } else {
           setErrorMessage("Error fetching profile data");
         }
@@ -26,7 +30,34 @@ const UserProfile = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [routeLocation]);
+
+  const fetchMlSuggestions = async (data) => {
+    try {
+      const res = await fetch("http://localhost:5020/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          availability: data.availability,
+          location: data.location,
+          occupation: data.occupation,
+          interests: data.interests,
+          hobbies: data.hobbies,
+        }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        setMlSuggestions(result.prediction);
+      } else {
+        console.error("error fetching ML suggestions");
+      }
+    } catch (error) {
+      console.error("error fetching ML suggestions:", error);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
@@ -77,16 +108,42 @@ const UserProfile = () => {
               <div className="mb-4">
                 <p className="text-lg font-semibold">Attendance Rating:</p>
                 <div class="rating gap-1">
-                    <input type="radio" name="rating-3" class="mask mask-heart bg-red-400" checked="checked"/>
-                    <input type="radio" name="rating-3" class="mask mask-heart bg-orange-400" checked="checked" />
-                    <input type="radio" name="rating-3" class="mask mask-heart bg-yellow-400" checked="checked"/>
-                    <input type="radio" name="rating-3" class="mask mask-heart bg-lime-400" checked="checked"/>
-                    <input type="radio" name="rating-3" class="mask mask-heart bg-green-400" />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-red-400"
+                    checked="checked"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-orange-400"
+                    checked="checked"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-yellow-400"
+                    checked="checked"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-lime-400"
+                    checked="checked"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-green-400"
+                  />
                 </div>
-            </div>
-            <Link to="/info-form">
-            <button className="btn btn-outline btn-accent">Edit Profile</button>
-            </Link>
+              </div>
+              <Link to="/info-form">
+                <button className="btn btn-outline btn-accent">
+                  Edit Profile
+                </button>
+              </Link>
             </div>
           ) : (
             <div className="text-center">
@@ -105,9 +162,20 @@ const UserProfile = () => {
             <h2 className="text-xl font-semibold mb-4">
               {profileData.username}'s Posts
             </h2>
-            <p className="text-base text-gray-700">
-              This section will contain all of the user's posts.
-            </p>
+            {mlSuggestions ? (
+              <p className="text-base text-gray-700">
+                We suggest: {mlSuggestions}
+              </p>
+            ) : (
+              <p className="text-gray-500">Loading suggestions...</p>
+            )}
+
+            <button
+              className="btn btn-primary mt-4"
+              onClick={() => fetchMlSuggestions(profileData)}
+            >
+              Refresh Recommendations
+            </button>
           </div>
         </div>
       </div>

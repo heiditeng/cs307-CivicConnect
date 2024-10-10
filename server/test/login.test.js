@@ -3,6 +3,9 @@ const {app, signupUser, loginUser, users} = require('../server');
 const request = require('supertest');
 const sinon = require('sinon');
 const passport = require('passport');
+const {sendOTPEmail} = require('../messages.js');
+const bcrypt = require('bcrypt');
+
 
 describe('Google OAuth Authentication', () => {
     beforeEach(() => {
@@ -40,6 +43,49 @@ describe('Google OAuth Authentication', () => {
         const response = await request(app).get('/auth/google');
         expect(response.statusCode).toBe(302); // expect a 302 redirect (send user to diff page)
         expect(response.headers.location).toContain('accounts.google.com'); // check redirection to google login
+    });
+});
+
+describe('MFA Login Tests', () => {
+    let otpStore = {};
+
+    beforeEach(() => {
+        users.length = 0; 
+        otpStore = {}; // clear OTP store
+    });
+
+    beforeEach(async () => {
+        // ensure user creation with correct data
+        const hashedPassword = await bcrypt.hash('testPassword123', 10);
+        users.push({
+            username: 'testUser',
+            password: hashedPassword, 
+            email: 'test@example.com',
+            enableMFA: true, 
+        });
+    });
+
+    beforeEach(() => {
+        sinon.stub(sendOTPEmail).callsFake((email, otp) => {
+            otpStore[email] = otp; 
+            return Promise.resolve(); // simulate success
+        });
+    });
+
+    afterEach(() => {
+        sinon.restore(); 
+    });
+
+    it('should send OTP when MFA login is initiated', async () => {
+        const response = await request(app)
+            .post('/login')
+            .send({ username: 'testUser', password: 'testPassword123' });
+    
+        console.log('Response body:', response.body); 
+        console.log('OTP Store after login:', otpStore); 
+    
+        expect(response.statusCode).toBe(200);
+        expect(response.body.message).toBe('OTP sent to your email.');
     });
 });
 

@@ -13,11 +13,11 @@ describe('Password Reset Routes', () => {
 
     // requesting a password reset link
     it('should generate a password reset link for a valid email', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'heiditeng22@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'civicconnect075@gmail.com', '123456789');
 
         const response = await request(app)
             .post('/request-password-reset')
-            .send({email: 'heiditeng22@gmail.com'});
+            .send({email: 'civicconnect075@gmail.com'});
 
         expect(response.statusCode).toBe(200);
         expect(response.body.message).toBe('Password reset link sent successfully.');
@@ -65,7 +65,7 @@ describe('Password Reset Routes', () => {
     // user does not exist
     it('should return an error if the token is valid but the user does not exist', async () => {
         // Generate a reset token for an email not associated with any user
-        const resetToken = jwt.sign({ email: 'avishi@gmail.com' }, secretKey, { expiresIn: '1h' });
+        const resetToken = jwt.sign({ email: 'heiditeng22@gmail.com' }, secretKey, { expiresIn: '1h' });
 
         // Send request to reset password
         const response = await request(app)

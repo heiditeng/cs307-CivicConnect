@@ -10,6 +10,24 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// one time password to email
+async function sendOTPEmail(toEmail, otp) {
+    const mailOptions = {
+      from: '"Your App" <your-email@gmail.com>',
+      to: toEmail,
+      subject: 'Your Login OTP',
+      html: `<p>Your one-time login code is: <b>${otp}</b></p>`,
+    };
+  
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`OTP sent to ${toEmail}`);
+    } catch (error) {
+      console.error('Error sending OTP email:', error);
+      throw new Error('Failed to send OTP email.');
+    }
+  }
+
 // send password reset email
 async function sendPasswordResetEmail(toEmail, resetLink) {
   const mailOptions = {
@@ -46,4 +64,4 @@ async function sendPasswordResetSuccessEmail(toEmail) {
     }
   }
 
-module.exports = {sendPasswordResetEmail, sendPasswordResetSuccessEmail};
+module.exports = {sendPasswordResetEmail, sendPasswordResetSuccessEmail, sendOTPEmail};

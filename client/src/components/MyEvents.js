@@ -1,17 +1,26 @@
 // src/components/MyEvents.js
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 const MyEvents = () => {
+  const location = useLocation();
   const [events, setEvents] = useState([
     { id: 1, name: 'Community Cleanup', date: '2024-10-10', imageUrl: 'https://example.com/community-cleanup.jpg' },
     { id: 2, name: 'Local Concert', date: '2024-10-15', imageUrl: 'https://example.com/local-concert.jpg' },
     { id: 3, name: 'Charity Run', date: '2024-10-20', imageUrl: 'https://example.com/charity-run.jpg' },
   ]);
 
-  const handleDelete = (id) => {
-    setEvents(events.filter(event => event.id !== Number(id)));
+  // Handle the event deletion
+  const handleDeleteEvent = (id) => {
+    setEvents(events.filter(event => event.id !== id));
   };
+
+  // Check for state passed from DeleteConfirmation
+  useEffect(() => {
+    if (location.state && location.state.deletedId) {
+      handleDeleteEvent(location.state.deletedId);
+    }
+  }, [location.state]);
 
   return (
     <div>
@@ -26,7 +35,12 @@ const MyEvents = () => {
               <Link to={`/event-details/${event.id}`}>
                 <button>Show Details</button>
               </Link>
-              <button onClick={() => handleDelete(event.id)}>Delete Event</button>
+              <Link to={{
+                pathname: "/delete-confirmation",
+                state: { eventId: event.id, eventName: event.name, deleteEvent: handleDeleteEvent }
+              }}>
+                <button>Delete Event</button>
+              </Link>
             </li>
           ))}
         </ul>

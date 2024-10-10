@@ -3,6 +3,8 @@ const { app, signupUser, users } = require('../server');
 const jwt = require('jsonwebtoken'); 
 const bcrypt = require('bcrypt');
 const secretKey = 'key';
+const {sendPasswordResetEmail} = require('../emailService'); // Import the email service
+
 
 describe('Password Reset Routes', () => {
     beforeEach(() => {
@@ -15,11 +17,10 @@ describe('Password Reset Routes', () => {
 
         const response = await request(app)
             .post('/request-password-reset')
-            .send({ email: 'heiditeng22@gmail.com' });
+            .send({email: 'heiditeng22@gmail.com'});
 
         expect(response.statusCode).toBe(200);
-        expect(response.body.message).toBe('Password reset link generated successfully.');
-        expect(response.body.resetLink).toBeDefined(); // link should be present
+        expect(response.body.message).toBe('Password reset link sent successfully.');
     });
 
     // requesting a password reset link with an invalid email

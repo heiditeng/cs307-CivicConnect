@@ -160,6 +160,7 @@ app.post('/login', async (req, res) => {
         else if (user.enableMFAPhone) {
             otp = generateOTP();
             otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+            console.log("sending SMS...");
            
             await sendOTPSMS(user.phoneNumber, otp);
             res.status(200).json({ message: 'OTP sent to your phone.' });

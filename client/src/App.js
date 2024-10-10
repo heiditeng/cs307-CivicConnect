@@ -7,9 +7,7 @@ import UserInformationForm from './components/UserInformationForm';
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';
-
 import NewPassword from './components/NewPassword';
-
 
 function App() {
 

@@ -7,7 +7,8 @@ const session = require('express-session'); // handle sessions
 const profileRoutes = require('./profileRoutes'); // import profile routes
 const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
-const { sendOTPEmail } = require('./emailService');
+const { sendOTPEmail } = require('./emailService'); // email
+const { sendOTPSMS } = require('./twilioService'); // SMS 
 
 
 // express needs to be in front of passport for google auth to work !!!
@@ -69,7 +70,7 @@ const transporter = nodemailer.createTransport({
 app.use('/', passwordRoutes);
 
 
-async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFA) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFA, enableMFAPhone) {
     if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
     }
@@ -89,15 +90,15 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // store user in the list
-    users.push({ username, password: hashedPassword, email, phoneNumber, enableMFA});
+    users.push({username, password: hashedPassword, email, phoneNumber, enableMFA, enableMFAPhone});
 
     return 'User registered successfully.';
 }
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, confirmPassword, email, phoneNumber, enableMFA} = req.body;
-        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFA);
+        const {username, password, confirmPassword, email, phoneNumber, enableMFA, enableMFAPhone} = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFA, enableMFAPhone);
         res.status(201).json({message});
     } catch (error) {
         res.status(400).json({error: error.message});
@@ -143,20 +144,25 @@ app.post('/login', async (req, res) => {
             throw new Error('Invalid username or password.');
         }
 
-        // check if MFA is enabled for the user
-        if (user.enableMFA) {
-            const otp = generateOTP();
-            otpStore[user.email] = {otp, expiresAt: Date.now() + 5 * 60 * 1000};
+       // check if MFA is enabled (either via email or phone)
+       if (user.enableMFAEmail || user.enableMFAPhone) {
+        const otp = generateOTP();
+        otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
-            console.log(`OTP stored for ${user.email}:`, otpStore[user.email]);
-
+        if (user.enableMFAEmail) {
+            // send OTP via email
             await sendOTPEmail(user.email, otp);
             res.status(200).json({ message: 'OTP sent to your email.' });
-        } else {
-            // standard login
-            const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
-            res.status(200).json({ message: 'Login successful.', token });
+        } else if (user.enableMFAPhone) {
+            // send OTP via SMS
+            // await sendOTPSMS(user.phoneNumber, otp);
+            // res.status(200).json({ message: 'OTP sent to your phone.' });
         }
+    } else {
+        // standard login if MFA is not enabled
+        const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
+        res.status(200).json({ message: 'Login successful.', token });
+    }
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

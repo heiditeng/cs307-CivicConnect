@@ -9,6 +9,8 @@ const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const { sendOTPEmail } = require('./emailService'); // email
 const { sendOTPSMS } = require('./smsService'); // SMS
+const validator = require('validator'); // validates email
+
 
 // express needs to be in front of passport for google auth to work !!!
 const {passport, users} = require('./googleAuth');
@@ -67,10 +69,36 @@ const transporter = nodemailer.createTransport({
 // Use password routes
 app.use('/', passwordRoutes);
 
+// password validation function
+function isPasswordValid(password) {
+    // Regex explanation:
+    // (?=.*[A-Z])      ensure at least one uppercase letter
+    // (?=.*[0-9])      ensure at least one digit
+    // (?=.*[!@#$%^&*]) ensure at least one special character
+    // .{8,}            ensure the password is at least 5 characters long
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{5,}$/;
+    return passwordRegex.test(password);
+}
+
+function isEmailValid(email) {
+    // Regex for a simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
 
 async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone) {
     if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
+    }
+
+    // check if email is valid
+    if (!isEmailValid(email)) {
+        throw new Error('Invalid email format.');
+    }
+
+    // check if password meets the complexity requirements
+    if (!isPasswordValid(password)) {
+        throw new Error('Password must include at least one uppercase letter, one symbol, one number, and be at least 8 characters long.');
     }
 
     // check if password matches
@@ -96,7 +124,6 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
 app.post('/signup', async (req, res) => {
     try {
         const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone} = req.body;
-        console.log('Received signup data:', req.body);
         const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone);
         res.status(201).json({message});
     } catch (error) {

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {users} = require('./googleAuth');
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
-const {sendPasswordResetEmail} = require('./emailService'); // import the email service from emailService.js
+const {sendPasswordResetEmail, sendPasswordResetSuccessEmail} = require('./emailService'); // import the email service from emailService.js
 
 const router = express.Router();
 const secretKey = 'key';
@@ -69,6 +69,8 @@ router.post('/reset-password', async (req, res) => {
 
         // Hash the new password and update it
         user.password = await bcrypt.hash(newPassword, 10);
+
+        await sendPasswordResetSuccessEmail(user.email);
         res.status(200).json({ message: 'Password has been reset successfully.' });
     } catch (error) {
         res.status(400).json({ error: 'Invalid or expired token.' });

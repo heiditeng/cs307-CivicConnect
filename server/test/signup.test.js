@@ -27,6 +27,6 @@ describe('signupUser', () => {
     // if user already exists
     it('should throw an error when the user already exists', async () => {
         await signupUser('avishiGoyal', 'securePass123', 'securePass123', 'avishi@gmail.com', '123');
-        await expect(signupUser('avishiGoyal', 'securePass123', 'securePass123','avishi@gmail.com', '123')).rejects.toThrow('User with this username or email already exists.');
+        await expect(signupUser('avishiGoyal', 'securePass123', 'securePass123', 'avishi@gmail.com', '123')).rejects.toThrow('User with this username or email already exists.');
     });
 });

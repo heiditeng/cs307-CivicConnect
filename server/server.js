@@ -131,7 +131,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
 // using the profile routes
 app.use('/api/profiles', profileRoutes);
 

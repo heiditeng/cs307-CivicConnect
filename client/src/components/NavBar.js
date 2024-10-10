@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 // Remember - a component is just a function that returns a JSX template!
-import { Link } from 'react-router-dom'; 
 
 const NavBar = () => {
     return (
@@ -36,7 +35,7 @@ const NavBar = () => {
                 <Link to="/login">log out</Link>
               </li>
               <li>
-                <Link to="/my-events">My Events</Link> {/* Add My Events link */}
+                <Link to="/my-events">My Events</Link>
               </li>
             </ul>
           </div>

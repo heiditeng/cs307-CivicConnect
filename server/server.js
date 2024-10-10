@@ -8,7 +8,7 @@ const profileRoutes = require('./profileRoutes'); // import profile routes
 const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const { sendOTPEmail } = require('./emailService'); // email
-const { sendOTPSMS } = require('./smsTest'); // SMS
+const { sendOTPSMS } = require('./smsService'); // SMS
 
 // express needs to be in front of passport for google auth to work !!!
 const {passport, users} = require('./googleAuth');

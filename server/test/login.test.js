@@ -61,7 +61,7 @@ describe('MFA Login Tests', () => {
             username: 'testUser',
             password: hashedPassword, 
             email: 'test@example.com',
-            enableMFA: true, 
+            enableMFAEmail: true, 
         });
     });
 

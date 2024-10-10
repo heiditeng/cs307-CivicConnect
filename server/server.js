@@ -145,24 +145,17 @@ app.post('/login', async (req, res) => {
         }
 
        // check if MFA is enabled (either via email or phone)
-       if (user.enableMFAEmail || user.enableMFAPhone) {
+       if (user.enableMFAEmail) {
         const otp = generateOTP();
         otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
-        if (user.enableMFAEmail) {
-            // send OTP via email
-            await sendOTPEmail(user.email, otp);
-            res.status(200).json({ message: 'OTP sent to your email.' });
-        } else if (user.enableMFAPhone) {
-            // send OTP via SMS
-            // await sendOTPSMS(user.phoneNumber, otp);
-            // res.status(200).json({ message: 'OTP sent to your phone.' });
-        }
-    } else {
+        await sendOTPEmail(user.email, otp);
+        res.status(200).json({message: 'OTP sent to your email.'});
+        } else {
         // standard login if MFA is not enabled
         const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful.', token });
-    }
+        }
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

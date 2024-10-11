@@ -1,7 +1,35 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+const availabilityOptions = ["Weekdays", "Weekends"];
+const occupationOptions = [
+  "Student",
+  "Teacher",
+  "Technology",
+  "Music",
+  "Business",
+  "Medicine",
+  "Culinary",
+];
+const interestsOptions = [
+  "Food",
+  "Art",
+  "Coding",
+  "Instruments",
+  "Finance",
+  "Health",
+  "Cooking",
+];
+const hobbiesOptions = [
+  "Painting",
+  "Gaming",
+  "Guitar",
+  "Reading",
+  "Running",
+  "Baking",
+];
 
 const UserInformationForm = () => {
-  // useState hooks to store form input and any feedback messages
   const [availability, setAvailability] = useState("");
   const [location, setLocation] = useState("");
   const [occupation, setOccupation] = useState("");
@@ -10,15 +38,13 @@ const UserInformationForm = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // fetch profile data to pre-populate form
   useEffect(() => {
     const fetchProfileData = async () => {
+      const username = localStorage.getItem("username");
       try {
         const res = await fetch(
-          "http://localhost:5010/api/profiles/profile/aysu"
-        ); // currently hardcoded to aysu will change
-
-        // if response is valid/successful
+          `http://localhost:5010/api/profiles/profile/${username}`
+        );
         if (res.ok) {
           const data = await res.json();
           setAvailability(data.availability);
@@ -35,43 +61,45 @@ const UserInformationForm = () => {
     };
 
     fetchProfileData();
-  }, []); // [] only will run once when component initialized
+  }, []);
 
-  // handling form submission
+  const handleLocationChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      // u can only type nums
+      setLocation(value);
+    } else {
+      setErrorMessage("Please enter a valid zip code.");
+    }
+  };
+
   const handleSubmit = async (e) => {
-    // tells browser to stop the default action action associated w event
-    // i.e prevents page reload
     e.preventDefault();
-
-    // for error and non-error messages
     setSuccessMessage("");
     setErrorMessage("");
 
-    // try to make an API call
     try {
+      const username = localStorage.getItem("username");
+
       const response = await fetch(
         "http://localhost:5010/api/profiles/update-profile",
         {
-          method: "POST", // POST request to send data to the server
+          method: "POST",
           headers: {
-            "Content-Type": "application/json", // Informing the server that we're sending JSON
+            "Content-Type": "application/json",
           },
-          // user name should be tracked when a user has logged in
-          // for now, it will be hard-coded to aysu
           body: JSON.stringify({
-            username: "aysu",
+            username: username, // Use the username retrieved from local storage
             availability,
             location,
             occupation,
             interests,
-            hobbies
-          }), // The data being sent
+            hobbies,
+          }),
         }
       );
 
-      // parse the JSON response from server
       const res = await response.json();
-
       if (response.ok) {
         setSuccessMessage("Profile updated successfully!");
       } else {
@@ -91,68 +119,86 @@ const UserInformationForm = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Availability</span>
-            </label>
+            <label className="label">Availability</label>
+            <select
+              className="select select-bordered w-full"
+              value={availability}
+              onChange={(e) => setAvailability(e.target.value)}
+            >
+              <option value="" disabled>
+                Select availability
+              </option>
+              {availabilityOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-control mb-4">
+            <label className="label">Location (Zip Code)</label>
             <input
               className="input input-bordered w-full"
               type="text"
-              value={availability} // binding the input value to availability state
-              onChange={(e) => setAvailability(e.target.value)} // update
-              placeholder="e.g., Weekdays, 9 AM - 5 PM" // placeholder
+              value={location}
+              onChange={handleLocationChange}
+              placeholder="Enter your zip code"
             />
           </div>
 
           <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Location</span>
-            </label>
-            <input
-              className="input input-bordered w-full"
-              type="text"
-              value={location} // binding input w location state
-              onChange={(e) => setLocation(e.target.value)} // update
-              placeholder="City or neighborhood"
-            />
-          </div>
-
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Occupation</span>
-            </label>
-            <input
-              className="input input-bordered w-full"
-              type="text"
+            <label className="label">Occupation</label>
+            <select
+              className="select select-bordered w-full"
               value={occupation}
-              onChange={(e) => setOccupation(e.target.value)} // update
-              placeholder="e.g., Student, Teacher"
-            />
+              onChange={(e) => setOccupation(e.target.value)}
+            >
+              <option value="" disabled>
+                Select occupation
+              </option>
+              {occupationOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Interests</span>
-            </label>
-            <input
-              className="input input-bordered w-full"
-              type="text"
+            <label className="label">Interests</label>
+            <select
+              className="select select-bordered w-full"
               value={interests}
-              onChange={(e) => setInterests(e.target.value)} // update
-              placeholder="e.g., Art, Animals"
-            />
+              onChange={(e) => setInterests(e.target.value)}
+            >
+              <option value="" disabled>
+                Select interests
+              </option>
+              {interestsOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Hobbies</span>
-            </label>
-            <input
-              className="input input-bordered w-full"
-              type="text"
+            <label className="label">Hobbies</label>
+            <select
+              className="select select-bordered w-full"
               value={hobbies}
-              onChange={(e) => setHobbies(e.target.value)} // update
-              placeholder="e.g., Painting, Running"
-            />
+              onChange={(e) => setHobbies(e.target.value)}
+            >
+              <option value="" disabled>
+                Select hobbies
+              </option>
+              {hobbiesOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-control mt-6">
@@ -160,6 +206,14 @@ const UserInformationForm = () => {
               Update Profile
             </button>
           </div>
+          <div className="form-control mt-2">
+            <Link to="/profile">
+              <button type="button" className="btn btn-secondary w-full">
+                Exit
+              </button>
+            </Link>
+          </div>
+
           {successMessage && (
             <div className="mt-4">
               <p className="text-center text-sm text-success">
@@ -167,7 +221,6 @@ const UserInformationForm = () => {
               </p>
             </div>
           )}
-
           {errorMessage && (
             <div className="mt-4">
               <p className="text-center text-sm text-error">{errorMessage}</p>

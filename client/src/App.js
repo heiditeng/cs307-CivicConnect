@@ -10,6 +10,7 @@ import UserInformationForm from './components/UserInformationForm';
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';
+import OrganizationProfile from './components/OrganizationProfile';
 import NewPassword from './components/NewPassword';
 import ccLogo from './ccLogo.png'; 
 import MyEvents from './components/MyEvents';
@@ -42,6 +43,9 @@ function App() {
             <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
           </Routes>
         </div>
+            <Route path="/organization-profile" element={<OrganizationProfile />} />
+        </Routes>
+
       </div>
     </Router>
   );

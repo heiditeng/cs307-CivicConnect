@@ -24,16 +24,15 @@ const Login = ({ onSwitchToSignup }) => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Check if OTP is required (email or phone-based)
-        if (data.message.includes('OTP sent to your email') || data.message.includes('OTP sent to your phone')) {
-          setRequiresOTP(true); // Prompt OTP input
-          setResponseMessage(data.message);
-        } else {
-          // Successful login without OTP
-          localStorage.setItem('authToken', data.token); // Save token
-          navigate('/profile'); // Navigate to profile
-        }
+      if (response.ok && data.message === 'OTP sent to your email.') {
+        setRequiresOTP(true); // trigger OTP input
+        setResponseMessage(data.message);
+      } else if (response.ok) {
+        setResponseMessage(data.message);
+        console.log(localStorage.token);
+        localStorage.setItem('authToken', data.token); // store token in local storage
+        localStorage.setItem('username', data.username);
+        navigate('/myprofile'); // navigate to the homepage or another page
       } else {
         // Handle login error
         setResponseMessage(`Error: ${data.error}`);

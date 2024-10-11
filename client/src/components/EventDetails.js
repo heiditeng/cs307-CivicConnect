@@ -1,56 +1,73 @@
-// src/components/EventDetails.js
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 
-const EventDetails = ({ onDelete }) => {
-  const { id } = useParams(); // Get the event ID from the URL
-  const navigate = useNavigate(); // To navigate after deletion
+const EventDetails = () => {
+  const { id } = useParams();
+  const [eventData, setEventData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Sample data for events (this should ideally come from a database or API)
-  const events = {
-    1: {
-      name: 'Community Cleanup',
-      date: '2024-10-10',
-      imageUrl: '',
-      description: 'Join us for a community cleanup to keep our park beautiful!',
-    },
-    2: {
-      name: 'Local Concert',
-      date: '2024-10-15',
-      imageUrl: '',
-      description: 'Enjoy an evening of music with local bands!',
-    },
-    3: {
-      name: 'Charity Run',
-      date: '2024-10-20',
-      imageUrl: '',
-      description: 'Participate in a charity run to support local charities.',
-    },
-  };
+  // Fetch individual event data by ID
+  useEffect(() => {
+    const fetchEventDetails = async () => {
+      try {
+        const res = await fetch(`http://localhost:5010/api/events/events/${id}`);
 
-  const event = events[id];
+        if (res.ok) {
+          const data = await res.json();
+          setEventData(data);
+        } else {
+          setErrorMessage("Error fetching event data");
+        }
+      } catch (error) {
+        setErrorMessage("Error fetching event data");
+      }
+    };
 
-  const handleDelete = () => {
-    if (onDelete) {
-      onDelete(id); // Call the delete function
-    }
-    navigate('/my-events'); // Navigate back to My Events after deletion
-  };
+    fetchEventDetails();
+  }, [id]);
+
+  if (errorMessage) {
+    return <div className="text-error">{errorMessage}</div>;
+  }
+
+  if (!eventData) {
+    return <div className="text-gray-500">Loading event data...</div>;
+  }
 
   return (
-    <div>
-      <h2>Event Details</h2>
-      {event ? (
-        <div>
-          <h3>{event.name}</h3>
-          <p>Date: {event.date}</p>
-          <img src={event.imageUrl} alt={event.name} style={{ width: '300px', height: '300px', objectFit: 'cover' }} />
-          <p>Description: {event.description}</p>
-          <button onClick={handleDelete}>Delete Event</button> {/* Delete button */}
+    <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
+      <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold mb-4">{eventData.eventName}</h2>
+        <p><strong>Date:</strong> {eventData.eventDate}</p>
+        <p><strong>Start Time:</strong> {eventData.eventStartTime}</p>
+        <p><strong>End Time:</strong> {eventData.eventEndTime}</p>
+        <p><strong>Zipcode:</strong> {eventData.eventZipcode}</p>
+        <p><strong>Description:</strong> {eventData.eventDescription}</p>
+        {eventData.eventImage && (
+          <img
+            src={eventData.eventImage}
+            alt={eventData.eventName}
+            style={{ width: "200px", height: "200px", objectFit: "cover" }}
+          />
+        )}
+        {eventData.eventVideo && (
+          <video
+            controls
+            style={{ width: "100%", height: "auto" }}
+          >
+            <source src={eventData.eventVideo} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        )}
+        <div className="mt-4">
+          <Link to={`/delete-confirmation/${id}/${eventData.eventName}`}>
+            <button className="btn btn-outline btn-danger mr-2">Delete Event</button>
+          </Link>
+          <Link to="/my-events">
+            <button className="btn btn-outline btn-primary">Back to My Events</button>
+          </Link>
         </div>
-      ) : (
-        <p>Event not found.</p>
-      )}
+      </div>
     </div>
   );
 };

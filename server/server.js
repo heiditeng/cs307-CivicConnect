@@ -10,6 +10,7 @@ const { emailTemplates, errorMessages, successMessages } = require('./messages')
 const { sendOTPEmail } = require('./emailService'); // email
 const { sendOTPSMS } = require('./smsService'); // SMS
 const validator = require('validator'); // validates email
+const eventRoutes = require('./eventRoutes'); // import event routes
 
 
 // express needs to be in front of passport for google auth to work !!!
@@ -226,6 +227,9 @@ app.post('/verify-otp', (req, res) => {
 
 // using the profile routes
 app.use('/api/profiles', profileRoutes);
+
+// Using the event routes
+app.use('/api/events', eventRoutes); // Integrate event routes
 
 app.get("/api", (req, res) => {
     res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })

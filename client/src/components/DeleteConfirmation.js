@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-const DeleteConfirmation = ({ handleDelete }) => {
-  const location = useLocation();
+const DeleteConfirmation = () => {
+  const { id, eventName } = useParams();
   const navigate = useNavigate();
-  const { eventId, eventName } = location.state || { eventId: null, eventName: '' };
-
   const [deleted, setDeleted] = useState(false);
   const [cancelled, setCancelled] = useState(false);
 
-  const confirmDelete = () => {
-    if (eventId && handleDelete) {
-      handleDelete(eventId); // Call the delete function
-      setDeleted(true); // Show success message
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(`http://localhost:5010/api/events/events/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setDeleted(true);
+      } else {
+        console.error("Error deleting event");
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
     }
   };
 
@@ -20,25 +27,28 @@ const DeleteConfirmation = ({ handleDelete }) => {
     setCancelled(true);
   };
 
+  const goBackToEvents = () => {
+    navigate('/my-events');
+  };
+
   return (
-    <div className="confirmation-modal">
+    <div className="confirmation-modal flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
       {!deleted && !cancelled ? (
         <>
-          <h3>Confirm Deletion</h3>
+          <h3 className="text-xl font-bold">Confirm Deletion</h3>
           <p>Are you sure you want to delete the event: {eventName}?</p>
-          <button onClick={confirmDelete}>Confirm</button>
-          <button onClick={cancelDelete}>Cancel</button>
+          <button className="btn btn-outline btn-danger mt-2" onClick={confirmDelete}>Confirm</button>
+          <button className="btn btn-outline btn-secondary mt-2" onClick={cancelDelete}>Cancel</button>
         </>
       ) : cancelled ? (
         <div>
-          <h3>Event was not deleted.</h3>
+          <h3 className="text-xl">Event was not deleted.</h3>
+          <button className="btn btn-outline btn-primary mt-2" onClick={goBackToEvents}>Back to My Events</button>
         </div>
       ) : (
         <div>
-          <h3>Event Deleted Successfully!</h3>
-          <Link to="/my-events">
-            <button>Go to My Events</button>
-          </Link>
+          <h3 className="text-xl">Event Deleted Successfully!</h3>
+          <button className="btn btn-outline btn-primary mt-2" onClick={goBackToEvents}>Back to My Events</button>
         </div>
       )}
     </div>

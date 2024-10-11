@@ -1,7 +1,11 @@
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
+const app = express();
+const path = require('path');
 
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Configure multer to handle file uploads
 const upload = multer({ dest: 'uploads/' }); // Specify the uploads directory
 
@@ -15,7 +19,7 @@ let events = [
         eventEndTime: '12:00 PM',
         eventZipcode: '94101',
         eventDescription: 'Join us for a community cleanup to keep our park beautiful!',
-        eventImage: null,
+        eventImage: 'animal.jpeg',
         eventVideo: null,
     },
     {
@@ -26,7 +30,7 @@ let events = [
         eventEndTime: '10:00 PM',
         eventZipcode: '30301',
         eventDescription: 'Enjoy an evening of music with local bands!',
-        eventImage: null,
+        eventImage: 'duck.jpeg',
         eventVideo: null,
     },
     {
@@ -37,7 +41,7 @@ let events = [
         eventEndTime: '11:00 AM',
         eventZipcode: '94102',
         eventDescription: 'Participate in a charity run to support local charities.',
-        eventImage: null,
+        eventImage: 'monkey.jpeg',
         eventVideo: null,
     },
 ];

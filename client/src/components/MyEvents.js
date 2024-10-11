@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import monkeyImage from './uploads/monkey.jpeg';
 
 const MyEvents = () => {
   const [eventsData, setEventsData] = useState([]);
@@ -39,21 +40,23 @@ const MyEvents = () => {
                 <p>Zipcode: {event.eventZipcode}</p>
                 {event.eventImage && (
                   <img
-                    src={event.eventImage}
+                    src={monkeyImage}
                     alt={event.eventName}
                     style={{ width: "100px", height: "100px", objectFit: "cover" }}
                   />
                 )}
-                <Link to={`/event-details/${event.id}`}>
-                  <button className="btn btn-outline btn-primary mt-2">
-                    Show Details
-                  </button>
-                </Link>
-                <Link to={`/delete-confirmation/${event.id}/${event.eventName}`}>
-                  <button className="btn btn-outline btn-danger mt-2 ml-2">
-                    Delete Event
-                  </button>
-                </Link>
+                <div className="mt-2"> {/* Add a div to wrap the buttons */}
+                  <Link to={`/event-details/${event.id}`}>
+                    <button className="btn btn-outline btn-primary mt-2">
+                      Show Details
+                    </button>
+                  </Link>
+                  <Link to={`/delete-confirmation/${event.id}/${event.eventName}`}>
+                    <button className="btn btn-outline btn-danger mt-2 ml-2">
+                      Delete Event
+                    </button>
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

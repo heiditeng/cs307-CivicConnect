@@ -171,7 +171,6 @@ app.post('/login', async (req, res) => {
             throw new Error('Invalid username or password.');
         }
 
-
         console.log("before");
 
         let otp;
@@ -181,14 +180,9 @@ app.post('/login', async (req, res) => {
             otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
             console.log("sending email ...");
-        // Check if MFA is enabled for the user
-        if (user.enableMFA) {
-            const otp = generateOTP();
-            otpStore[user.email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
             await sendOTPEmail(user.email, otp);
-
             res.status(200).json({ message: 'OTP sent to your email.' });
-        } 
+        }
         // check if MFA via phone is enabled
         else if (user.enableMFAPhone) {
             otp = generateOTP();
@@ -197,12 +191,9 @@ app.post('/login', async (req, res) => {
            
             await sendOTPSMS(user.phoneNumber, otp);
             res.status(200).json({ message: 'OTP sent to your phone.' });
-        } 
-        // no MFA enabled
-        else {
-            console.log("no MFA");
         } else {
             // Standard login without MFA
+            console.log("no MFA");
             const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
             res.status(200).json({ message: 'Login successful.', token, username: user.username });
         }

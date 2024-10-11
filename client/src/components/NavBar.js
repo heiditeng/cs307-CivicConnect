@@ -29,7 +29,7 @@ const NavBar = () => {
                 <Link to="/myprofile">My Profile</Link> {/*only navigation to communtiy member profile added so far*/}
               </li>
               <li>
-                <Link to="/login">log out</Link>
+                <Link to="/">log out</Link>
               </li>
               <li>
                 <Link to="/events">My Events</Link>

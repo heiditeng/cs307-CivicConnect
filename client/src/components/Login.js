@@ -8,7 +8,6 @@ const Login = ({ onSwitchToSignup }) => {
   const [otp, setOTP] = useState(''); // state for OTP input
   const [responseMessage, setResponseMessage] = useState('');
   const [requiresOTP, setRequiresOTP] = useState(false); // track if OTP is required
-  const [isOtpSent, setIsOtpSent] = useState(false); // track SMS
   const navigate = useNavigate(); // react router to navigate to other pages
 
   const handleLogin = async (e) => {

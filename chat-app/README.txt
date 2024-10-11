@@ -31,7 +31,7 @@ This should listen to your local database and start the basic frontend.
 
 
 
-Step 3: connect to http://localhost:3000/
+Step 3: connect to http://localhost:4000/
 
 open multiple instances if you want to simulate a conversation
 

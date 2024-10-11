@@ -1,0 +1,211 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <style>
+        .message { margin: 10px; padding: 10px; border-radius: 5px; }
+        .message.right { background-color: #d1ffd1; text-align: right; }
+        .message.left { background-color: #ffd1d1; text-align: left; }
+    </style>
+</head>
+<body>
+<div id="chat-container">
+    <input id="user_id" placeholder="User ID">
+    <input id="room_id" placeholder="Room ID">
+    <button onclick="joinRoom()">Join Room</button>
+</div>
+<div id="messages"></div>
+<input id="messageInput" placeholder="Type a message">
+<button onclick="sendMessage()">Send</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let socket;
+
+    function joinRoom() {
+        const userId = document.getElementById('user_id').value;
+        const roomId = document.getElementById('room_id').value;
+
+        socket = io.connect('http://localhost:3000');
+        socket.emit('joinRoom', roomId);
+
+        fetch(`/messages/${roomId}`)
+            .then(response => response.json())
+            .then(messages => {
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('message', msg.user_id === userId ? 'right' : 'left');
+                    messageDiv.textContent = msg.content;
+                    messagesDiv.appendChild(messageDiv);
+                });
+            });
+
+        socket.on('message', (data) => {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', data.user_id === userId ? 'right' : 'left');
+            messageDiv.textContent = data.content;
+            messagesDiv.appendChild(messageDiv);
+        });
+    }
+
+    function sendMessage() {
+        const userId = document.getElementById('user_id').value;
+        const roomId = document.getElementById('room_id').value;
+        const content = document.getElementById('messageInput').value;
+
+        socket.emit('message', { room_id: roomId, user_id: userId, content });
+        document.getElementById('messageInput').value = '';
+    }
+</script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Room</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="chat-container">
+    <div id="inputs">
+      <input id="user_id" placeholder="User ID">
+      <input id="room_id" placeholder="Room ID">
+      <button onclick="joinRoom()">Join Room</button>
+    </div>
+    <div id="messages"></div>
+    <div id="inputs">
+      <input id="messageInput" placeholder="Type a message or paste a link">
+      <label for="imageInput" class="upload-icon">
+        <img src="upload-icon.png" alt="Upload" style="width: 24px; height: 24px; cursor: pointer;">
+      </label>
+      <input type="file" id="imageInput" accept="image/*" style="display: none;">
+      <button onclick="sendMessageOrImageOrLink()">Send</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    function isValidURL(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    let socket;
+
+    function joinRoom() {
+      const userId = document.getElementById('user_id').value;
+      const roomId = document.getElementById('room_id').value;
+
+      socket = io.connect('http://localhost:4000');
+      socket.emit('joinRoom', roomId);
+
+      fetch(`/messages/${roomId}`)
+        .then(response => response.json())
+        .then(messages => {
+          const messagesDiv = document.getElementById('messages');
+          messagesDiv.innerHTML = '';
+          messages.forEach(msg => {
+            renderMessage(msg, userId);
+          });
+        });
+
+      socket.on('message', (data) => {
+        renderMessage(data, userId);
+      });
+    }
+
+    function renderMessage(data, userId) {
+      const messagesDiv = document.getElementById('messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', data.user_id === userId ? 'right' : 'left');
+      messageDiv.style.display = 'flex';
+      messageDiv.style.justifyContent = data.user_id === userId ? 'flex-end' : 'flex-start';
+      messageDiv.style.maxWidth = '80%';
+
+      // Display text message
+      if (data.content && data.content.trim() !== '') {
+        const textContent = document.createElement('p');
+        textContent.textContent = data.content;
+        textContent.style.padding = '10px';
+        textContent.style.borderRadius = '10px';
+        textContent.style.margin = '5px';
+        textContent.style.backgroundColor = data.user_id === userId ? '#d1ffd1' : '#ffd1d1';
+        textContent.style.maxWidth = '100%';
+        textContent.style.wordWrap = 'break-word';
+        messageDiv.appendChild(textContent);
+      }
+
+      // Display image message
+      if (data.image_url) {
+        const img = document.createElement('img');
+        img.src = data.image_url;
+        img.style.maxWidth = '100%';
+        img.style.borderRadius = '10px';
+        img.style.margin = '5px';
+        messageDiv.appendChild(img);
+      }
+
+      // Display link
+      if (data.link) {
+        const anchor = document.createElement('a');
+        anchor.href = data.link;
+        anchor.textContent = data.link;
+        anchor.target = '_blank';
+        anchor.style.padding = '10px';
+        anchor.style.borderRadius = '10px';
+        anchor.style.margin = '5px';
+        anchor.style.backgroundColor = data.user_id === userId ? '#d1ffd1' : '#ffd1d1';
+        anchor.style.wordWrap = 'break-word';
+        messageDiv.appendChild(anchor);
+      }
+
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function sendMessageOrImageOrLink() {
+      const userId = document.getElementById('user_id').value;
+      const roomId = document.getElementById('room_id').value;
+      const content = document.getElementById('messageInput').value.trim();
+      const imageInput = document.getElementById('imageInput');
+
+      if (content !== '') {
+        if (isValidURL(content)) {
+          socket.emit('message', { room_id: roomId, user_id: userId, link: content });
+        } else {
+          socket.emit('message', { room_id: roomId, user_id: userId, content });
+        }
+        document.getElementById('messageInput').value = '';
+      } else if (imageInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('photo', imageInput.files[0]);
+        formData.append('room_id', roomId);
+        formData.append('user_id', userId);
+
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Image uploaded successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error uploading image:', error);
+        });
+
+        imageInput.value = '';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-// Remember - a component is just a function that returns a JSX template!
-import { Link } from 'react-router-dom'; 
+import '../styles/tailwind.css'; 
 
 const NavBar = () => {
     return (
@@ -42,7 +41,7 @@ const NavBar = () => {
           </div>
         </div>
         <div className="navbar-center">
-          <a className="btn btn-ghost text-xl">CivicConnect</a>
+          <p className="btn btn-ghost text-xl">CivicConnect</p>
         </div>
         <div className="navbar-end">
           <Link to="/create-event" className="btn btn-ghost">

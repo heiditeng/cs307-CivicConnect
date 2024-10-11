@@ -4,8 +4,11 @@ import './Signup.css';
 const Signup = ({ onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [enableMFAEmail, setEnableMFAEmail] = useState(false);
+  const [enableMFAPhone, setEnableMFAPhone] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
 
   const handleSignup = async (e) => {
@@ -17,7 +20,15 @@ const Signup = ({ onSwitchToLogin }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, email, phoneNumber }),
+        body: JSON.stringify({ 
+          username, 
+          password, 
+          confirmPassword, 
+          email, 
+          phoneNumber,
+          enableMFAEmail,
+          enableMFAPhone
+        }),
       });
 
       const data = await response.json();
@@ -56,6 +67,16 @@ const Signup = ({ onSwitchToLogin }) => {
           />
         </div>
         <div className="form-group">
+          <label className="form-label">Confirm Password:</label>
+          <input
+            className="form-input"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
           <label className="form-label">Email:</label>
           <input
             className="form-input"
@@ -75,11 +96,32 @@ const Signup = ({ onSwitchToLogin }) => {
             required
           />
         </div>
+        <div className="form-group">
+          <label className="form-label">
+            <input
+              type="checkbox"
+              checked={enableMFAEmail}
+              onChange={(e) => setEnableMFAEmail(e.target.checked)}
+            />
+            Email: Enable Multi-Factor Authentication
+          </label>
+        </div>
+        <div className="form-group">
+          <label className="form-label">
+            <input
+              type="checkbox"
+              checked={enableMFAPhone}
+              onChange={(e) => setEnableMFAPhone(e.target.checked)}
+            />
+            Phone: Enable Multi-Factor Authentication
+          </label>
+        </div>
         <button className="signup-button" type="submit">
-            Sign Up</button>
+          Sign Up
+        </button>
       </form>
       {responseMessage && <p className="response-message">{responseMessage}</p>}
-        <button className="switch-button" onClick={onSwitchToLogin}>
+      <button className="switch-button" onClick={onSwitchToLogin}>
         Already have an account? Login
       </button>
     </div>

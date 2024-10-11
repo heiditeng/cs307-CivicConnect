@@ -5,17 +5,17 @@ const router = express.Router();
 let communityMembers = [
     {
         username: 'aysu',
-        availability: 'Weekdays, 9 AM - 5 PM',
-        location: 'San Diego, CA',
-        occupation: 'Student',
-        interests: 'Food',
-        hobbies: 'Cooking'
+        availability: 'Weekdays',
+        location: '94101',
+        occupation: 'Culinary',
+        interests: 'Cooking',
+        hobbies: 'Baking'
 
     },
     {
         username: 'heidi',
         availability: 'Weekends',
-        location: 'Los Angeles, CA',
+        location: '30301',
         occupation: 'Student',
         interests: 'Art',
         hobbies: 'Running'

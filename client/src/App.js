@@ -10,11 +10,23 @@ import UserInformationForm from './components/UserInformationForm';
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';
+import NewPassword from './components/NewPassword';
+import ccLogo from './ccLogo.png'; 
 import MyEvents from './components/MyEvents';
 import DeleteConfirmation from './components/DeleteConfirmation';
 
 function App() {
   const title = "Welcome to CivicConnect!";
+  return (
+    <Router>
+    <div className='App'>
+      <NavBar />
+      <div className='content'>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
+          </div>
+        <h1 style={{ textAlign: 'center', marginBottom: '10px'}}>{title}</h1>
+        <Routes>
   
   return (
     <Router>
@@ -33,9 +45,9 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
+            <Route path="/reset-password" element={<NewPassword />} /> 
             <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
           </Routes>
-        </div>
       </div>
     </Router>
   );

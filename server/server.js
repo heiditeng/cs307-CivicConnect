@@ -3,97 +3,46 @@ const bcrypt = require('bcrypt'); // used for hashing passwords
 const jwt = require('jsonwebtoken'); // create and verify JWT
 const cors = require('cors'); // import cors
 const nodemailer = require('nodemailer'); // allow for emails to be sent
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session'); // handle sessions
 const profileRoutes = require('./profileRoutes'); // import profile routes
+const passwordRoutes = require('./passwordRoutes'); // password routes
+const { emailTemplates, errorMessages, successMessages } = require('./messages');
+const { sendOTPEmail } = require('./emailService'); // email
+const { sendOTPSMS } = require('./smsService'); // SMS
+const validator = require('validator'); // validates email
+
 
 // express needs to be in front of passport for google auth to work !!!
-const app = express()
+const {passport, users} = require('./googleAuth');
+const secretKey = 'key'
+const otpStore = {};
+
+// function to generate a 6-digit OTP
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000', // allow requests from this front-end origin
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 
-app.use(express.json()); 
-
-let users = [];
-const secretKey = 'key'; 
-
-// nodemailer (sends email)
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, 
-    auth: {
-        user: 'civicconnect075@gmail.com',
-        pass: 'CS307Project2024!' 
-    }
-});
-
-// transporter.verify((error, success) => {
-//     if (error) {
-//         console.error('SMTP Configuration Error:', error);
-//     } else {
-//         console.log('SMTP Server is ready to send messages.');
-//     }
-// });
-
-app.use(cors({
-    origin: 'http://localhost:3000', // allow requests from this front-end origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
-app.use(express.json()); 
+app.use(express.json());
 
 // express-session setup
 app.use(session({
-    secret: 'secret', // sign the session
-    resave: false, // session won't be saved
-    saveUninitialized: true // new intialized sessions
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: true
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// passport.js Google OAuth setup
-// clientID and clientSecret can be found in google console cloud -> API services -> credentials -> OAuth 2.0 ClientID
-// google strategy allwows for google signup
-passport.use(new GoogleStrategy({
-    clientID: '1058244633617-ko8kjjl51lb15pcfqv5mrdf51ik3mb82.apps.googleusercontent.com',
-    clientSecret: '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',
-    callbackURL: 'http://localhost:5010/auth/google/callback'
-}, 
-// after google authenticates ...
-(accessToken, refreshToken, profile, done) => {
-    // creates new user object if not found
-    let user = users.find(u => u.googleId === profile.id);
-    if (!user) {
-        user = {
-            googleId: profile.id,
-            username: profile.displayName,
-            email: profile.emails[0].value
-        };
-        users.push(user);
-    }
-    // sign in successful
-    return done(null, user);
-}));
-
-// googleID stored
-passport.serializeUser((user, done) => {
-    done(null, user.googleId);
-});
-
-// retrieves data based on session
-passport.deserializeUser((id, done) => {
-    const user = users.find(u => u.googleId === id);
-    done(null, user);
-});
-
-// google OAuth routes
+// Google OAuth routes
 app.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
@@ -102,78 +51,59 @@ app.get('/auth/google/callback', passport.authenticate('google', {
     failureRedirect: '/login'
 }),
 (req, res) => {
-    // Successful authentication, redirect to home page
-    res.redirect('http://localhost:3000');
+    // successful authentication, redirect to home page
+    res.redirect('http://localhost:3000/profile');
 });
 
-app.get('/send-test-email', async (req, res) => {
-    const mailOptions = {
-        from: 'civicconnect075@gmail.com',
-        to: 'heiditeng22@gmail.com', 
-        subject: 'Test Email',
-        text: 'This is a test email from CivicConnect.'
-    };
-
-    console.log("Before sending...");
-    try {
-        console.log("Sending test email...");
-        await transporter.sendMail(mailOptions);
-        console.log("Test email sent successfully.");
-        res.status(200).send('Test email sent successfully.');
-    } catch (error) {
-        console.error('Error sending test email:', error);
-        res.status(500).send('Error sending test email.');
+// nodemailer (sends email)
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'civicconnect075@gmail.com',
+        pass: 'CS307Project2024!'
     }
 });
 
-// password reset request route
-app.post('/request-password-reset', async (req, res) => {
-    const {email} = req.body;
-    console.log("Received password reset request for email:", email);
+// Use password routes
+app.use('/', passwordRoutes);
 
-    if (!email) {
-        return res.status(400).json({error: 'Please provide an email address.'});
-    }
+// password validation function
+function isPasswordValid(password) {
+    // Regex explanation:
+    // (?=.*[A-Z])      ensure at least one uppercase letter
+    // (?=.*[0-9])      ensure at least one digit
+    // (?=.*[!@#$%^&*]) ensure at least one special character
+    // .{8,}            ensure the password is at least 5 characters long
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{5,}$/;
+    return passwordRegex.test(password);
+}
 
-    // find the user by email
-    const user = users.find(user => user.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-        console.log("User not found for email:", email);
-        return res.status(200).json({message: 'If this email is registered, you will receive a password reset link.'});
-    }
+function isEmailValid(email) {
+    // Regex for a simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
 
-    // generate reset token that expires in 1 hour
-    const resetToken = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
-
-    // send an email with the reset link
-    const resetLink = `http://localhost:5010/reset-password?token=${resetToken}`;
-
-    const mailOptions = {
-        from: 'civicconnect075@gmail.com',
-        to: user.email,
-        subject: 'Password Reset Request',
-        html: `
-            <h3>Password Reset Request</h3>
-            <p>Hello ${user.username}! </p>
-            <p>We received a request to reset your password. Click the link below to reset your password:</p>
-            <a href="${resetLink}">Reset Password</a>
-            <p>If you did not request a password reset, please ignore this email. This link will expire in an hour. </p>
-            <p>Have a nice day!</p>`
-    };
-
-    try {
-        console.log("Sending email...");
-        await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully.");
-        res.status(200).json({message: 'If this email is registered, you will receive a password reset link.'});
-    } catch (error) {
-        res.status(500).json({error: 'Error sending email. Please try again later.'});
-    }
-});
-
-async function signupUser(username, password, email, phoneNumber) {
-    if (!username || !password || !email || !phoneNumber) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone) {
+    if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
+    }
+
+    // check if email is valid
+    if (!isEmailValid(email)) {
+        throw new Error('Invalid email format.');
+    }
+
+    // check if password meets the complexity requirements
+    if (!isPasswordValid(password)) {
+        throw new Error('Password must include at least one uppercase letter, one symbol, one number, and be at least 8 characters long.');
+    }
+
+    // check if password matches
+    if (password !== confirmPassword) {
+        throw new Error('Passwords do not match.');
     }
 
     // check if the user already exists through email + username
@@ -185,19 +115,19 @@ async function signupUser(username, password, email, phoneNumber) {
     // hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // store user in the list
-    users.push({ username, password: hashedPassword, email, phoneNumber});
+    // store user in the list with MFA settings
+    users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
 
     return 'User registered successfully.';
 }
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, email, phoneNumber } = req.body;
-        const message = await signupUser(username, password, email, phoneNumber);
-        res.status(201).json({ message });
+        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone} = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone);
+        res.status(201).json({message});
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({error: error.message});
     }
 });
 
@@ -225,18 +155,84 @@ async function loginUser(username, password) {
     return { message: 'Login successful.', token };
 }
 
+// login route with MFA check
 app.post('/login', async (req, res) => {
+    const {username, password} = req.body;
+
     try {
-        const { username, password } = req.body;
-        const result = await loginUser(username, password);
-        res.status(200).json(result);
+        const user = users.find(user => user.username === username);
+        if (!user) {
+            throw new Error('Invalid username or password.');
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error('Invalid username or password.');
+        }
+
+        console.log("before");
+
+        let otp;
+        // check if MFA via email is enabled
+        if (user.enableMFAEmail) {
+            otp = generateOTP();
+            otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+
+            console.log("sending email ...");
+            await sendOTPEmail(user.email, otp);
+
+            res.status(200).json({ message: 'OTP sent to your email.' });
+        } 
+        // check if MFA via phone is enabled
+        else if (user.enableMFAPhone) {
+            otp = generateOTP();
+            otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+            console.log("sending SMS...");
+           
+            await sendOTPSMS(user.phoneNumber, otp);
+            res.status(200).json({ message: 'OTP sent to your phone.' });
+        } 
+        // no MFA enabled
+        else {
+            console.log("no MFA");
+            const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
+            res.status(200).json({ message: 'Login successful.', token });
+        }
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
+// verify OTP (MFA Step)
+app.post('/verify-otp', (req, res) => {
+    const {username, otp} = req.body;
+    try {
+        const otpData = otpStore[username];
+        if (!otpData || otpData.otp !== otp || Date.now() > otpData.expiresAt) {
+            throw new Error('Invalid or expired OTP.');
+        }
+
+        // OTP is valid, generate JWT token
+        const token = jwt.sign({username}, secretKey, {expiresIn: '1h'});
+
+        // Clear OTP after successful verification
+        delete otpStore[username];
+
+        res.status(200).json({message: 'Login successful.', token});
+    } catch (error) {
+        res.status(400).json({error: error.message});
+    }
+});
+
 // using the profile routes
 app.use('/api/profiles', profileRoutes);
+
+app.get("/api", (req, res) => {
+    res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })
+})
+
+// using port 5010 bc 5000 taken
+// app.listen(5010, () => {console.log("Server has started on port 5010")})
 
 // start the server only if not in a test environment
 if (process.env.NODE_ENV !== 'test') {

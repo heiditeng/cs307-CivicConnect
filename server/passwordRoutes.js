@@ -52,6 +52,17 @@ router.post('/request-password-reset', async (req, res) => {
     // res.status(200).json({ message: 'Password reset link generated successfully.', resetLink });
 });
 
+// password validation function
+function isPasswordValid(password) {
+    // Regex explanation:
+    // (?=.*[A-Z])      ensure at least one uppercase letter
+    // (?=.*[0-9])      ensure at least one digit
+    // (?=.*[!@#$%^&*]) ensure at least one special character
+    // .{8,}            ensure the password is at least 5 characters long
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{5,}$/;
+    return passwordRegex.test(password);
+}
+
 // Reset password
 router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
@@ -65,6 +76,11 @@ router.post('/reset-password', async (req, res) => {
         const user = users.find(user => user.email.toLowerCase() === userEmail.toLowerCase());
         if (!user) {
             return res.status(400).json({ error: 'Invalid token or user not found.' });
+        }
+
+        // check if password meets the complexity requirements
+        if (!isPasswordValid(newPassword)) {
+            throw new Error('Password must include at least one uppercase letter, one symbol, one number, and be at least 8 characters long.');
         }
 
         // Hash the new password and update it

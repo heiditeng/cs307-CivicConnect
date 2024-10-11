@@ -8,6 +8,7 @@ const Login = ({ onSwitchToSignup }) => {
   const [otp, setOTP] = useState(''); // state for OTP input
   const [responseMessage, setResponseMessage] = useState('');
   const [requiresOTP, setRequiresOTP] = useState(false); // track if OTP is required
+  const [isOtpSent, setIsOtpSent] = useState(false); // track SMS
   const navigate = useNavigate(); // react router to navigate to other pages
 
   const handleLogin = async (e) => {
@@ -24,13 +25,14 @@ const Login = ({ onSwitchToSignup }) => {
 
       const data = await response.json();
 
-      if (response.ok && data.message === 'OTP sent to your email.') {
+      // check if OTP is required (either via email or phone)
+      if (response.ok && (data.message.includes('OTP sent to your email') || data.message.includes('OTP sent to your phone'))) {
         setRequiresOTP(true); // trigger OTP input
         setResponseMessage(data.message);
       } else if (response.ok) {
         setResponseMessage(data.message);
         localStorage.setItem('authToken', data.token); // store token in local storage
-        navigate('/myprofile'); // navigate to the homepage or another page
+        navigate('/profile'); 
       } else {
         setResponseMessage(`Error: ${data.error}`);
       }
@@ -39,7 +41,7 @@ const Login = ({ onSwitchToSignup }) => {
     }
   };
 
-  // Define the missing handleOTPSubmit function
+  // define the missing handleOTPSubmit function
   const handleOTPSubmit = async (e) => {
     e.preventDefault(); // prevent the page from refreshing
 
@@ -87,7 +89,7 @@ const Login = ({ onSwitchToSignup }) => {
               required
             />
           </div>
-          <button className="login-button" type="submit">
+          <button className="login-button" type="submit" disabled={!otp}>
             Submit OTP
           </button>
         </form>

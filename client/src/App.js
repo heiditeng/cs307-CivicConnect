@@ -41,11 +41,9 @@ function App() {
             <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} /> 
             <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
+            <Route path="/organization-profile" element={<OrganizationProfile />} />
           </Routes>
         </div>
-            <Route path="/organization-profile" element={<OrganizationProfile />} />
-        </Routes>
-
       </div>
     </Router>
   );

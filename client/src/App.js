@@ -1,10 +1,10 @@
+import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // navigation between pages
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
 import UserInformationForm from './components/UserInformationForm';
-
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';

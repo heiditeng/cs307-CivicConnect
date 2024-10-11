@@ -13,7 +13,7 @@ describe('Password Reset Routes', () => {
 
     // requesting a password reset link
     it('should generate a password reset link for a valid email', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'civicconnect075@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123!', 'securePass123!', 'civicconnect075@gmail.com', '123456789');
 
         const response = await request(app)
             .post('/request-password-reset')
@@ -35,20 +35,20 @@ describe('Password Reset Routes', () => {
 
     // valid token
     it('should reset the password successfully with a valid token', async () => {
-        await signupUser('heidiTeng', 'securePass123', 'securePass123', 'heiditeng22@gmail.com', '123456789');
+        await signupUser('heidiTeng', 'securePass123!', 'securePass123!', 'heiditeng22@gmail.com', '123456789');
 
         const resetToken = jwt.sign({ email: 'heiditeng22@gmail.com' }, secretKey, { expiresIn: '1h' });
 
         const response = await request(app)
             .post('/reset-password')
-            .send({ token: resetToken, newPassword: 'hihihi' });
+            .send({ token: resetToken, newPassword: 'hIhI!!!123' });
 
         expect(response.statusCode).toBe(200);
         expect(response.body.message).toBe('Password has been reset successfully.');
 
         // verify that the password was updated
         const user = users.find(u => u.email === 'heiditeng22@gmail.com');
-        const isPasswordCorrect = await bcrypt.compare('hihihi', user.password);
+        const isPasswordCorrect = await bcrypt.compare('hIhI!!!123', user.password);
         expect(isPasswordCorrect).toBe(true);
     });
 
@@ -56,7 +56,7 @@ describe('Password Reset Routes', () => {
     it('should return an error when using an invalid or expired token', async () => {
         const response = await request(app)
             .post('/reset-password')
-            .send({ token: 'invalidToken', newPassword: 'hihihi' });
+            .send({ token: 'invalidToken', newPassword: 'hIhI!!!123' });
 
         expect(response.statusCode).toBe(400);
         expect(response.body.error).toBe('Invalid or expired token.');
@@ -70,7 +70,7 @@ describe('Password Reset Routes', () => {
         // Send request to reset password
         const response = await request(app)
             .post('/reset-password')
-            .send({ token: resetToken, newPassword: 'hihihi' });
+            .send({ token: resetToken, newPassword: 'hIhI!!!123' });
 
         // Expect error response
         expect(response.statusCode).toBe(400);

@@ -1,3 +1,4 @@
+// src/components/CreateEvent.js
 import React, { Component } from 'react';
 
 class CreateEvent extends Component {
@@ -9,6 +10,7 @@ class CreateEvent extends Component {
       eventStartTime: '',
       eventEndTime: '',
       eventLocation: '',
+      eventDescription: '',
       eventImage: null,
       eventVideo: null,
     };
@@ -29,21 +31,33 @@ class CreateEvent extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('eventName', this.state.eventName);
-    formData.append('eventDate', this.state.eventDate);
-    formData.append('eventStartTime', this.state.eventStartTime);
-    formData.append('eventEndTime', this.state.eventEndTime);
-    formData.append('eventLocation', this.state.eventLocation);
-    if (this.state.eventImage) {
-      formData.append('eventImage', this.state.eventImage);
-    }
-    if (this.state.eventVideo) {
-      formData.append('eventVideo', this.state.eventVideo);
-    }
-    
-    // Log or send formData to your backend here
-    console.log("Event Details: ", formData);
+    console.log("Form submitted");
+    const newEvent = {
+      id: Date.now(), // Unique ID generation logic
+      name: this.state.eventName,
+      date: this.state.eventDate,
+      startTime: this.state.eventStartTime,
+      endTime: this.state.eventEndTime,
+      location: this.state.eventLocation,
+      description: this.state.eventDescription,
+      imageUrl: this.state.eventImage ? URL.createObjectURL(this.state.eventImage) : '',
+      // Add more properties as needed
+    };
+
+    // Call the addEvent function passed from props
+    this.props.addEvent(newEvent);
+
+    // Reset the form
+    this.setState({
+      eventName: '',
+      eventDate: '',
+      eventStartTime: '',
+      eventEndTime: '',
+      eventLocation: '',
+      eventDescription: '',
+      eventImage: null,
+      eventVideo: null,
+    });
   };
 
   render() {
@@ -97,6 +111,15 @@ class CreateEvent extends Component {
               type="text"
               name="eventLocation"
               value={this.state.eventLocation}
+              onChange={this.handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Event Description:</label>
+            <textarea
+              name="eventDescription"
+              value={this.state.eventDescription}
               onChange={this.handleChange}
               required
             />

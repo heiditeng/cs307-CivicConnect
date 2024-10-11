@@ -29,9 +29,12 @@ const Login = ({ onSwitchToSignup }) => {
         setResponseMessage(data.message);
       } else if (response.ok) {
         setResponseMessage(data.message);
+        console.log(localStorage.token);
         localStorage.setItem('authToken', data.token); // store token in local storage
+        localStorage.setItem('username', data.username);
         navigate('/myprofile'); // navigate to the homepage or another page
       } else {
+        // Handle login error
         setResponseMessage(`Error: ${data.error}`);
       }
     } catch (error) {
@@ -39,9 +42,9 @@ const Login = ({ onSwitchToSignup }) => {
     }
   };
 
-  // Define the missing handleOTPSubmit function
+  // define the missing handleOTPSubmit function
   const handleOTPSubmit = async (e) => {
-    e.preventDefault(); // prevent the page from refreshing
+    e.preventDefault(); // Prevent page refresh
 
     try {
       const response = await fetch('http://localhost:5010/verify-otp', {
@@ -66,16 +69,16 @@ const Login = ({ onSwitchToSignup }) => {
     }
   };
 
+  // Handle Google login redirection
   const handleGoogleLogin = () => {
-    // redirect the user to the Google authentication route
     window.location.href = 'http://localhost:5010/auth/google';
   };
 
   return (
     <div className="login">
       <h2 className="login-title">Login</h2>
+      
       {requiresOTP ? (
-        // OTP form is displayed when OTP is required
         <form className="otp-form" onSubmit={handleOTPSubmit}>
           <div className="form-group">
             <label className="form-label">Enter OTP:</label>
@@ -87,12 +90,11 @@ const Login = ({ onSwitchToSignup }) => {
               required
             />
           </div>
-          <button className="login-button" type="submit">
+          <button className="login-button" type="submit" disabled={!otp}>
             Submit OTP
           </button>
         </form>
       ) : (
-        // Regular login form is displayed initially
         <form className="login-form" onSubmit={handleLogin}>
           <div className="form-group">
             <label className="form-label">Username:</label>
@@ -119,15 +121,20 @@ const Login = ({ onSwitchToSignup }) => {
           </button>
         </form>
       )}
+
       {responseMessage && <p className="response-message">{responseMessage}</p>}
+      
       <button className="switch-button" onClick={onSwitchToSignup}>
         Don't have an account? Sign Up
       </button>
+
       <button
         className="forgot-password-link"
-        onClick={() => navigate('/forgot-password')}>
+        onClick={() => navigate('/forgot-password')}
+      >
         Forgot Password?
       </button>
+
       <button className="google-login-button" onClick={handleGoogleLogin}>
         Sign in with Google
       </button>

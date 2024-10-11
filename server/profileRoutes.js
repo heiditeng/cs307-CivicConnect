@@ -4,21 +4,12 @@ const router = express.Router();
 // mock data for community members -- will replace later with mongDB 
 let communityMembers = [
     {
-        username: 'aysu',
+        username: 'aysuaysu',
         availability: 'Weekdays',
         location: '94101',
         occupation: 'Culinary',
         interests: 'Cooking',
         hobbies: 'Baking'
-
-    },
-    {
-        username: 'heidi',
-        availability: 'Weekends',
-        location: '30301',
-        occupation: 'Student',
-        interests: 'Art',
-        hobbies: 'Running'
 
     }
 ];

@@ -63,5 +63,5 @@ model.compile({
     });
 
     await model.save('file://./model');
-    console.log('model succes!');
+    console.log('model success!');
 })();

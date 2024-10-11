@@ -5,6 +5,7 @@ const cors = require('cors'); // import cors
 const nodemailer = require('nodemailer'); // allow for emails to be sent
 const session = require('express-session'); // handle sessions
 const profileRoutes = require('./profileRoutes'); // import profile routes
+const organizationRoutes = require('./organizationRoutes');
 const passwordRoutes = require('./passwordRoutes'); // password routes
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const { sendOTPEmail } = require('./emailService'); // email
@@ -158,7 +159,7 @@ async function loginUser(username, password) {
 
 // login route with MFA check
 app.post('/login', async (req, res) => {
-    const {username, password} = req.body;
+    const { username, password } = req.body;
 
     try {
         const user = users.find(user => user.username === username);
@@ -171,6 +172,7 @@ app.post('/login', async (req, res) => {
             throw new Error('Invalid username or password.');
         }
 
+
         console.log("before");
 
         let otp;
@@ -180,6 +182,10 @@ app.post('/login', async (req, res) => {
             otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
 
             console.log("sending email ...");
+        // Check if MFA is enabled for the user
+        if (user.enableMFA) {
+            const otp = generateOTP();
+            otpStore[user.email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
             await sendOTPEmail(user.email, otp);
 
             res.status(200).json({ message: 'OTP sent to your email.' });
@@ -196,8 +202,10 @@ app.post('/login', async (req, res) => {
         // no MFA enabled
         else {
             console.log("no MFA");
+        } else {
+            // Standard login without MFA
             const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
-            res.status(200).json({ message: 'Login successful.', token });
+            res.status(200).json({ message: 'Login successful.', token, username: user.username });
         }
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -227,6 +235,7 @@ app.post('/verify-otp', (req, res) => {
 
 // using the profile routes
 app.use('/api/profiles', profileRoutes);
+app.use('/api/organizations', organizationRoutes);
 
 // Using the event routes
 app.use('/api/events', eventRoutes); // Integrate event routes

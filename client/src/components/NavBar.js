@@ -1,7 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/tailwind.css'; 
-// Remember - a component is just a function that returns a JSX template!
-import { Link } from 'react-router-dom'; 
 
 const NavBar = () => {
     return (
@@ -35,6 +34,9 @@ const NavBar = () => {
               <li>
                 <Link to="/login">log out</Link>
               </li>
+              <li>
+                <Link to="/my-events">My Events</Link> {/* Add My Events link */}
+              </li>
             </ul>
           </div>
         </div>
@@ -42,6 +44,9 @@ const NavBar = () => {
           <p className="btn btn-ghost text-xl">CivicConnect</p>
         </div>
         <div className="navbar-end">
+          <Link to="/create-event" className="btn btn-ghost">
+            Create an Event
+          </Link>
           <button className="btn btn-ghost btn-circle">
             <svg
               xmlns="http://www.w3.org/2000/svg"

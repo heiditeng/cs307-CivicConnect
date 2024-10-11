@@ -17,23 +17,16 @@ import DeleteConfirmation from './components/DeleteConfirmation';
 
 function App() {
   const title = "Welcome to CivicConnect!";
-  return (
-    <Router>
-    <div className='App'>
-      <NavBar />
-      <div className='content'>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-            <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
-          </div>
-        <h1 style={{ textAlign: 'center', marginBottom: '10px'}}>{title}</h1>
-        <Routes>
   
   return (
     <Router>
       <div className='App'>
         <NavBar />
         <div className='content'>
-          <h1 className='header-title'>{title}</h1>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
+          </div>
+          <h1 style={{ textAlign: 'center', marginBottom: '10px'}}>{title}</h1>
           <Routes>
             <Route path="/" element={<AuthPage />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
@@ -48,6 +41,7 @@ function App() {
             <Route path="/reset-password" element={<NewPassword />} /> 
             <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
           </Routes>
+        </div>
       </div>
     </Router>
   );

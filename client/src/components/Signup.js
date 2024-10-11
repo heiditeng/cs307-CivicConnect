@@ -7,7 +7,8 @@ const Signup = ({ onSwitchToLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [enableMFA, setEnableMFA] = useState(false);
+  const [enableMFAEmail, setEnableMFAEmail] = useState(false);
+  const [enableMFAPhone, setEnableMFAPhone] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
 
   const handleSignup = async (e) => {
@@ -25,7 +26,8 @@ const Signup = ({ onSwitchToLogin }) => {
           confirmPassword, 
           email, 
           phoneNumber,
-          enableMFA
+          enableMFAEmail,
+          enableMFAPhone
         }),
       });
 
@@ -98,10 +100,20 @@ const Signup = ({ onSwitchToLogin }) => {
           <label className="form-label">
             <input
               type="checkbox"
-              checked={enableMFA}
-              onChange={(e) => setEnableMFA(e.target.checked)}
+              checked={enableMFAEmail}
+              onChange={(e) => setEnableMFAEmail(e.target.checked)}
             />
-            Enable Multi-Factor Authentication (MFA) for Email
+            Email: Enable Multi-Factor Authentication
+          </label>
+        </div>
+        <div className="form-group">
+          <label className="form-label">
+            <input
+              type="checkbox"
+              checked={enableMFAPhone}
+              onChange={(e) => setEnableMFAPhone(e.target.checked)}
+            />
+            Phone: Enable Multi-Factor Authentication
           </label>
         </div>
         <button className="signup-button" type="submit">

@@ -7,6 +7,7 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true); // manage view: true for Login, false for Signup
 
   const switchToSignup = () => {
+    console.log('Switching to Signup');
     setIsLogin(false); // show Signup
   };
 

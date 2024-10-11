@@ -62,7 +62,7 @@ const MyEvents = () => {
             {errorMessage ? (
               <p className="text-error">{errorMessage}</p>
             ) : (
-              <p className="text-gray-500">Loading events data...</p>
+              <p className="text-gray-500">No events found.</p>
             )}
           </div>
         )}

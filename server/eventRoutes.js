@@ -51,9 +51,15 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
         return res.status(400).json({ error: 'Name, date, eventZipcode, and description are required' });
     }
 
+    if (events.length > 0) {
+        newId = events[events.length - 1].id + 1; 
+    } else {
+        newId = 1;
+    }
+
     // Create a new event object
     const newEvent = {
-        id: events.length + 1,
+        id: newId,
         eventName: name,
         eventDate: date,
         eventStartTime,

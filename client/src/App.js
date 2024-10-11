@@ -1,4 +1,3 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import NavBar from './components/NavBar';
@@ -12,7 +11,7 @@ import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';
 import MyEvents from './components/MyEvents';
-import DeleteConfirmation from './components/DeleteConfirmation'; // Import the new component
+import DeleteConfirmation from './components/DeleteConfirmation';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -34,7 +33,7 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
-            <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> {/* New route */}
+            <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
           </Routes>
         </div>
       </div>

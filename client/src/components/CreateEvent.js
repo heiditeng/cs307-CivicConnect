@@ -31,10 +31,15 @@ class CreateEvent extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Form submitted");
     const newEvent = {
-      id: Date.now(), // or any unique ID generation logic
+      id: Date.now(), // Unique ID generation logic
       name: this.state.eventName,
       date: this.state.eventDate,
+      startTime: this.state.eventStartTime,
+      endTime: this.state.eventEndTime,
+      location: this.state.eventLocation,
+      description: this.state.eventDescription,
       imageUrl: this.state.eventImage ? URL.createObjectURL(this.state.eventImage) : '',
       // Add more properties as needed
     };

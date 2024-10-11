@@ -1,33 +1,17 @@
-// src/components/MyEvents.js
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-const MyEvents = () => {
-  const location = useLocation();
-  const [events, setEvents] = useState([
-    { id: 1, name: 'Community Cleanup', date: '2024-10-10', imageUrl: 'https://example.com/community-cleanup.jpg' },
-    { id: 2, name: 'Local Concert', date: '2024-10-15', imageUrl: 'https://example.com/local-concert.jpg' },
-    { id: 3, name: 'Charity Run', date: '2024-10-20', imageUrl: 'https://example.com/charity-run.jpg' },
-  ]);
+const MyEvents = ({ events = [], confirmDelete }) => {
+  const activeEvents = events.filter(event => !event.deleted);
 
-  // Handle the event deletion
-  const handleDeleteEvent = (id) => {
-    setEvents(events.filter(event => event.id !== id));
-  };
-
-  // Check for state passed from DeleteConfirmation
-  useEffect(() => {
-    if (location.state && location.state.deletedId) {
-      handleDeleteEvent(location.state.deletedId);
-    }
-  }, [location.state]);
+  console.log(events);
 
   return (
     <div>
       <h2>My Events</h2>
-      {events.length > 0 ? (
+      {activeEvents.length > 0 ? (
         <ul>
-          {events.map((event) => (
+          {activeEvents.map((event) => (
             <li key={event.id}>
               <h3>{event.name}</h3>
               <p>Date: {event.date}</p>
@@ -35,12 +19,7 @@ const MyEvents = () => {
               <Link to={`/event-details/${event.id}`}>
                 <button>Show Details</button>
               </Link>
-              <Link to={{
-                pathname: "/delete-confirmation",
-                state: { eventId: event.id, eventName: event.name, deleteEvent: handleDeleteEvent }
-              }}>
-                <button>Delete Event</button>
-              </Link>
+              <button onClick={() => confirmDelete(event.id, event.name)}>Delete Event</button>
             </li>
           ))}
         </ul>

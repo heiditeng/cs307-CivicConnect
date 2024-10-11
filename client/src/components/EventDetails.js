@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import monkeyImage from './uploads/monkey.jpeg';
 import catVid from './uploads/cat.mp4';
 
 const EventDetails = () => {
@@ -47,18 +46,25 @@ const EventDetails = () => {
         <p><strong>End Time:</strong> {eventData.eventEndTime}</p>
         <p><strong>Zipcode:</strong> {eventData.eventZipcode}</p>
         <p><strong>Description:</strong> {eventData.eventDescription}</p>
+        {/* Image section */}
         {eventData.eventImage && (
-          <img
-            src={monkeyImage}
-            alt={eventData.eventName}
-            style={{ width: "200px", height: "200px", objectFit: "cover" }}
-          />
+          <div className="mb-4"> {/* Added a container for the image */}
+            <img
+              src={`http://localhost:5010/uploads/${eventData.eventImage}`}
+              alt={eventData.eventName}
+              style={{ width: "200px", height: "200px", objectFit: "cover" }}
+            />
+          </div>
         )}
+
+        {/* Video section */}
         {eventData.eventVideo && (
-          <video controls style={{ width: "100%", height: "auto" }}>
-            <source src={catVid} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          <div className="mb-4"> {/* Added a container for the video */}
+            <video controls style={{ width: "100%", maxWidth: "600px", height: "auto" }}>
+              <source src={`http://localhost:5010/uploads/${eventData.eventVideo}`} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         )}
         <div className="mt-4">
           <Link to={`/delete-confirmation/${id}/${eventData.eventName}`}>

@@ -1,13 +1,35 @@
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
-const app = express();
 const path = require('path');
+const app = express();
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// Configure multer to handle file uploads
-const upload = multer({ dest: 'uploads/' }); // Specify the uploads directory
+
+// Configure multer to handle file uploads and preserve original file names
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname); // Use the original file name
+    }
+});
+
+const upload = multer({ storage: storage });
+
+console.log('Serving static files from:', path.join(__dirname,'uploads'));
+
+// Test route for checking static file serving
+app.get('/test-file', (req, res) => {
+    res.sendFile(path.join(__dirname, 'uploads', 'monkey.jpeg'), (err) => {
+        if (err) {
+            console.error('File not found:', err);
+            res.status(404).send('File not found');
+        }
+    });
+});
 
 // Mock data for events -- replace later with MongoDB
 let events = [
@@ -20,7 +42,7 @@ let events = [
         eventZipcode: '94101',
         eventDescription: 'Join us for a community cleanup to keep our park beautiful!',
         eventImage: 'animal.jpeg',
-        eventVideo: null,
+        eventVideo: 'cat.mp4',
     },
     {
         id: 2,
@@ -55,11 +77,7 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
         return res.status(400).json({ error: 'Name, date, eventZipcode, and description are required' });
     }
 
-    if (events.length > 0) {
-        newId = events[events.length - 1].id + 1; 
-    } else {
-        newId = 1;
-    }
+    const newId = events.length > 0 ? events[events.length - 1].id + 1 : 1;
 
     // Create a new event object
     const newEvent = {
@@ -70,8 +88,8 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
         eventEndTime,
         eventZipcode,
         eventDescription: description,
-        eventImage: req.files.eventImage ? req.files.eventImage[0].path : null, // Save the file path
-        eventVideo: req.files.eventVideo ? req.files.eventVideo[0].path : null, // Save the file path
+        eventImage: req.files.eventImage ? req.files.eventImage[0].originalname : null, // Save only the file name
+        eventVideo: req.files.eventVideo ? req.files.eventVideo[0].originalname : null, // Save only the file name
     };
 
     events.push(newEvent);

@@ -1,4 +1,5 @@
 import React from 'react';
+import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
@@ -39,11 +40,9 @@ function App() {
             <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} /> 
             <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
+            <Route path="/organization-profile" element={<OrganizationProfile />} />
           </Routes>
         </div>
-            <Route path="/organization-profile" element={<OrganizationProfile />} />
-        </Routes>
-
       </div>
     </Router>
   );

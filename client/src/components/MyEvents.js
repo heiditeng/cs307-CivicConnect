@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import monkeyImage from './uploads/monkey.jpeg';
 
 const MyEvents = () => {
   const [eventsData, setEventsData] = useState([]);
@@ -27,43 +26,46 @@ const MyEvents = () => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
-      <div className="flex flex-col w-full max-w-5xl gap-4">
-        <h2 className="text-2xl font-bold mb-4">My Events</h2>
+    <div className="flex justify-center items-center min-h-screen p-8 bg-gray-50">
+      <div className="flex flex-col w-full max-w-5xl gap-6">
+        <h2 className="text-3xl font-bold text-center mb-6 text-primary">My Events</h2>
 
         {eventsData.length > 0 ? (
-          <ul className="bg-base-200 p-6 rounded-lg shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {eventsData.map((event) => (
-              <li key={event.id} className="mb-4">
-                <h3 className="text-xl font-semibold">{event.eventName}</h3>
-                <p>Date: {event.eventDate}</p>
-                <p>Zipcode: {event.eventZipcode}</p>
+              <div
+                key={event.id}
+                className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow duration-300 aspect-square flex flex-col justify-between"
+              >
+                <div className="card-body p-4">
+                  <h3 className="card-title text-lg font-semibold text-gray-800">{event.eventName}</h3>
+                  <p className="text-sm text-gray-600">Date: {event.eventDate}</p>
+                  <p className="text-sm text-gray-600 mb-3">Zipcode: {event.eventZipcode}</p>
+                </div>
                 {event.eventImage && (
-                  <img
-                    src={monkeyImage}
-                    alt={event.eventName}
-                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                  />
+                  <figure className="h-32 w-full overflow-hidden rounded-t-lg">
+                    <img
+                      src={`http://localhost:5010/uploads/${event.eventImage}`}
+                      alt={event.eventName}
+                      className="object-cover w-full h-full"
+                    />
+                  </figure>
                 )}
-                <div className="mt-2"> {/* Add a div to wrap the buttons */}
+                <div className="card-actions justify-end p-4">
                   <Link to={`/event-details/${event.id}`}>
-                    <button className="btn btn-outline btn-primary mt-2">
-                      Show Details
-                    </button>
+                    <button className="btn btn-primary btn-sm">Show Details</button>
                   </Link>
                   <Link to={`/delete-confirmation/${event.id}/${event.eventName}`}>
-                    <button className="btn btn-outline btn-danger mt-2 ml-2">
-                      Delete Event
-                    </button>
+                    <button className="btn btn-error btn-sm ml-2">Delete Event</button>
                   </Link>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
-          <div className="text-center">
+          <div className="text-center py-12">
             {errorMessage ? (
-              <p className="text-error">{errorMessage}</p>
+              <p className="text-red-600 font-semibold">{errorMessage}</p>
             ) : (
               <p className="text-gray-500">No events found.</p>
             )}

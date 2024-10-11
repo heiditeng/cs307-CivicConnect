@@ -24,15 +24,18 @@ const Login = ({ onSwitchToSignup }) => {
 
       const data = await response.json();
 
-      // check if OTP is required (either via email or phone)
-      if (response.ok && (data.message.includes('OTP sent to your email') || data.message.includes('OTP sent to your phone'))) {
-        setRequiresOTP(true); // trigger OTP input
-        setResponseMessage(data.message);
-      } else if (response.ok) {
-        setResponseMessage(data.message);
-        localStorage.setItem('authToken', data.token); // store token in local storage
-        navigate('/profile'); 
+      if (response.ok) {
+        // Check if OTP is required (email or phone-based)
+        if (data.message.includes('OTP sent to your email') || data.message.includes('OTP sent to your phone')) {
+          setRequiresOTP(true); // Prompt OTP input
+          setResponseMessage(data.message);
+        } else {
+          // Successful login without OTP
+          localStorage.setItem('authToken', data.token); // Save token
+          navigate('/profile'); // Navigate to profile
+        }
       } else {
+        // Handle login error
         setResponseMessage(`Error: ${data.error}`);
       }
     } catch (error) {
@@ -42,7 +45,7 @@ const Login = ({ onSwitchToSignup }) => {
 
   // define the missing handleOTPSubmit function
   const handleOTPSubmit = async (e) => {
-    e.preventDefault(); // prevent the page from refreshing
+    e.preventDefault(); // Prevent page refresh
 
     try {
       const response = await fetch('http://localhost:5010/verify-otp', {
@@ -67,16 +70,16 @@ const Login = ({ onSwitchToSignup }) => {
     }
   };
 
+  // Handle Google login redirection
   const handleGoogleLogin = () => {
-    // redirect the user to the Google authentication route
     window.location.href = 'http://localhost:5010/auth/google';
   };
 
   return (
     <div className="login">
       <h2 className="login-title">Login</h2>
+      
       {requiresOTP ? (
-        // OTP form is displayed when OTP is required
         <form className="otp-form" onSubmit={handleOTPSubmit}>
           <div className="form-group">
             <label className="form-label">Enter OTP:</label>
@@ -93,7 +96,6 @@ const Login = ({ onSwitchToSignup }) => {
           </button>
         </form>
       ) : (
-        // Regular login form is displayed initially
         <form className="login-form" onSubmit={handleLogin}>
           <div className="form-group">
             <label className="form-label">Username:</label>
@@ -120,15 +122,20 @@ const Login = ({ onSwitchToSignup }) => {
           </button>
         </form>
       )}
+
       {responseMessage && <p className="response-message">{responseMessage}</p>}
+      
       <button className="switch-button" onClick={onSwitchToSignup}>
         Don't have an account? Sign Up
       </button>
+
       <button
         className="forgot-password-link"
-        onClick={() => navigate('/forgot-password')}>
+        onClick={() => navigate('/forgot-password')}
+      >
         Forgot Password?
       </button>
+
       <button className="google-login-button" onClick={handleGoogleLogin}>
         Sign in with Google
       </button>

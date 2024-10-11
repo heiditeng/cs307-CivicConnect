@@ -29,7 +29,9 @@ const Login = ({ onSwitchToSignup }) => {
         setResponseMessage(data.message);
       } else if (response.ok) {
         setResponseMessage(data.message);
+        console.log(localStorage.token);
         localStorage.setItem('authToken', data.token); // store token in local storage
+        localStorage.setItem('username', data.username);
         navigate('/myprofile'); // navigate to the homepage or another page
       } else {
         setResponseMessage(`Error: ${data.error}`);

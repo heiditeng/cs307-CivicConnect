@@ -11,6 +11,7 @@ import UserInformationForm from './components/UserInformationForm';
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';
+import OrganizationProfile from './components/OrganizationProfile';
 
 import NewPassword from './components/NewPassword';
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} /> 
+            <Route path="/organization-profile" element={<OrganizationProfile />} />
 
         </Routes>
       </div>

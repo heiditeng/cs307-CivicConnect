@@ -237,6 +237,9 @@ app.post('/verify-otp', (req, res) => {
 app.use('/api/profiles', profileRoutes);
 app.use('/api/organizations', organizationRoutes);
 
+//post route
+app.use('/posts', postRoute);
+
 app.get("/api", (req, res) => {
     res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })
 })

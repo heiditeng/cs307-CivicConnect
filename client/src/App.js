@@ -10,6 +10,7 @@ import UserInformationForm from './components/UserInformationForm';
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import MyProfileCM from './components/MyProfileCM';
+import CreatePost from './components/'
 import OrganizationProfile from './components/OrganizationProfile';
 import NewPassword from './components/NewPassword';
 import ccLogo from './ccLogo.png'; 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
+            <Route path="/create-post" element={<CreatePost />} />
             <Route path="/reset-password" element={<NewPassword />} /> 
             <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
             <Route path="/organization-profile" element={<OrganizationProfile />} />

@@ -1,96 +1,130 @@
 /* Profile Page */
 .profile-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100vh;
-  }
-  
-  /* Title */
-  h1 {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 2rem;
-  }
-  
-  /* Bottom bar */
-  .bottom-bar {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    background-color: #f8f9fa;
-    padding: 10px 0;
-    border-top: 1px solid #ddd;
-  }
-  
-  /* Create Post button */
-  .create-post-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-  }
-
-  /* Edit Profile Button */
-  .edit-profile-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .create-post-button:hover {
-    background-color: #0056b3;
-  }
-
-  edit-profile-button:hover {
-    background-color: #0056b3;
-  }
-
-  /* Form styles */
-.create-post-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+/* Title */
+h1 {
   margin-top: 20px;
+  text-align: center;
+  font-size: 2rem;
+}
+
+/* Bottom bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background-color: #f8f9fa;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+}
+
+/* Create Post button */
+.create-post-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+/* Edit Profile Button */
+.edit-profile-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.create-post-button:hover {
+  background-color: #0056b3;
+}
+
+edit-profile-button:hover {
+  background-color: #0056b3;
+}
+
+/* Form styles */
+.create-post-form {
+display: flex;
+flex-direction: column;
+gap: 15px;
+margin-top: 20px;
 }
 
 .create-post-form input[type="text"],
 .create-post-form input[type="file"] {
-  padding: 10px;
-  font-size: 14px;
-  width: 100%;
+padding: 10px;
+font-size: 14px;
+width: 100%;
 }
 
 .create-post-form button {
-  padding: 10px;
-  font-size: 16px;
-  margin-top: 10px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+padding: 10px;
+font-size: 16px;
+margin-top: 10px;
+background-color: #28a745;
+color: white;
+border: none;
+border-radius: 5px;
+cursor: pointer;
 }
 
 .create-post-form button[type="button"] {
-  background-color: grey;
+background-color: grey;
 }
 
 .create-post-form button:hover {
-  background-color: darkgrey;
+background-color: darkgrey;
 }
 
 .create-post-form button[type="button"]:hover {
-  background-color: darkgrey;
+background-color: darkgrey;
 }
-  
+
+.post-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+/* Default like button style */
+.like-button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  margin-left: 10px;
+}
+
+/* Highlighted style when liked */
+.like-button.liked {
+  background-color: blue;
+  color: white;
+  border: 1px solid blue;
+}
+
+.post-media {
+  width: 60%;
+}
+
+.post-details {
+  flex: 1;
+}

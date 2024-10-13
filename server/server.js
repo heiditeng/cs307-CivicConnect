@@ -11,6 +11,7 @@ const { emailTemplates, errorMessages, successMessages } = require('./messages')
 const { sendOTPEmail } = require('./emailService'); // email
 const { sendOTPSMS } = require('./smsService'); // SMS
 const validator = require('validator'); // validates email
+const postRoute = require('./postRoute'); 
 
 
 // express needs to be in front of passport for google auth to work !!!

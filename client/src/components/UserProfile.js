@@ -11,6 +11,7 @@ const UserProfile = () => {
     const fetchProfile = async () => {
       const username = localStorage.getItem('username'); 
       console.log(username);
+  
       if (username) {
         try {
           const res = await fetch(`http://localhost:5010/api/profiles/profile/${username}`);
@@ -19,7 +20,8 @@ const UserProfile = () => {
             setProfileData(data);
             fetchMlSuggestions(data);
           } else {
-            setErrorMessage("Error fetching profile data");
+            // If profile is not found, create a new one
+            await addNewProfile(username);
           }
         } catch (error) {
           setErrorMessage("Error fetching profile data");
@@ -28,9 +30,31 @@ const UserProfile = () => {
         setErrorMessage("No username found. Please log in again.");
       }
     };
-
+  
+    const addNewProfile = async (username) => {
+      try {
+        const res = await fetch('http://localhost:5010/api/profiles/add-member', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username }),
+        });
+  
+        if (res.ok) {
+          const newProfile = await res.json();
+          setProfileData(newProfile.member);
+        } else {
+          setErrorMessage('Error adding new profile');
+        }
+      } catch (error) {
+        setErrorMessage('Error adding new profile');
+      }
+    };
+  
     fetchProfile();
   }, [routeLocation]);
+  
 
   const fetchMlSuggestions = async (data) => {
     try {

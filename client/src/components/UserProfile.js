@@ -9,12 +9,14 @@ const UserProfile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const username = localStorage.getItem('username'); 
+      const username = localStorage.getItem("username");
       console.log(username);
-  
+
       if (username) {
         try {
-          const res = await fetch(`http://localhost:5010/api/profiles/profile/${username}`);
+          const res = await fetch(
+            `http://localhost:5010/api/profiles/profile/${username}`
+          );
           if (res.ok) {
             const data = await res.json();
             setProfileData(data);
@@ -30,31 +32,33 @@ const UserProfile = () => {
         setErrorMessage("No username found. Please log in again.");
       }
     };
-  
+
     const addNewProfile = async (username) => {
       try {
-        const res = await fetch('http://localhost:5010/api/profiles/add-member', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username }),
-        });
-  
+        const res = await fetch(
+          "http://localhost:5010/api/profiles/add-member",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username }),
+          }
+        );
+
         if (res.ok) {
           const newProfile = await res.json();
           setProfileData(newProfile.member);
         } else {
-          setErrorMessage('Error adding new profile');
+          setErrorMessage("Error adding new profile");
         }
       } catch (error) {
-        setErrorMessage('Error adding new profile');
+        setErrorMessage("Error adding new profile");
       }
     };
-  
+
     fetchProfile();
   }, [routeLocation]);
-  
 
   const fetchMlSuggestions = async (data) => {
     try {
@@ -103,25 +107,64 @@ const UserProfile = () => {
             <div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Username:</p>
-                <p className="text-base text-gray-700">{profileData.username}</p>
+                <p className="text-base text-gray-700">
+                  {profileData.username}
+                </p>
               </div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Location:</p>
-                <p className="text-base text-gray-700">{profileData.location}</p>
+                <p className="text-base text-gray-700">
+                  {profileData.location}
+                </p>
               </div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Interests & Hobbies:</p>
-                <p className="text-base text-gray-700">{profileData.interests}</p>
+                <p className="text-base text-gray-700">
+                  {profileData.interests}
+                </p>
                 <p className="text-base text-gray-700">{profileData.hobbies}</p>
               </div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Upcoming/RSVP'd events:</p>
                 <p className="text-base text-gray-700">
-                  This will contain all upcoming event titles with hyperlinks to the event post.
+                  This will contain all upcoming event titles with hyperlinks to
+                  the event post.
                 </p>
               </div>
+              <div className="mb-4">
+              <p className="text-lg font-semibold">Attendance Rating:</p>
+                <div class="rating gap-1">
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-red-400"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-orange-400"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-yellow-400"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-lime-400"
+                  />
+                  <input
+                    type="radio"
+                    name="rating-3"
+                    class="mask mask-heart bg-green-400"
+                  />
+                </div>
+              </div>
               <Link to="/info-form">
-                <button className="btn btn-outline btn-accent">Edit Profile</button>
+                <button className="btn btn-outline btn-accent">
+                  Edit Profile
+                </button>
               </Link>
             </div>
           ) : (
@@ -141,7 +184,9 @@ const UserProfile = () => {
               {profileData.username}'s Recommendation
             </h2>
             {mlSuggestions ? (
-              <p className="text-base text-gray-700">We suggest: {mlSuggestions}</p>
+              <p className="text-base text-gray-700">
+                We suggest: {mlSuggestions}
+              </p>
             ) : (
               <p className="text-gray-500">Loading suggestions...</p>
             )}

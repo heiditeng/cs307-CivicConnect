@@ -55,6 +55,9 @@ const MyEvents = () => {
                   <Link to={`/event-details/${event.id}`}>
                     <button className="btn btn-primary btn-sm">Show Details</button>
                   </Link>
+                  <Link to={`/modify-event/${event.id}`}>
+                    <button className="btn btn-secondary btn-sm ml-2">Modify Event</button>
+                  </Link>
                   <Link to={`/delete-confirmation/${event.id}/${event.eventName}`}>
                     <button className="btn btn-error btn-sm ml-2">Delete Event</button>
                   </Link>

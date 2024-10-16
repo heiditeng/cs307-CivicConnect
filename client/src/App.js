@@ -13,7 +13,6 @@ function App() {
 
   const title = "Welcome to CivicConnect!";
 
-  
   return (
     <Router>
     <div className='App'>

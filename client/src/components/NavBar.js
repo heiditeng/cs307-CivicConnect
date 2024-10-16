@@ -31,7 +31,7 @@ const NavBar = () => {
                 <Link to="/info-form">user info form</Link>
               </li>
               <li>
-                <Link to="/login">log out</Link>
+                <Link to="/">log out</Link>
               </li>
             </ul>
           </div>

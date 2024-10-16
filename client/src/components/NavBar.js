@@ -32,9 +32,6 @@ const NavBar = () => {
                 <Link to="/login">log out</Link>
               </li>
               <li>
-                <Link to="/">log out</Link>
-              </li>
-              <li>
                 <Link to="/my-events">My Events</Link>
               </li>
             </ul>

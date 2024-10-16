@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// mock data for community members -- will replace later with mongDB 
+// mock data for community members -- will replace later with MongoDB
 let communityMembers = [
     {
         username: 'aysuaysu',
@@ -10,7 +10,6 @@ let communityMembers = [
         occupation: 'Culinary',
         interests: 'Cooking',
         hobbies: 'Baking'
-
     }
 ];
 
@@ -51,6 +50,25 @@ router.get('/profile/:username', (req, res) => {
 
     // return the member data
     res.json(member);
+});
+
+// route to add a new community member with default values
+router.post('/add-member', (req, res) => {
+    const { username } = req.body;
+    console.log(username);
+
+    // Add new member with other fields initialized to null
+    const newMember = {
+        username: username,
+        availability: null,
+        location: null,
+        occupation: null,
+        interests: null,
+        hobbies: null
+    };
+
+    communityMembers.push(newMember);
+    return res.status(201).json({ message: 'New member added successfully!', member: newMember });
 });
 
 module.exports = router;

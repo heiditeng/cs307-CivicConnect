@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import MyEvents from "./MyEvents";
 
 const OrganizationProfile = () => {
   const [orgData, setOrgData] = useState("");
@@ -77,7 +78,7 @@ const OrganizationProfile = () => {
         <div className="w-full md:w-2/3 flex flex-col gap-4">
           <div className="p-6 bg-base-100 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
-            {orgData.events ? (
+            {/*orgData.events ? (
               orgData.events.map((event, index) => (
                 <div key={index} className="mb-2">
                   <p className="text-base text-gray-700">
@@ -87,7 +88,8 @@ const OrganizationProfile = () => {
               ))
             ) : (
               <p className="text-gray-500">No events available</p>
-            )}
+            )*/}
+            <MyEvents/>
           </div>
         </div>
       </div>

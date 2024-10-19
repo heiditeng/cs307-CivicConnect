@@ -3,7 +3,7 @@ import Login from './Login';
 import Signup from './Signup';
 import './AuthPage.css';
 
-const AuthPage = () => {
+const AuthPage = ({ isOrganization }) => {
   const [isLogin, setIsLogin] = useState(true); // manage view: true for Login, false for Signup
 
   const switchToSignup = () => {
@@ -18,9 +18,9 @@ const AuthPage = () => {
   return (
     <div className="auth-page">
       {isLogin ? (
-        <Login onSwitchToSignup={switchToSignup} />
+        <Login onSwitchToSignup={switchToSignup} isOrganization={isOrganization} />
       ) : (
-        <Signup onSwitchToLogin={switchToLogin} />
+        <Signup onSwitchToLogin={switchToLogin} isOrganization={isOrganization} />
       )}
     </div>
   );

@@ -15,6 +15,7 @@ import NewPassword from './components/NewPassword';
 import MyEvents from './components/MyEvents';
 import DeleteConfirmation from './components/DeleteConfirmation';
 import ccLogo from './ccLogo.png'; 
+import UserTypeSelectionPage from './components/UserTypeSelection';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -29,7 +30,10 @@ function App() {
           </div>
           <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>{title}</h1>
           <Routes>
-            <Route path="/" element={<AuthPage />} />
+            {/* Redirect to User Type Selection Page */}
+            <Route path="/" element={<UserTypeSelectionPage />} />
+            <Route path="/user-auth" element={<AuthPage isOrganization={false} />} />
+            <Route path="/organization-auth" element={<AuthPage isOrganization={true} />} />
             <Route path="/forgot-password" element={<ResetPassword />} />
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/my-events" element={<MyEvents />} />

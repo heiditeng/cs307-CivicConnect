@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserTypeSelection.css';
 
 const UserTypeSelectionPage = () => {
+  const [userType, setUserType] = useState(null);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSelect = (userType) => {
-    if (userType === 'organization') {
-      navigate('/organization-auth');
+  const handleSelect = (type) => {
+    setUserType(type);
+    setError(''); // Clear any existing error
+  };
+
+  const handleContinue = () => {
+    if (!userType) {
+      setError('Please select either "User" or "Organization" before continuing.');
     } else {
-      navigate('/user-auth');
+      navigate(userType === 'organization' ? '/organization-auth' : '/user-auth');
     }
   };
 
@@ -17,19 +24,23 @@ const UserTypeSelectionPage = () => {
     <div className="user-type-container">
       <h1 className="selection-title">Are you a User or Organization?</h1>
       <div className="selection-buttons">
-        <button 
-          className="selection-button organization-button" 
+        <button
+          className={`selection-button ${userType === 'organization' ? 'selected' : ''}`}
           onClick={() => handleSelect('organization')}
         >
           Organization
         </button>
-        <button 
-          className="selection-button user-button" 
+        <button
+          className={`selection-button ${userType === 'user' ? 'selected' : ''}`}
           onClick={() => handleSelect('user')}
         >
           User
         </button>
       </div>
+      {error && <p className="error-message">{error}</p>}
+      <button className="continue-button" onClick={handleContinue}>
+        Continue
+      </button>
     </div>
   );
 };

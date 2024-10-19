@@ -15,6 +15,11 @@ const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
 
 
+// mongo db stuff
+const connectDB = require('./db');
+connectDB();
+
+
 // express needs to be in front of passport for google auth to work !!!
 const {passport, users} = require('./googleAuth');
 const secretKey = 'key'

@@ -1,43 +1,44 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './UserTypeSelection.css';
 
-const UserTypeSelectionPage = () => {
-  const [userType, setUserType] = useState(null);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+const UserTypeSelection = ({ onContinue }) => {
+  const [selectedType, setSelectedType] = useState(null);
 
-  const handleSelect = (type) => {
-    setUserType(type);
-    setError(''); // Clear any existing error
+  // button clicking + deselecting
+  const handleSelection = (type) => {
+    if (selectedType === type) {
+      setSelectedType(null); 
+    } else {
+      setSelectedType(type); 
+    }
   };
 
+  // need to choose button otw error
   const handleContinue = () => {
-    if (!userType) {
-      setError('Please select either "User" or "Organization" before continuing.');
+    if (selectedType) {
+      onContinue(selectedType); 
     } else {
-      navigate(userType === 'organization' ? '/organization-auth' : '/user-auth');
+      alert('Please select an option before continuing.');
     }
   };
 
   return (
-    <div className="user-type-container">
-      <h1 className="selection-title">Are you a User or Organization?</h1>
-      <div className="selection-buttons">
+    <div className="user-type-selection">
+      <h2>Are you a User or Organization?</h2>
+      <div className="buttons">
         <button
-          className={`selection-button ${userType === 'organization' ? 'selected' : ''}`}
-          onClick={() => handleSelect('organization')}
+          className={`selection-button ${selectedType === 'Organization' ? 'selected' : ''}`}
+          onClick={() => handleSelection('Organization')}
         >
           Organization
         </button>
         <button
-          className={`selection-button ${userType === 'user' ? 'selected' : ''}`}
-          onClick={() => handleSelect('user')}
+          className={`selection-button ${selectedType === 'User' ? 'selected' : ''}`}
+          onClick={() => handleSelection('User')}
         >
           User
         </button>
       </div>
-      {error && <p className="error-message">{error}</p>}
       <button className="continue-button" onClick={handleContinue}>
         Continue
       </button>
@@ -45,4 +46,4 @@ const UserTypeSelectionPage = () => {
   );
 };
 
-export default UserTypeSelectionPage;
+export default UserTypeSelection;

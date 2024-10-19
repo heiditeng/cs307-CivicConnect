@@ -19,6 +19,15 @@ import UserTypeSelectionPage from './components/UserTypeSelection';
 
 function App() {
   const title = "Welcome to CivicConnect!";
+
+  // user or org continue button + redirection of user vs org login pages
+  const handleContinue = (selectedType) => {
+    if (selectedType === 'User') {
+      window.location.href = '/user-auth';
+    } else if (selectedType === 'Organization') {
+      window.location.href = '/organization-auth';
+    }
+  };
   
   return (
     <Router>
@@ -30,8 +39,8 @@ function App() {
           </div>
           <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>{title}</h1>
           <Routes>
-            {/* Redirect to User Type Selection Page */}
-            <Route path="/" element={<UserTypeSelectionPage />} />
+            {/* Redirect to User Type Selection Page with onContinue prop */}
+            <Route path="/" element={<UserTypeSelectionPage onContinue={handleContinue} />} />
             <Route path="/user-auth" element={<AuthPage isOrganization={false} />} />
             <Route path="/organization-auth" element={<AuthPage isOrganization={true} />} />
             <Route path="/forgot-password" element={<ResetPassword />} />

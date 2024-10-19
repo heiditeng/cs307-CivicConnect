@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserTypeSelection.css';
 
@@ -7,9 +7,18 @@ const UserTypeSelectionPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // load previous selection from local storage
+  useEffect(() => {
+    const savedUserType = localStorage.getItem('userType');
+    if (savedUserType) {
+      setUserType(savedUserType);
+    }
+  }, []);
+
   const handleSelect = (type) => {
     setUserType(type);
-    setError(''); // Clear any existing error
+    setError('');
+    localStorage.setItem('userType', type); // save selection to local storage
   };
 
   const handleContinue = () => {
@@ -25,13 +34,13 @@ const UserTypeSelectionPage = () => {
       <h1 className="selection-title">Are you a User or Organization?</h1>
       <div className="selection-buttons">
         <button
-          className={`selection-button ${userType === 'organization' ? 'selected' : ''}`}
+          className={`selection-button organization-button ${userType === 'organization' ? 'selected' : ''}`}
           onClick={() => handleSelect('organization')}
         >
           Organization
         </button>
         <button
-          className={`selection-button ${userType === 'user' ? 'selected' : ''}`}
+          className={`selection-button user-button ${userType === 'user' ? 'selected' : ''}`}
           onClick={() => handleSelect('user')}
         >
           User

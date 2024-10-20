@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Signup.css';
 
-const Signup = ({ onSwitchToLogin }) => {
+const Signup = ({ onSwitchToLogin, isOrganization }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,7 +27,8 @@ const Signup = ({ onSwitchToLogin }) => {
           email, 
           phoneNumber,
           enableMFAEmail,
-          enableMFAPhone
+          enableMFAPhone,
+          isOrganization
         }),
       });
 
@@ -44,6 +45,7 @@ const Signup = ({ onSwitchToLogin }) => {
 
   return (
     <div className="signup">
+      <h2>{isOrganization ? 'Organization' : 'User'} Sign Up</h2>
       <h2 className="signup-title"> SignUp</h2>
       <form className="signup-form" onSubmit={handleSignup}>
         <div className="form-group">

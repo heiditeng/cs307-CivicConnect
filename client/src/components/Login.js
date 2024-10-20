@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-const Login = ({ onSwitchToSignup }) => {
+const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOTP] = useState(''); // state for OTP input
@@ -76,8 +76,8 @@ const Login = ({ onSwitchToSignup }) => {
 
   return (
     <div className="login">
-      <h2 className="login-title">Login</h2>
-      
+      <h2>{isOrganization ? 'Organization' : 'User'} Login</h2>
+
       {requiresOTP ? (
         <form className="otp-form" onSubmit={handleOTPSubmit}>
           <div className="form-group">

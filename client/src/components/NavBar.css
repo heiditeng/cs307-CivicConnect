@@ -1,0 +1,91 @@
+/* Basic Navbar Styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1e3a8a; /* Navy blue background */
+  padding: 10px 20px;
+  color: white;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-start, .navbar-center, .navbar-end {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Dropdown Styles */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: #2563eb; /* Slightly lighter blue */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.dropdown-btn:hover {
+  background: #3b82f6; /* Hover effect */
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  color: black;
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 5px;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content a {
+  padding: 8px 12px;
+  text-decoration: none;
+  display: block;
+  color: #1e3a8a;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dropdown-content a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-content a:hover {
+  background-color: #f3f4f6; /* Light grey */
+}
+
+/* Create Event Button Styles */
+.create-event-btn {
+  background: #10b981; /* Green background */
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1rem;
+  margin-left: 10px;
+}
+
+.create-event-btn:hover {
+  background: #059669; /* Darker green */
+}

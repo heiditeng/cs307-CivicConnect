@@ -12,7 +12,7 @@ const UserTypeSelection = ({ onContinue }) => {
     if (selectedType) {
       localStorage.setItem('selectedType', selectedType);
     } else {
-      localStorage.removeItem('selectedType'); // clear if deselected
+      localStorage.removeItem('selecte§§çdType'); // clear if deselected
     }
   }, [selectedType]);
 
@@ -25,10 +25,10 @@ const UserTypeSelection = ({ onContinue }) => {
     }
   };
 
-  // handle continue button
   const handleContinue = () => {
     if (selectedType) {
-      onContinue(selectedType); 
+      const isOrganization = selectedType === 'Organization';
+      onContinue(isOrganization); 
     } else {
       alert('Please select an option before continuing.');
     }

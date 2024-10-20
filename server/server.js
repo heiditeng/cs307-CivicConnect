@@ -13,6 +13,7 @@ const { sendOTPSMS } = require('./smsService'); // SMS
 const validator = require('validator'); // validates email
 const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
+const User = require('./user.js'); // import the user model
 
 
 // mongo db stuff
@@ -94,7 +95,7 @@ function isEmailValid(email) {
     return emailRegex.test(email);
 }
 
-async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization) {
     if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
     }
@@ -124,15 +125,27 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // store user in the list with MFA settings
-    users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
+    // users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
+
+    const user = new User({
+        username,
+        password: hashedPassword,
+        email,
+        phoneNumber,
+        enableMFAEmail,
+        enableMFAPhone,
+        isOrganization
+      });
+
+    await user.save(); // save in mongo
 
     return 'User registered successfully.';
 }
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone} = req.body;
-        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone);
+        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization} = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization);
         res.status(201).json({message});
     } catch (error) {
         res.status(400).json({error: error.message});

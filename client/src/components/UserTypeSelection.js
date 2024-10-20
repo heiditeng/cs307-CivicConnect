@@ -1,34 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './UserTypeSelection.css';
 
 const UserTypeSelection = ({ onContinue }) => {
-  // get the previously saved type from local storage, if any
-  const [selectedType, setSelectedType] = useState(() => {
-    return localStorage.getItem('selectedType') || null;
-  });
+  const [selectedType, setSelectedType] = useState(null);
 
-  // use effect to update local storage whenever selectedType changes
-  useEffect(() => {
-    if (selectedType) {
-      localStorage.setItem('selectedType', selectedType);
-    } else {
-      localStorage.removeItem('selecte§§çdType'); // clear if deselected
-    }
-  }, [selectedType]);
-
-  // handle button clicking + deselecting
   const handleSelection = (type) => {
-    if (selectedType === type) {
-      setSelectedType(null); 
-    } else {
-      setSelectedType(type); 
-    }
+    setSelectedType(type);
   };
 
   const handleContinue = () => {
     if (selectedType) {
-      const isOrganization = selectedType === 'Organization';
-      onContinue(isOrganization); 
+      onContinue(selectedType);
     } else {
       alert('Please select an option before continuing.');
     }

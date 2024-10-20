@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+// user model class
+// includes the information that will be stored in the db about each user
+// used keys of required (needs to be included or throw error), default (optional), 
+// and unique (meaning that only one of each)
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },

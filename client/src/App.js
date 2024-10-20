@@ -37,7 +37,9 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', marginBottom: '30px' }}>
             <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
           </div>
-          <h1 style={{ textAlign: 'center', marginTop: '30px', marginBottom: '10px' }}>{title}</h1>
+          <h1 style={{ textAlign: 'center', marginTop: '30px', marginBottom: '10px', fontWeight: 'bold', fontSize: '2em' }}>
+            {title}
+          </h1>
           <Routes>
             <Route path="/" element={<UserTypeSelectionPage onContinue={handleContinue} />} />
             <Route path="/user-auth" element={<AuthPage isOrganization={false} />} />

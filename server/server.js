@@ -127,6 +127,8 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     // store user in the list with MFA settings
     // users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
 
+    // create instance of user model in user.js
+    // User object represents a new record to be saved in db
     const user = new User({
         username,
         password: hashedPassword,
@@ -137,7 +139,7 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         isOrganization
       });
 
-    await user.save(); // save in mongo
+    await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
 
     return 'User registered successfully.';
 }

@@ -11,6 +11,8 @@ class CreateEvent extends Component {
         eventDescription: '',
         eventImage: null,
         eventVideo: null,
+        maxCapacity: '',
+        eventType: '',
         successMessage: '',
         errorMessage: '',
         zipCodeError: '',
@@ -50,6 +52,8 @@ class CreateEvent extends Component {
         formData.append('eventEndTime', this.state.eventEndTime);
         formData.append('eventZipcode', this.state.eventZipcode);
         formData.append('description', this.state.eventDescription);
+        formData.append('maxCapacity', this.state.maxCapacity);
+        formData.append('eventType', this.state.eventType);
 
         // Only append files if they exist
         if (this.state.eventImage) {
@@ -141,6 +145,30 @@ class CreateEvent extends Component {
                         {this.state.zipCodeError && (
                             <div style={{ color: 'red' }}>{this.state.zipCodeError}</div>
                         )}
+                    </div>
+                    <div>
+                        <label>Max Capacity:</label>
+                        <input
+                            type="number"
+                            name="maxCapacity"
+                            value={this.state.maxCapacity}
+                            onChange={this.handleChange}
+                            min="1"
+                        />
+                    </div>
+                    <div>
+                        <label>Event Type:</label>
+                        <select
+                            name="eventType"
+                            value={this.state.eventType}
+                            onChange={this.handleChange}
+                        >
+                            <option value="">Select an event type</option>
+                            <option value="environmental">Environmental</option>
+                            <option value="education">Education</option>
+                            <option value="health">Health</option>
+                            {/* Add more options as needed */}
+                        </select>
                     </div>
                     <div>
                         <label>Event Description:</label>

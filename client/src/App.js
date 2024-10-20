@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import AuthPage from './components/AuthPage';
 import ResetPassword from './components/ResetPassword';
@@ -14,13 +14,13 @@ import OrganizationProfile from './components/OrganizationProfile';
 import NewPassword from './components/NewPassword';
 import MyEvents from './components/MyEvents';
 import DeleteConfirmation from './components/DeleteConfirmation';
-import ccLogo from './ccLogo.png'; 
+import ccLogo from './ccLogo.png';
 import UserTypeSelectionPage from './components/UserTypeSelection';
+import './index.css';
 
 function App() {
   const title = "Welcome to CivicConnect!";
 
-  // user or org continue button + redirection of user vs org login pages
   const handleContinue = (selectedType) => {
     if (selectedType === 'User') {
       window.location.href = '/user-auth';
@@ -28,18 +28,17 @@ function App() {
       window.location.href = '/organization-auth';
     }
   };
-  
+
   return (
     <Router>
-      <div className='App'>
+      <div className="App">
         <NavBar />
-        <div className='content'>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <div className="content">
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', marginBottom: '30px' }}>
             <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
           </div>
-          <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>{title}</h1>
+          <h1 style={{ textAlign: 'center', marginTop: '30px', marginBottom: '10px' }}>{title}</h1>
           <Routes>
-            {/* Redirect to User Type Selection Page with onContinue prop */}
             <Route path="/" element={<UserTypeSelectionPage onContinue={handleContinue} />} />
             <Route path="/user-auth" element={<AuthPage isOrganization={false} />} />
             <Route path="/organization-auth" element={<AuthPage isOrganization={true} />} />
@@ -51,7 +50,7 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
-            <Route path="/reset-password" element={<NewPassword />} /> 
+            <Route path="/reset-password" element={<NewPassword />} />
             <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
             <Route path="/organization-profile" element={<OrganizationProfile />} />
           </Routes>

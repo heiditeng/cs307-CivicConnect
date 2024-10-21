@@ -1,23 +1,35 @@
 const express = require('express');
+const Post = require('./post');
+
 const router = express.Router();
 
-// In-memory storage for posts (testing)
-let posts = [
-  {
-    id: 1,
-    files: ['https://images.unsplash.com/flagged/photo-1551373916-bdaddbf4f881?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9ja3xlbnwwfHwwfHx8MA%3D%3D'],  // Mocked image URL
-    caption: 'event experience desc',
-    location: '120 Grant Street',
-    event: 'Volunteering',
-    reactions: 0,
-  }
-];
+// Route to create a new post
+router.post('/create', async (req, res) => {
+  try {
+    const { caption, location, event, files } = req.body;
+    const newPost = new Post({
+      caption,
+      location,
+      event,
+      files, // For now, this will be a list of file URLs
+    });
 
-// Route to fetch all posts for "My Posts" page
-router.get('/myposts', (req, res) => {
-  console.log('Sending posts data to frontend:', posts);  // To verify it's being called
-  res.json(posts);  // Send the posts data as JSON
+    await newPost.save();
+    res.status(201).json(newPost);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating post', error });
+  }
 });
 
-// Additional routes for creating posts, handling reactions, etc.
+// Route to fetch all posts
+router.get('/myposts', async (req, res) => {
+  try {
+    const posts = await Post.find();
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching posts', error });
+  }
+});
+
 module.exports = router;
+

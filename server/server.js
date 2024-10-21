@@ -11,7 +11,7 @@ const { emailTemplates, errorMessages, successMessages } = require('./messages')
 const { sendOTPEmail } = require('./emailService'); // email
 const { sendOTPSMS } = require('./smsService'); // SMS
 const validator = require('validator'); // validates email
-const postRoute = require('./postRoute'); 
+const postRoutes = require('./postRoute'); 
 
 
 // express needs to be in front of passport for google auth to work !!!
@@ -238,12 +238,20 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/organizations', organizationRoutes);
 
 //post route
-app.use('/posts', postRoute);
+app.use('/posts', postRoutes);
 
 app.get("/api", (req, res) => {
     res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })
 })
 
+//replace with global db connection string 
+mongoose.connect('mongodb+srv://rooheeurs:test123@cluster0.r8kut.mongodb.net/', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+    .then(() => console.log('MongoDB connected'))
+    .catch((err) => console.log(err));
+    
 // using port 5010 bc 5000 taken
 // app.listen(5010, () => {console.log("Server has started on port 5010")})
 

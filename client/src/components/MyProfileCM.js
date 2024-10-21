@@ -62,15 +62,22 @@ const MyProfileCM = () => {
               
               {/* Like button */}
               <button
-                className={`like-button ${likedPosts[post.id] ? 'liked' : ''}`}
+                className={"like-button ${likedPosts[post.id] ? 'liked' : ''}"}
                 onClick={() => toggleLike(post.id)}
               >
                 {likedPosts[post.id] ? 'Unlike' : 'Like'}
               </button>
+
+              <button
+                className="comments-button"
+                onClick={navigate("/comment-page")}  //navigate to comments page
+              >
+                View Comments
+              </button>
             </div>
           ))
         ) : (
-          <p>No posts availble</p>
+          <p>No posts available</p>
         )}
       </div>
     </div>

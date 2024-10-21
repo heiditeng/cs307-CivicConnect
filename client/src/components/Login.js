@@ -32,6 +32,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         console.log(localStorage.token);
         localStorage.setItem('authToken', data.token); // store token in local storage
         localStorage.setItem('username', data.username);
+        localStorage.setItem('isOrganization', data.isOrganization); // should track whether organization or not
         navigate('/myprofile'); // navigate to the homepage or another page
       } else {
         // Handle login error

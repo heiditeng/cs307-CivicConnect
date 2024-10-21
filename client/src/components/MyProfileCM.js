@@ -70,7 +70,7 @@ const MyProfileCM = () => {
             </div>
           ))
         ) : (
-          <p>No posts available</p>
+          <p>No posts availble</p>
         )}
       </div>
     </div>

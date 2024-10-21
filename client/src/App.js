@@ -16,6 +16,7 @@ import NewPassword from './components/NewPassword';
 import ccLogo from './ccLogo.png'; 
 import MyEvents from './components/MyEvents';
 import DeleteConfirmation from './components/DeleteConfirmation';
+import CommentPage from './components/CommentPage';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/reset-password" element={<NewPassword />} /> 
             <Route path="/delete-confirmation" element={<DeleteConfirmation />} /> 
             <Route path="/organization-profile" element={<OrganizationProfile />} />
+            <Route path="/comment-page" element={<CommentPage/>}/>
           </Routes>
         </div>
       </div>

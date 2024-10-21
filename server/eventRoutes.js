@@ -2,6 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const path = require('path');
+
+const mongoose = require('mongoose');
+
 const app = express();
 
 // Serve static files from the uploads directory
@@ -97,8 +100,17 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
 });
 
 // Route to fetch all events
-router.get('/events', (req, res) => {
-    res.json(events);
+// router.get('/events', (req, res) => {
+//     res.json(events);
+// });
+
+router.get('/events', async (req, res) => {
+    try {
+        const events = await Event.find();
+        res.json(events);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching events' });
+    }
 });
 
 // Route to fetch a single event by ID
@@ -115,16 +127,31 @@ router.get('/events/:id', (req, res) => {
 
 
 // Route to delete an event
-router.delete('/events/:id', (req, res) => {
+// router.delete('/events/:id', (req, res) => {
+//     const { id } = req.params;
+//     const eventIndex = events.findIndex(event => event.id === parseInt(id));
+
+//     if (eventIndex === -1) {
+//         return res.status(404).json({ error: 'Event not found' });
+//     }
+
+//     events.splice(eventIndex, 1);
+//     res.status(204).send(); // No content response
+// });
+
+router.delete('/events/:id', async (req, res) => {
     const { id } = req.params;
-    const eventIndex = events.findIndex(event => event.id === parseInt(id));
+    try {
+        const event = await Event.findByIdAndDelete(id);
 
-    if (eventIndex === -1) {
-        return res.status(404).json({ error: 'Event not found' });
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        res.status(204).send(); // No content response
+    } catch (error) {
+        res.status(500).json({ error: 'Error deleting event' });
     }
-
-    events.splice(eventIndex, 1);
-    res.status(204).send(); // No content response
 });
 
 module.exports = router;

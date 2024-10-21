@@ -14,6 +14,7 @@ import OrganizationProfile from './components/OrganizationProfile';
 import NewPassword from './components/NewPassword';
 import MyEvents from './components/MyEvents';
 import DeleteConfirmation from './components/DeleteConfirmation';
+import ModifyEvent from './components/ModifyEvent';
 import ccLogo from './ccLogo.png';
 import UserTypeSelectionPage from './components/UserTypeSelection';
 import './index.css';
@@ -45,6 +46,7 @@ function App() {
             <Route path="/forgot-password" element={<ResetPassword />} />
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/my-events" element={<MyEvents />} />
+            <Route path="/modify-event/:id" element={<ModifyEvent />} /> 
             <Route path="/event-details/:id" element={<EventDetails />} />
             <Route path="/info-form" element={<UserInformationForm />} />
             <Route path="/profile" element={<UserProfile />} />

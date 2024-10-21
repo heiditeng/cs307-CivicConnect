@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useLoadScript, GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
-import './CreatePost.css';  
+import './CreatePost.css';  // Importing the CSS file
 
 const mapContainerStyle = {
   width: '100%',
@@ -15,8 +15,8 @@ const defaultCenter = {
 const CreatePost = () => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: 'AIzaSyC23dj5ms0zwq9ImWCrrWGalNrgiGL1OvQ',
-    libraries: ['places'], //load places library
-    });
+    libraries: ['places'], // Ensure 'places' library is loaded
+  });
 
   const [postData, setPostData] = useState({
     files: [],
@@ -70,13 +70,39 @@ const CreatePost = () => {
     setLocationError(''); // Clear any previous location error when user types
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (postData.files.length === 0) {
-      setError('Please upload at least one image or video.');
-      return;
+
+  if (postData.files.length === 0) {
+    setError('Please upload at least one image or video.');
+    return;
+  }
+
+  const postDataToSend = {
+    caption: postData.caption,
+    location: postData.location,
+    event: postData.event,
+    files: postData.files.map((file) => URL.createObjectURL(file)), //mock url
+  };
+
+  try {
+    const response = await fetch('/posts/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postDataToSend),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(errorMessage);
     }
 
+    const createdPost = await response.json();
+    alert('Post created successfully!');
+    
+    // Clear the form after successful submission
     setPostData({
       files: [],
       caption: '',
@@ -84,6 +110,10 @@ const CreatePost = () => {
       event: '',
     });
     setError('');
+  } catch (error) {
+    console.error('Error creating post:', error);
+    setError('Error creating post');
+  }
   };
 
   const onPlaceChanged = () => {

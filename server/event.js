@@ -1,0 +1,16 @@
+const mongoose = require('mongoose');
+
+const EventSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  date: { type: Date, required: true },
+  startTime: { type: String, required: true },
+  endTime: { type: String, required: true },
+  location: { type: String, required: true },
+  maxCapacity: { type: Number, required: true },
+  type: { type: String, required: true },
+  description: { type: String, required: true },
+  image: { type: String },
+  video: { type: String },
+});
+
+module.exports = mongoose.model('Event', EventSchema);

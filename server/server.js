@@ -13,6 +13,12 @@ const { sendOTPSMS } = require('./smsService'); // SMS
 const validator = require('validator'); // validates email
 const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
+const User = require('./user.js'); // import the user model
+
+
+// mongo db stuff
+const connectDB = require('./db');
+connectDB();
 
 
 // express needs to be in front of passport for google auth to work !!!
@@ -89,7 +95,7 @@ function isEmailValid(email) {
     return emailRegex.test(email);
 }
 
-async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization) {
     if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
     }
@@ -119,15 +125,29 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // store user in the list with MFA settings
-    users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
+    // users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
+
+    // create instance of user model in user.js
+    // User object represents a new record to be saved in db
+    const user = new User({
+        username,
+        password: hashedPassword,
+        email,
+        phoneNumber,
+        enableMFAEmail,
+        enableMFAPhone,
+        isOrganization
+      });
+
+    await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
 
     return 'User registered successfully.';
 }
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone} = req.body;
-        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone);
+        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization} = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization);
         res.status(201).json({message});
     } catch (error) {
         res.status(400).json({error: error.message});
@@ -163,16 +183,15 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const user = users.find(user => user.username === username);
+        const user = await User.findOne({ username });
         if (!user) {
-            throw new Error('Invalid username or password.');
+            return res.status(400).json({ error: 'Invalid username or password.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             throw new Error('Invalid username or password.');
         }
-
 
         console.log("before");
 
@@ -197,7 +216,7 @@ app.post('/login', async (req, res) => {
         else {
             // Standard login without MFA
             const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
-            res.status(200).json({ message: 'Login successful.', token, username: user.username });
+            res.status(200).json({ message: 'Login successful.', token, username: user.username, isOrganization: user.isOrganization });
         }
     } catch (error) {
         res.status(400).json({ error: error.message });

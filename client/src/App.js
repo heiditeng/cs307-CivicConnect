@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect} from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
@@ -28,6 +28,12 @@ function App() {
       window.location.href = '/organization-auth';
     }
   };
+
+  // clear local storage bc user has been logged out 
+  useEffect(() => {
+    console.log('Clearing localStorage...');
+    localStorage.clear();
+  }, []);
 
   return (
     <Router>

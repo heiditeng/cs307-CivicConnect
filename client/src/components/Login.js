@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
@@ -9,6 +9,8 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [responseMessage, setResponseMessage] = useState('');
   const [requiresOTP, setRequiresOTP] = useState(false); // track if OTP is required
   const navigate = useNavigate(); // react router to navigate to other pages
+   
+  
 
   const handleLogin = async (e) => {
     e.preventDefault(); // prevent the page from refreshing
@@ -33,7 +35,8 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         localStorage.setItem('authToken', data.token); // store token in local storage
         localStorage.setItem('username', data.username);
         localStorage.setItem('isOrganization', data.isOrganization); // should track whether organization or not
-        navigate('/myprofile'); // navigate to the homepage or another page
+        navigate('/profile'); // navigate to the homepage or another page
+        console.log(localStorage.username);
       } else {
         // Handle login error
         setResponseMessage(`Error: ${data.error}`);

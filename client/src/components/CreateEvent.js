@@ -7,7 +7,7 @@ class CreateEvent extends Component {
         eventDate: '',
         eventStartTime: '',
         eventEndTime: '',
-        eventZipcode: '',
+        location: '',
         eventDescription: '',
         eventImage: null,
         eventVideo: null,
@@ -15,12 +15,12 @@ class CreateEvent extends Component {
         eventType: '',
         successMessage: '',
         errorMessage: '',
-        zipCodeError: '',
-        redirectToMyEvents: false, // Added state for redirection
+        locationError: '',
+        redirectToMyEvents: false,
     };
 
     handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value, zipCodeError: '' }); // Reset zip code error on change
+        this.setState({ [e.target.name]: e.target.value, locationError: '' });
     };
 
     handleImageChange = (e) => {
@@ -31,36 +31,31 @@ class CreateEvent extends Component {
         this.setState({ eventVideo: e.target.files[0] });
     };
 
-    validateZipcode = (zipcode) => {
-        const regex = /^[0-9]{5}(?:-[0-9]{4})?$/; // Basic US zip code validation
-        return regex.test(zipcode);
-    };
-
     handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate zip code
-        if (!this.validateZipcode(this.state.eventZipcode)) {
-            this.setState({ zipCodeError: 'Invalid Zip Code' });
+        // Validate required fields
+        if (!this.state.location) {
+            this.setState({ locationError: 'Location is required' });
             return;
         }
 
         const formData = new FormData();
         formData.append('name', this.state.eventName);
         formData.append('date', this.state.eventDate);
-        formData.append('eventStartTime', this.state.eventStartTime);
-        formData.append('eventEndTime', this.state.eventEndTime);
-        formData.append('eventZipcode', this.state.eventZipcode);
+        formData.append('startTime', this.state.eventStartTime);
+        formData.append('endTime', this.state.eventEndTime);
+        formData.append('location', this.state.location);
+        formData.append('maxCapacity', Number(this.state.maxCapacity));
+        formData.append('type', this.state.eventType);
         formData.append('description', this.state.eventDescription);
-        formData.append('maxCapacity', this.state.maxCapacity);
-        formData.append('eventType', this.state.eventType);
 
-        // Only append files if they exist
+        // Append files only if they exist
         if (this.state.eventImage) {
-            formData.append('eventImage', this.state.eventImage);
+            formData.append('image', this.state.eventImage);
         }
         if (this.state.eventVideo) {
-            formData.append('eventVideo', this.state.eventVideo);
+            formData.append('video', this.state.eventVideo);
         }
 
         try {
@@ -73,7 +68,7 @@ class CreateEvent extends Component {
                 this.setState({ 
                     successMessage: 'Event created successfully!', 
                     errorMessage: '', 
-                    zipCodeError: '', 
+                    locationError: '', 
                 });
             } else {
                 const errorData = await res.json();
@@ -135,15 +130,15 @@ class CreateEvent extends Component {
                         />
                     </div>
                     <div>
-                        <label>Event Zip Code:</label>
+                        <label>Location:</label>
                         <input
                             type="text"
-                            name="eventZipcode"
-                            value={this.state.eventZipcode}
+                            name="location"
+                            value={this.state.location}
                             onChange={this.handleChange}
                         />
-                        {this.state.zipCodeError && (
-                            <div style={{ color: 'red' }}>{this.state.zipCodeError}</div>
+                        {this.state.locationError && (
+                            <div style={{ color: 'red' }}>{this.state.locationError}</div>
                         )}
                     </div>
                     <div>
@@ -167,7 +162,6 @@ class CreateEvent extends Component {
                             <option value="environmental">Environmental</option>
                             <option value="education">Education</option>
                             <option value="health">Health</option>
-                            {/* Add more options as needed */}
                         </select>
                     </div>
                     <div>

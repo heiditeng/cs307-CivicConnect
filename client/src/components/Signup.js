@@ -27,7 +27,8 @@ const Signup = ({ onSwitchToLogin, isOrganization }) => {
           email, 
           phoneNumber,
           enableMFAEmail,
-          enableMFAPhone
+          enableMFAPhone,
+          isOrganization
         }),
       });
 

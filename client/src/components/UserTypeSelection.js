@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './UserTypeSelection.css';
 
 const UserTypeSelection = ({ onContinue }) => {
-  const [selectedType, setSelectedType] = useState(null);
+  // retrieve the previous selection from local storage, if any
+  const initialUserType = localStorage.getItem('userType') || null;
+  const [selectedType, setSelectedType] = useState(initialUserType);
+
+  // save the selection to local storage whenever it changes
+  useEffect(() => {
+    if (selectedType) {
+      localStorage.setItem('userType', selectedType);
+    }
+  }, [selectedType]);
 
   const handleSelection = (type) => {
     setSelectedType(type);

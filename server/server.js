@@ -127,6 +127,8 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     // store user in the list with MFA settings
     // users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
 
+    // create instance of user model in user.js
+    // User object represents a new record to be saved in db
     const user = new User({
         username,
         password: hashedPassword,
@@ -137,7 +139,7 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         isOrganization
       });
 
-    await user.save(); // save in mongo
+    await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
 
     return 'User registered successfully.';
 }
@@ -181,16 +183,15 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const user = users.find(user => user.username === username);
+        const user = await User.findOne({ username });
         if (!user) {
-            throw new Error('Invalid username or password.');
+            return res.status(400).json({ error: 'Invalid username or password.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             throw new Error('Invalid username or password.');
         }
-
 
         console.log("before");
 
@@ -215,7 +216,7 @@ app.post('/login', async (req, res) => {
         else {
             // Standard login without MFA
             const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
-            res.status(200).json({ message: 'Login successful.', token, username: user.username });
+            res.status(200).json({ message: 'Login successful.', token, username: user.username, isOrganization: user.isOrganization });
         }
     } catch (error) {
         res.status(400).json({ error: error.message });

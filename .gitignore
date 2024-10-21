@@ -1,3 +1,4 @@
 
 textbelt/
 node_modules/
+server/.env

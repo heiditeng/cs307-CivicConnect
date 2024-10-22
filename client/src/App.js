@@ -17,6 +17,7 @@ import DeleteConfirmation from './components/DeleteConfirmation';
 import ModifyEvent from './components/ModifyEvent';
 import ccLogo from './ccLogo.png';
 import UserTypeSelectionPage from './components/UserTypeSelection';
+import SaveCredentials from './components/SaveCredentials';
 import './index.css';
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
             <Route path="/reset-password" element={<NewPassword />} />
             <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
             <Route path="/organization-profile" element={<OrganizationProfile />} />
+            <Route path="/save-credentials" element={<SaveCredentials />} />
           </Routes>
         </div>
       </div>

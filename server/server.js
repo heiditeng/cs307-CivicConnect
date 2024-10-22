@@ -193,7 +193,7 @@ app.post('/login', async (req, res) => {
             throw new Error('Invalid username or password.');
         }
 
-        console.log("before");
+        console.log("before login");
 
         let otp;
         if (user.enableMFAEmail) {
@@ -220,6 +220,27 @@ app.post('/login', async (req, res) => {
         }
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+});
+
+// saving credentials route
+app.post('/save-credentials', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(400).json({ error: 'User not found.' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Invalid password.' });
+        }
+
+        req.session.savedCredentials = { username, password };
+        res.status(200).json({ message: 'Credentials saved successfully.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to save credentials.' });
     }
 });
 

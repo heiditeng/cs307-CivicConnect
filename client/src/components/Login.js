@@ -7,12 +7,12 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [password, setPassword] = useState('');
   const [otp, setOTP] = useState(''); // state for OTP input
   const [responseMessage, setResponseMessage] = useState('');
-  const [requiresOTP, setRequiresOTP] = useState(false); // For OTP input
-  const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false); // For "Save Credentials" option
-  const [isLoadedFromStorage, setIsLoadedFromStorage] = useState(false); // To track if creds are loaded from storage
+  const [requiresOTP, setRequiresOTP] = useState(false);
+  const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false); // for "Save Credentials" option
+  const [isLoadedFromStorage, setIsLoadedFromStorage] = useState(false); // track if creds are loaded from storage
   const navigate = useNavigate();
 
-  // Populate fields with saved credentials from local storage on page load
+  // populate fields with saved credentials from local storage on page load
   useEffect(() => {
     const savedUsername = localStorage.getItem('savedUsername');
     const savedPassword = localStorage.getItem('savedPassword');
@@ -42,7 +42,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         setRequiresOTP(true);
         setResponseMessage(data.message);
       } else if (response.ok) {
-        // Successful login
+        // successful login
         setResponseMessage('Login successful!');
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('username', data.username);
@@ -55,7 +55,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           navigate('/myprofile');
         }
       } else {
-        // Credentials do not match, clear saved credentials and show error
+        // credentials do not match, clear saved credentials and show error
         setResponseMessage(`Error: ${data.error}. Please enter your credentials manually.`);
         localStorage.removeItem('savedUsername');
         localStorage.removeItem('savedPassword');
@@ -67,7 +67,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
 
   const handleSaveCreds = (save) => {
     if (save) {
-      // Save credentials in local storage
+      // save credentials in local storage
       localStorage.setItem('savedUsername', username);
       localStorage.setItem('savedPassword', password);
       setResponseMessage('Credentials saved successfully!');
@@ -75,11 +75,11 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
       setResponseMessage('Credentials not saved.');
     }
 
-    // Redirect to the profile page
+    // redirect to the profile page
     navigate('/myprofile');
   };
 
-  // Define the handleOTPSubmit function
+  // define the handleOTPSubmit function
   const handleOTPSubmit = async (e) => {
     e.preventDefault();
 
@@ -106,7 +106,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     }
   };
 
-  // Handle Google login redirection
+  // handle Google login redirection
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:5010/auth/google';
   };
@@ -159,7 +159,6 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         </form>
       )}
 
-      {/* Show Save Credentials Prompt only if not loaded from storage */}
       {showSaveCredsPrompt && !isLoadedFromStorage && (
         <div className="save-creds-prompt">
           <p>Would you like to save your credentials for future logins?</p>

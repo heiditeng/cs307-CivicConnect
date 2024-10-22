@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const MyEvents = () => {
+const MyEvents = ({ userId }) => {
   const [eventsData, setEventsData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -9,7 +9,7 @@ const MyEvents = () => {
   useEffect(() => {
     const fetchMyEvents = async () => {
       try {
-        const res = await fetch("http://localhost:5010/api/events/events");
+        const res = await fetch(`http://localhost:5010/api/events/events/user/${userId}`);
 
         if (res.ok) {
           const data = await res.json();
@@ -22,8 +22,10 @@ const MyEvents = () => {
       }
     };
 
-    fetchMyEvents();
-  }, []);
+    if (userId) {
+      fetchMyEvents();
+    }
+  }, [userId]);
 
   // Format date for display
   const formatDate = (dateString) => {

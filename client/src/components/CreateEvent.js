@@ -17,7 +17,13 @@ class CreateEvent extends Component {
         errorMessage: '',
         locationError: '',
         redirectToMyEvents: false,
+        userId: '',
     };
+
+    componentDidMount() {
+        const username = localStorage.getItem("username");
+        this.setState({ userId: username });
+    }
 
     handleChange = (e) => {
         this.setState({ [e.target.name]: e.target.value, locationError: '' });
@@ -40,6 +46,8 @@ class CreateEvent extends Component {
             return;
         }
 
+        console.log('User ID:', this.state.userId);
+
         const formData = new FormData();
         formData.append('name', this.state.eventName);
         formData.append('date', this.state.eventDate);
@@ -49,13 +57,14 @@ class CreateEvent extends Component {
         formData.append('maxCapacity', Number(this.state.maxCapacity));
         formData.append('type', this.state.eventType);
         formData.append('description', this.state.eventDescription);
+        formData.append('userId', this.state.userId); // Use userId from state
 
         // Append files only if they exist
         if (this.state.eventImage) {
-            formData.append('image', this.state.eventImage);
+            formData.append('eventImage', this.state.eventImage);
         }
         if (this.state.eventVideo) {
-            formData.append('video', this.state.eventVideo);
+            formData.append('eventVideo', this.state.eventVideo);
         }
 
         try {

@@ -19,6 +19,7 @@ import ccLogo from './ccLogo.png';
 import UserTypeSelectionPage from './components/UserTypeSelection';
 import SaveCredentials from './components/SaveCredentials';
 import './index.css';
+import CreatePost from './components/CreatePost';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -59,6 +60,7 @@ function App() {
             <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
             <Route path="/organization-profile" element={<OrganizationProfile />} />
             <Route path="/save-credentials" element={<SaveCredentials />} />
+            <Route path="/create-post" element={<CreatePost />} />
           </Routes>
         </div>
       </div>

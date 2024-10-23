@@ -14,7 +14,7 @@ const validator = require('validator'); // validates email
 const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
 const User = require('./user.js'); // import the user model
-
+const postRoutes = require('./postRoutes.js'); //import post routes
 
 // mongo db stuff
 const connectDB = require('./db');
@@ -286,6 +286,9 @@ app.use('/api/organizations', organizationRoutes);
 
 // Using the event routes
 app.use('/api/events', eventRoutes); // Integrate event routes
+
+//using post routes
+app.use('/api/PostRoutes', postRoutes);
 
 app.get("/api", (req, res) => {
     res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const {users} = require('./googleAuth');
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const {sendPasswordResetEmail, sendPasswordResetSuccessEmail} = require('./emailService'); // import the email service from emailService.js
+const User = require('./user');
 
 const router = express.Router();
 const secretKey = 'key';
@@ -29,11 +30,18 @@ router.post('/request-password-reset', async (req, res) => {
         return res.status(400).json({ error: errorMessages.missingFields });
     }
 
-    const user = users.find(user => user.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-        console.log("User not found for email:", email);
-        return res.status(200).json({ message: errorMessages.emailNotFound });
-    }
+     // query mongoDB directly
+     const user = await User.findOne({ email: email.toLowerCase() });
+     if (!user) {
+         console.log("User not found for email:", email);
+         return res.status(200).json({ message: errorMessages.emailNotFound });
+     }
+
+    // const user = users.find(user => user.email.toLowerCase() === email.toLowerCase());
+    // if (!user) {
+    //     console.log("User not found for email:", email);
+    //     return res.status(200).json({ message: errorMessages.emailNotFound });
+    // }
 
     const resetToken = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
     const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
@@ -72,8 +80,9 @@ router.post('/reset-password', async (req, res) => {
         const decoded = jwt.verify(token, secretKey);
         const userEmail = decoded.email;
 
-        // Find the user by email
-        const user = users.find(user => user.email.toLowerCase() === userEmail.toLowerCase());
+    
+        // find the user by email in the database
+        const user = await User.findOne({ email: userEmail.toLowerCase() });
         if (!user) {
             return res.status(400).json({ error: 'Invalid token or user not found.' });
         }
@@ -85,6 +94,8 @@ router.post('/reset-password', async (req, res) => {
 
         // Hash the new password and update it
         user.password = await bcrypt.hash(newPassword, 10);
+       
+        await user.save();  // save the updated user object
 
         await sendPasswordResetSuccessEmail(user.email);
         res.status(200).json({ message: 'Password has been reset successfully.' });

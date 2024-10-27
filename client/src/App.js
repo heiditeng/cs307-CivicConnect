@@ -35,10 +35,11 @@ function App() {
     }
   };
 
-  // clear local storage bc user has been logged out 
+  // Clear only login-related localStorage items
   useEffect(() => {
-    console.log('Clearing localStorage...');
-    localStorage.clear();
+    console.log('Clearing login-related localStorage items...');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('sessionID');
   }, []);
 
   return (

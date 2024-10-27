@@ -24,10 +24,36 @@ const UserFeed = () => {
     fetchAllEvents();
   }, []);
 
-  // formatting from MyEvents.js
+  // Format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  // Handle RSVP for an event
+  const handleRSVP = async (eventId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/events/${eventId}/rsvp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: localStorage.getItem("savedUsername"),
+          }),
+        }
+      );
+
+      if (res.ok) {
+        fetchAllEvents(); // Refresh the feed to reflect RSVP changes
+      } else {
+        setErrorMessage("Error RSVPing to the event");
+      }
+    } catch (error) {
+      setErrorMessage("Error RSVPing to the event");
+    }
   };
 
   return (
@@ -76,6 +102,12 @@ const UserFeed = () => {
                       Show Details
                     </button>
                   </Link>
+                  <button
+                    className="btn btn-outline btn-success btn-sm ml-2"
+                    onClick={() => handleRSVP(event._id)}
+                  >
+                    RSVP
+                  </button>
                 </div>
               </div>
             ))}

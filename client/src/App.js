@@ -34,10 +34,10 @@ function App() {
   };
 
   // clear local storage bc user has been logged out 
-  useEffect(() => {
+ /* useEffect(() => {
     console.log('Clearing localStorage...');
     localStorage.clear();
-  }, []);
+  }, []);*/
 
   return (
     <Router>

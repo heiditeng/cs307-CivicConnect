@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const {users} = require('./googleAuth');
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const {sendPasswordResetEmail, sendPasswordResetSuccessEmail} = require('./emailService'); // import the email service from emailService.js
+const User = require('./user.js'); // import the user model
 
 const router = express.Router();
 const secretKey = 'key';
@@ -29,7 +30,7 @@ router.post('/request-password-reset', async (req, res) => {
         return res.status(400).json({ error: errorMessages.missingFields });
     }
 
-    const user = users.find(user => user.email.toLowerCase() === email.toLowerCase());
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
         console.log("User not found for email:", email);
         return res.status(200).json({ message: errorMessages.emailNotFound });
@@ -66,14 +67,16 @@ function isPasswordValid(password) {
 // Reset password
 router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
+    console.log("Received token for password reset:", token);
 
     try {
         // Verify the token
         const decoded = jwt.verify(token, secretKey);
+        console.log("Decoded token:", decoded); // Log decoded token
         const userEmail = decoded.email;
 
         // Find the user by email
-        const user = users.find(user => user.email.toLowerCase() === userEmail.toLowerCase());
+        const user = await User.findOne({ email: userEmail.toLowerCase() });
         if (!user) {
             return res.status(400).json({ error: 'Invalid token or user not found.' });
         }
@@ -82,9 +85,19 @@ router.post('/reset-password', async (req, res) => {
         if (!isPasswordValid(newPassword)) {
             throw new Error('Password must include at least one uppercase letter, one symbol, one number, and be at least 8 characters long.');
         }
+        console.log('User object before save:', user); // Log user object
 
         // Hash the new password and update it
         user.password = await bcrypt.hash(newPassword, 10);
+        console.log('New hashed password:', user.password); // Log hashed password
+        console.log('User object before save:', user); // Log user object
+       
+        try {
+            await user.save();
+        } catch (error) {
+            console.error('Error saving user:', error);
+            return res.status(500).json({ error: 'Failed to update password.' });
+        }
 
         await sendPasswordResetSuccessEmail(user.email);
         res.status(200).json({ message: 'Password has been reset successfully.' });

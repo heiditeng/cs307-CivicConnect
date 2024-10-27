@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
@@ -8,19 +8,9 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [otp, setOTP] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
   const [requiresOTP, setRequiresOTP] = useState(false);
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
-  const [credentialsSaved, setCredentialsSaved] = useState(false);
-
+  const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false);
+  const [credsLoaded, setCredsLoaded] = useState(false);
   const navigate = useNavigate();
-
-  // Check if credentials are saved
-  useEffect(() => {
-    const savedUsername = localStorage.getItem('savedUsername');
-    const savedPassword = localStorage.getItem('savedPassword');
-    if (savedUsername && savedPassword) {
-      setCredentialsSaved(true); // Show "Load Saved Credentials" button
-    }
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,19 +30,47 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         setRequiresOTP(true);
         setResponseMessage(data.message);
       } else if (response.ok) {
-        setResponseMessage(data.message);
+        // Successful login
+        setResponseMessage('Login successful!');
         localStorage.setItem('authToken', data.token);
-        localStorage.setItem('username', username);
+        localStorage.setItem('username', data.username);
         localStorage.setItem('isOrganization', data.isOrganization);
 
-        // Show prompt to save credentials
-        setShowSavePrompt(true);
+        // Check if credentials have changed
+        const savedUsername = localStorage.getItem('savedUsername');
+        const savedPassword = localStorage.getItem('savedPassword');
+        if (savedUsername !== username || savedPassword !== password) {
+          // If credentials have changed, clear the old credentials and show the prompt
+          localStorage.removeItem('savedUsername');
+          localStorage.removeItem('savedPassword');
+          setShowSaveCredsPrompt(true);
+        } else {
+          // If credentials match, proceed to profile page
+          navigate('/myprofile');
+        }
       } else {
-        setResponseMessage(`Error: ${data.error}`);
+        // Clear saved credentials if login fails due to mismatch
+        setResponseMessage(`Error: ${data.error}. Please enter your credentials manually.`);
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('savedPassword');
       }
     } catch (error) {
       setResponseMessage('Error: Unable to connect to the server.');
     }
+  };
+
+  const handleSaveCreds = (save) => {
+    if (save) {
+      // Save credentials and set the 'credsSaved' flag
+      localStorage.setItem('savedUsername', username);
+      localStorage.setItem('savedPassword', password);
+      localStorage.setItem('credsSaved', 'true'); // Mark as opted to save
+      setResponseMessage('Credentials saved successfully!');
+    } else {
+      setResponseMessage('Credentials not saved.');
+    }
+
+    navigate('/myprofile');
   };
 
   const handleOTPSubmit = async (e) => {
@@ -85,23 +103,17 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     window.location.href = 'http://localhost:5010/auth/google';
   };
 
-  // Save credentials and redirect to myprofile
-  const saveCredentials = () => {
-    localStorage.setItem('savedUsername', username);
-    localStorage.setItem('savedPassword', password);
-    setShowSavePrompt(false);
-    setCredentialsSaved(true);
-    navigate('/myprofile'); // Redirect after saving credentials
-  };
-
-  // Load saved credentials
-  const loadSavedCredentials = () => {
+  // handle loading saved credentials
+  const handleLoadSavedCreds = () => {
     const savedUsername = localStorage.getItem('savedUsername');
     const savedPassword = localStorage.getItem('savedPassword');
     if (savedUsername && savedPassword) {
       setUsername(savedUsername);
       setPassword(savedPassword);
-      setResponseMessage('Credentials loaded.');
+      setResponseMessage('Credentials loaded from storage.');
+      setCredsLoaded(true);
+    } else {
+      setResponseMessage('No saved credentials found.');
     }
   };
 
@@ -150,29 +162,32 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           <button className="login-button" type="submit">
             Login
           </button>
+
+          <button
+            className="load-creds-button"
+            type="button"
+            onClick={handleLoadSavedCreds}
+            disabled={credsLoaded}
+          >
+            Load Saved Credentials
+          </button>
         </form>
       )}
 
-      {responseMessage && <p className="response-message">{responseMessage}</p>}
-
-      {showSavePrompt && (
-        <div className="save-credentials-prompt">
-          <p>Do you want to save your credentials for future logins?</p>
-          <button onClick={saveCredentials} className="save-button">
+      {showSaveCredsPrompt && (
+        <div className="save-creds-prompt">
+          <p>Would you like to save your credentials for future logins?</p>
+          <button className="save-creds-button" onClick={() => handleSaveCreds(true)}>
             Yes, Save Credentials
           </button>
-          <button onClick={() => setShowSavePrompt(false)} className="cancel-button">
-            No, Thanks
+          <button className="save-creds-button" onClick={() => handleSaveCreds(false)}>
+            No, Do Not Save
           </button>
         </div>
       )}
 
-      {credentialsSaved && (
-        <button className="load-credentials-button" onClick={loadSavedCredentials}>
-          Load Saved Credentials
-        </button>
-      )}
-
+      {responseMessage && <p className="response-message">{responseMessage}</p>}
+      
       <button className="switch-button" onClick={onSwitchToSignup}>
         Don't have an account? Sign Up
       </button>

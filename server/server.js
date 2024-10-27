@@ -161,9 +161,9 @@ async function loginUser(username, password) {
     }
 
     // find user by username
-    const user = users.find(user => user.username === username);
+    const user = await User.findOne({ username });
     if (!user) {
-        throw new Error('Invalid username or password.');
+        return res.status(400).json({ error: 'Invalid username or password.' });
     }
 
     // compare provided password with hashed password
@@ -184,6 +184,7 @@ app.post('/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ username });
+        console.log(user);
         if (!user) {
             return res.status(400).json({ error: 'Invalid username or password.' });
         }

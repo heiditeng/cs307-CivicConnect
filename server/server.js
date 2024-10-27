@@ -115,8 +115,10 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         throw new Error('Passwords do not match.');
     }
 
-    // check if the user already exists through email + username
-    const existingUser = users.find(user => user.username === username || user.email === email);
+    const existingUser = await User.findOne({
+        $or: [{ username }, { email }]
+    });
+
     if (existingUser) {
         throw new Error('User with this username or email already exists.');
     }
@@ -139,9 +141,17 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         isOrganization
       });
 
-    await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
-
-    return 'User registered successfully.';
+    try {
+        await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
+        return 'User registered successfully.';
+    } catch (error) {
+        // handle duplicate key error
+        if (error.code === 11000) {
+            throw new Error('User with this username or email already exists.');
+        }
+        // rethrow any other errors
+        throw new Error('Failed to register user.');
+    }
 }
 
 app.post('/signup', async (req, res) => {

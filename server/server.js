@@ -195,6 +195,9 @@ app.post('/login', async (req, res) => {
         }
 
         console.log("before");
+        req.session.user = user.username;
+        console.log('Session after login:', req.session);
+
 
         let otp;
         if (user.enableMFAEmail) {
@@ -236,13 +239,14 @@ app.post('/save-credentials', (req, res) => {
 
         // Store the saved credentials in the session
         req.session.savedCredentials = { username, password };
+        console.log('Session at save-credentials:', req.session);
+
 
         res.status(200).json({ message: 'Credentials saved successfully.' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to save credentials.' });
     }
 });
-
 
 // verify OTP (MFA Step)
 app.post('/verify-otp', (req, res) => {

@@ -7,7 +7,7 @@ const SaveCredentials = () => {
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
-    const username = location.state?.username; // Get the username passed from login
+    const username = location.state?.username; // get the username passed from login
 
     const handleSaveCredentials = async () => {
         try {

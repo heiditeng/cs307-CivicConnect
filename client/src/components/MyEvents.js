@@ -56,6 +56,11 @@ const MyEvents = () => {
               >
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg font-semibold text-gray-800">{event.name}</h3>
+                  <p className="text-sm text-gray-600">Organization: 
+                    <Link to={`/profile`}>
+                      <strong className="text-blue-600 hover:underline">{event.userId}</strong>
+                    </Link>
+                  </p>
                   <p className="text-sm text-gray-600">Date: {formatDate(event.date)}</p>
                   <p className="text-sm text-gray-600 mb-3">Location: {event.location}</p>
                 </div>

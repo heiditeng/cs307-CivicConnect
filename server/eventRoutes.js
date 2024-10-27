@@ -55,18 +55,6 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
     }
 });
 
-// // Route to fetch all events for a specific user
-// router.get('/events/user/:userId', async (req, res) => {
-//     const { userId } = req.params;
-//     console.log('UserId in parent:', userId);
-//     try {
-//         const events = await Event.find({ userId });
-//         res.json(events);
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error fetching events' });
-//     }
-// });
-
 // Route to fetch all events
 router.get('/events', async (req, res) => {
     try {

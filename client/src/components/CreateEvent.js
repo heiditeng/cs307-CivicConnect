@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Navigate } from 'react-router-dom';
+import { Autocomplete } from '@react-google-maps/api';
 
 class CreateEvent extends Component {
     state = {
@@ -21,9 +22,20 @@ class CreateEvent extends Component {
     };
 
     componentDidMount() {
-        const username = localStorage.getItem("username");
-        this.setState({ userId: username });
+        const userId = localStorage.getItem("username");
+        this.setState({ userId });
+        // this.loadGooglePlacesScript();
     }
+
+    // loadGooglePlacesScript = () => {
+    //     const script = document.createElement('script');
+    //     script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBi4Q1s_l02slRnhUigHLzKff5UKpYAtHM&libraries=places`;
+    //     script.async = true;
+    //     script.onload = () => {
+    //         // Initialize Google Places API if needed
+    //     };
+    //     document.body.appendChild(script);
+    // };
 
     handleChange = (e) => {
         this.setState({ [e.target.name]: e.target.value, locationError: '' });
@@ -55,7 +67,7 @@ class CreateEvent extends Component {
         formData.append('maxCapacity', Number(this.state.maxCapacity));
         formData.append('type', this.state.eventType);
         formData.append('description', this.state.eventDescription);
-        formData.append('userId', this.state.userId); // Use userId from state
+        formData.append('userId', this.state.userId);
 
         // Append files only if they exist
         if (this.state.eventImage) {
@@ -138,6 +150,20 @@ class CreateEvent extends Component {
                     </div>
                     <div>
                         <label>Location:</label>
+                        {/* <Autocomplete
+                            onPlaceChanged={() => {
+                                const place = this.autocomplete.getPlace();
+                                this.setState({ location: place.formatted_address });
+                            }}
+                        >
+                            <input
+                                type="text"
+                                name="location"
+                                value={this.state.location}
+                                onChange={this.handleChange}
+                                ref={el => this.autocomplete = el}
+                            />
+                        </Autocomplete> */}
                         <input
                             type="text"
                             name="location"

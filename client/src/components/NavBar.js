@@ -2,9 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './NavBar.css';
 
-const isOrganization = localStorage.getItem('isOrganization') === 'true';
-
 const NavBar = () => {
+  const isOrganization = localStorage.getItem('isOrganization') === 'true';
+
   return (
     <nav className="navbar">
       {/* Navbar start section */}
@@ -26,12 +26,12 @@ const NavBar = () => {
 
       {/* Navbar end section */}
       {isOrganization && (
-      <div className="navbar-end">
-        <Link to="/create-event" className="create-event-btn">
-          Create an Event
-        </Link>
-      </div>
-    )}
+        <div className="navbar-end">
+          <Link to="/create-event" className="create-event-btn">
+            Create an Event
+          </Link>
+        </div>
+      )}
     </nav>
   );
 };

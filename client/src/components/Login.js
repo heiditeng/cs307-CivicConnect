@@ -1,3 +1,4 @@
+<<<<<<< main
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
@@ -7,6 +8,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [password, setPassword] = useState('');
   const [otp, setOTP] = useState(''); // state for OTP input
   const [responseMessage, setResponseMessage] = useState('');
+<<<<<<< main
   const [requiresOTP, setRequiresOTP] = useState(false);
   const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false); // for "Save Credentials" option
   const [isLoadedFromStorage, setIsLoadedFromStorage] = useState(false); // track if creds are loaded from storage
@@ -23,6 +25,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
       setResponseMessage('Credentials loaded. Please press Login to proceed.');
     }
   }, []);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -46,6 +49,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         setResponseMessage('Login successful!');
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('username', data.username);
+<<<<<<< main
         localStorage.setItem('isOrganization', data.isOrganization);
 
         // show "Save Credentials" prompt only if not loaded from storage

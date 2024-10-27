@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
@@ -12,19 +12,25 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [credsLoaded, setCredsLoaded] = useState(false);
   const navigate = useNavigate();
 
+  // Load saved credentials on component mount
+  useEffect(() => {
+    handleLoadSavedCreds();
+  }, []);
+
+  // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-        const response = await fetch('http://localhost:5010/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
+      const response = await fetch('http://localhost:5010/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
       if (response.ok && data.message === 'OTP sent to your email.') {
         setRequiresOTP(true);
@@ -55,24 +61,11 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         localStorage.removeItem('savedPassword');
       }
     } catch (error) {
-        setResponseMessage('Error: Unable to connect to the server.');
+      setResponseMessage('Error: Unable to connect to the server.');
     }
   };
 
-  const handleSaveCreds = (save) => {
-    if (save) {
-      // Save credentials and set the 'credsSaved' flag
-      localStorage.setItem('savedUsername', username);
-      localStorage.setItem('savedPassword', password);
-      localStorage.setItem('credsSaved', 'true'); // Mark as opted to save
-      setResponseMessage('Credentials saved successfully!');
-    } else {
-      setResponseMessage('Credentials not saved.');
-    }
-
-    navigate('/myprofile');
-  };
-
+  // Handle OTP submission
   const handleOTPSubmit = async (e) => {
     e.preventDefault();
 
@@ -99,11 +92,12 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     }
   };
 
+  // Handle Google login
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:5010/auth/google';
   };
 
-  // handle loading saved credentials
+  // Handle loading saved credentials
   const handleLoadSavedCreds = () => {
     const savedUsername = localStorage.getItem('savedUsername');
     const savedPassword = localStorage.getItem('savedPassword');
@@ -115,6 +109,24 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     } else {
       setResponseMessage('No saved credentials found.');
     }
+  };
+
+  // Handle saving credentials
+  const handleSaveCreds = (save) => {
+    if (save) {
+      localStorage.setItem('savedUsername', username);
+      localStorage.setItem('savedPassword', password);
+      localStorage.setItem('credsSaved', 'true');
+      setResponseMessage('Credentials saved successfully!');
+    } else {
+      setResponseMessage('Credentials not saved.');
+    }
+    navigate('/myprofile');
+  };
+
+  // Handle username change
+  const handleUsernameChange = (value) => {
+    setUsername(value);
   };
 
   return (
@@ -145,7 +157,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
               className="form-input"
               type="text"
               value={username}
-              onChange={(e) => handleUsernameChange(e.target.value)} // Handle username changes
+              onChange={(e) => handleUsernameChange(e.target.value)}
               required
             />
           </div>
@@ -187,7 +199,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
       )}
 
       {responseMessage && <p className="response-message">{responseMessage}</p>}
-      
+
       <button className="switch-button" onClick={onSwitchToSignup}>
         Don't have an account? Sign Up
       </button>

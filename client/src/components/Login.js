@@ -1,89 +1,78 @@
-<<<<<<< main
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [otp, setOTP] = useState(''); // state for OTP input
+  const [otp, setOTP] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
-<<<<<<< main
   const [requiresOTP, setRequiresOTP] = useState(false);
-  const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false); // for "Save Credentials" option
-  const [isLoadedFromStorage, setIsLoadedFromStorage] = useState(false); // track if creds are loaded from storage
+  const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false);
+  const [credsLoaded, setCredsLoaded] = useState(false);
   const navigate = useNavigate();
-
-  // populate fields with saved credentials from local storage on page load
-  useEffect(() => {
-    const savedUsername = localStorage.getItem('savedUsername');
-    const savedPassword = localStorage.getItem('savedPassword');
-    if (savedUsername && savedPassword) {
-      setUsername(savedUsername);
-      setPassword(savedPassword);
-      setIsLoadedFromStorage(true); // Mark as loaded from storage
-      setResponseMessage('Credentials loaded. Please press Login to proceed.');
-    }
-  }, []);
-
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5010/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+        const response = await fetch('http://localhost:5010/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
       if (response.ok && data.message === 'OTP sent to your email.') {
         setRequiresOTP(true);
         setResponseMessage(data.message);
       } else if (response.ok) {
-        // successful login
+        // Successful login
         setResponseMessage('Login successful!');
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('username', data.username);
-<<<<<<< main
         localStorage.setItem('isOrganization', data.isOrganization);
 
-        // show "Save Credentials" prompt only if not loaded from storage
-        if (!isLoadedFromStorage) {
+        // Check if credentials have changed
+        const savedUsername = localStorage.getItem('savedUsername');
+        const savedPassword = localStorage.getItem('savedPassword');
+        if (savedUsername !== username || savedPassword !== password) {
+          // If credentials have changed, clear the old credentials and show the prompt
+          localStorage.removeItem('savedUsername');
+          localStorage.removeItem('savedPassword');
           setShowSaveCredsPrompt(true);
         } else {
+          // If credentials match, proceed to profile page
           navigate('/myprofile');
         }
       } else {
-        // credentials do not match, clear saved credentials and show error
+        // Clear saved credentials if login fails due to mismatch
         setResponseMessage(`Error: ${data.error}. Please enter your credentials manually.`);
         localStorage.removeItem('savedUsername');
         localStorage.removeItem('savedPassword');
       }
     } catch (error) {
-      setResponseMessage('Error: Unable to connect to the server.');
+        setResponseMessage('Error: Unable to connect to the server.');
     }
   };
 
   const handleSaveCreds = (save) => {
     if (save) {
-      // save credentials in local storage
+      // Save credentials and set the 'credsSaved' flag
       localStorage.setItem('savedUsername', username);
       localStorage.setItem('savedPassword', password);
+      localStorage.setItem('credsSaved', 'true'); // Mark as opted to save
       setResponseMessage('Credentials saved successfully!');
     } else {
       setResponseMessage('Credentials not saved.');
     }
 
-    // redirect to the profile page
     navigate('/myprofile');
   };
 
-  // define the handleOTPSubmit function
   const handleOTPSubmit = async (e) => {
     e.preventDefault();
 
@@ -110,9 +99,22 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     }
   };
 
-  // handle Google login redirection
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:5010/auth/google';
+  };
+
+  // handle loading saved credentials
+  const handleLoadSavedCreds = () => {
+    const savedUsername = localStorage.getItem('savedUsername');
+    const savedPassword = localStorage.getItem('savedPassword');
+    if (savedUsername && savedPassword) {
+      setUsername(savedUsername);
+      setPassword(savedPassword);
+      setResponseMessage('Credentials loaded from storage.');
+      setCredsLoaded(true);
+    } else {
+      setResponseMessage('No saved credentials found.');
+    }
   };
 
   return (
@@ -143,7 +145,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
               className="form-input"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => handleUsernameChange(e.target.value)} // Handle username changes
               required
             />
           </div>
@@ -160,10 +162,19 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           <button className="login-button" type="submit">
             Login
           </button>
+
+          <button
+            className="load-creds-button"
+            type="button"
+            onClick={handleLoadSavedCreds}
+            disabled={credsLoaded}
+          >
+            Load Saved Credentials
+          </button>
         </form>
       )}
 
-      {showSaveCredsPrompt && !isLoadedFromStorage && (
+      {showSaveCredsPrompt && (
         <div className="save-creds-prompt">
           <p>Would you like to save your credentials for future logins?</p>
           <button className="save-creds-button" onClick={() => handleSaveCreds(true)}>

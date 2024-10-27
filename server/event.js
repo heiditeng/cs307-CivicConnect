@@ -11,7 +11,7 @@ const EventSchema = new mongoose.Schema({
   description: { type: String, required: true },
   image: { type: String },
   video: { type: String },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  userId: { type: String, required: true }
 });
 
 module.exports = mongoose.model('Event', EventSchema);

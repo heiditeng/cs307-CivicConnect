@@ -16,15 +16,15 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5010/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+        const response = await fetch('http://localhost:5010/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
       if (response.ok && data.message === 'OTP sent to your email.') {
         setRequiresOTP(true);
@@ -55,7 +55,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         localStorage.removeItem('savedPassword');
       }
     } catch (error) {
-      setResponseMessage('Error: Unable to connect to the server.');
+        setResponseMessage('Error: Unable to connect to the server.');
     }
   };
 
@@ -145,7 +145,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
               className="form-input"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => handleUsernameChange(e.target.value)} // Handle username changes
               required
             />
           </div>

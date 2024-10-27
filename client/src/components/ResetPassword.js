@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './ResetPassword.css';
 
-const ResetPassword = () => {
+const ResetPassword = ( {onPasswordReset}) => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [resetLink, setResetLink] = useState('');
@@ -23,6 +23,7 @@ const ResetPassword = () => {
       if (response.ok) {
         setMessage('Password reset link generated successfully.');
         setResetLink(data.resetLink); // Save the reset link from the server response
+        onPasswordReset();
       } else {
         setMessage(`Error: ${data.error}`);
       }

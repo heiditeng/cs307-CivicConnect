@@ -5,6 +5,7 @@ const {users} = require('./googleAuth');
 const { emailTemplates, errorMessages, successMessages } = require('./messages');
 const {sendPasswordResetEmail, sendPasswordResetSuccessEmail} = require('./emailService'); // import the email service from emailService.js
 const User = require('./user.js'); // import the user model
+const User = require('./user'); // Import your User model
 
 const router = express.Router();
 const secretKey = 'key';

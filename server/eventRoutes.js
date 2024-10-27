@@ -55,8 +55,8 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
     }
 });
 
-// Route to fetch all events
-router.get('/events', async (req, res) => {
+// note from aysu: updated this from /events to /
+router.get('/', async (req, res) => {
     try {
         const events = await Event.find();
         res.json(events);

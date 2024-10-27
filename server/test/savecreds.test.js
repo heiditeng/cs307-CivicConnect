@@ -4,7 +4,12 @@ jest.mock('mongoose', () => {
         return this;
     };
 
-    // simluate behavior of mongoose
+    // Mock Schema.Types with ObjectId
+    SchemaMock.Types = {
+        ObjectId: jest.fn(() => 'mockObjectId'),
+    };
+
+    // Simulate behavior of mongoose
     const ModelMock = {
         findOne: jest.fn(),
         save: jest.fn().mockResolvedValue({}),

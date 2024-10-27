@@ -46,8 +46,6 @@ class CreateEvent extends Component {
             return;
         }
 
-        console.log('User ID:', this.state.userId);
-
         const formData = new FormData();
         formData.append('name', this.state.eventName);
         formData.append('date', this.state.eventDate);

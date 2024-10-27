@@ -55,61 +55,27 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
     }
 });
 
-// router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
-//     const userId = req.user._id;
-
-//     const { name, date, startTime, endTime, location, maxCapacity, type, description } = req.body;
-
-//     if (!name || !date || !description || !location || !maxCapacity || !type) {
-//         return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, and description are required' });
-//     }
-
-//     const newEvent = new Event({
-//         name,
-//         date,
-//         startTime,
-//         endTime,
-//         location,
-//         maxCapacity,
-//         type,
-//         description,
-//         image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
-//         video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
-//         userId,
-//     });
-
+// // Route to fetch all events for a specific user
+// router.get('/events/user/:userId', async (req, res) => {
+//     const { userId } = req.params;
+//     console.log('UserId in parent:', userId);
 //     try {
-//         const savedEvent = await newEvent.save();
-//         res.status(201).json(savedEvent);
-//     } catch (error) {
-//         console.error('Error saving event:', error.message);
-//         res.status(500).json({ error: 'Error saving event' });
-//     }
-// });
-
-
-
-// Route to fetch all events
-// router.get('/events', async (req, res) => {
-//     try {
-//         const events = await Event.find();
+//         const events = await Event.find({ userId });
 //         res.json(events);
 //     } catch (error) {
 //         res.status(500).json({ error: 'Error fetching events' });
 //     }
 // });
 
-// Route to fetch all events for a specific user
-router.get('/events/user/:userId', async (req, res) => {
-    const { userId } = req.params;
+// Route to fetch all events
+router.get('/events', async (req, res) => {
     try {
-        const events = await Event.find({ userId });
+        const events = await Event.find(); // Retrieve all events
         res.json(events);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching events' });
     }
 });
-
 
 // Route to fetch a single event by ID
 router.get('/events/:id', async (req, res) => {

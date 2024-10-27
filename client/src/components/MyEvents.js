@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const MyEvents = ({ userId }) => {
+const MyEvents = () => {
   const [eventsData, setEventsData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const userId = localStorage.getItem("username");
 
-  // Fetch user events
   useEffect(() => {
-    const fetchMyEvents = async () => {
-      try {
-        const res = await fetch(`http://localhost:5010/api/events/events/user/${userId}`);
+    if (!userId) {
+      console.log('No userId provided');
+      return;
+    }
 
+    const fetchAllEvents = async () => {
+      console.log('Fetching events for user:', userId);
+      try {
+        const res = await fetch(`http://localhost:5010/api/events/events`);
+
+        console.log('Response status:', res.status);
+  
         if (res.ok) {
           const data = await res.json();
-          setEventsData(data);
+
+          // Filter events by userId
+          const userEvents = data.filter(event => event.userId === userId);
+          setEventsData(userEvents);
         } else {
           setErrorMessage("Error fetching events data");
         }
@@ -21,10 +32,8 @@ const MyEvents = ({ userId }) => {
         setErrorMessage("Error fetching events data");
       }
     };
-
-    if (userId) {
-      fetchMyEvents();
-    }
+  
+    fetchAllEvents();
   }, [userId]);
 
   // Format date for display

@@ -223,6 +223,26 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// save credentials route
+app.post('/save-credentials', (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // Ensure a user is logged in
+        if (!req.session.user) {
+            return res.status(400).json({ error: 'No user in session.' });
+        }
+
+        // Store the saved credentials in the session
+        req.session.savedCredentials = { username, password };
+
+        res.status(200).json({ message: 'Credentials saved successfully.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to save credentials.' });
+    }
+});
+
+
 // verify OTP (MFA Step)
 app.post('/verify-otp', (req, res) => {
     const {username, otp} = req.body;

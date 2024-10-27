@@ -34,32 +34,45 @@ const EventDetails = () => {
     return <div className="text-gray-500">Loading event data...</div>;
   }
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(':');
+    const hoursIn12Format = (hours % 12) || 12; // Convert to 12-hour format
+    const amPm = hours < 12 ? 'AM' : 'PM';
+    return `${hoursIn12Format}:${minutes} ${amPm}`;
+  };
+
   return (
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">{eventData.eventName}</h2>
-        <p><strong>Date:</strong> {eventData.eventDate}</p>
-        <p><strong>Start Time:</strong> {eventData.eventStartTime}</p>
-        <p><strong>End Time:</strong> {eventData.eventEndTime}</p>
-        <p><strong>Zipcode:</strong> {eventData.eventZipcode}</p>
-        <p><strong>Description:</strong> {eventData.eventDescription}</p>
+        <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
+        <p><strong>Date:</strong> {formatDate(eventData.date)}</p>
+        <p><strong>Location:</strong> {eventData.location}</p>
+        <p><strong>Start Time:</strong> {formatTime(eventData.startTime)}</p>
+        <p><strong>End Time:</strong> {formatTime(eventData.endTime)}</p>
+        <p><strong>Type:</strong> {eventData.type}</p>
+        <p><strong>Description:</strong> {eventData.description}</p>
         
         {/* Image section */}
-        {eventData.eventImage && (
+        {eventData.image && (
           <div className="mb-4">
             <img
-              src={`http://localhost:5010/uploads/${eventData.eventImage}`}
-              alt={eventData.eventName}
+              src={`http://localhost:5010/uploads/${eventData.image}`}
+              alt={eventData.name}
               style={{ width: "200px", height: "200px", objectFit: "cover" }}
             />
           </div>
         )}
 
         {/* Video section */}
-        {eventData.eventVideo && (
+        {eventData.video && (
           <div className="mb-4">
             <video controls style={{ width: "100%", maxWidth: "600px", height: "auto" }}>
-              <source src={`http://localhost:5010/uploads/${eventData.eventVideo}`} type="video/mp4" />
+              <source src={`http://localhost:5010/uploads/${eventData.video}`} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -72,7 +85,7 @@ const EventDetails = () => {
           <Link to={`/modify-event/${id}`}>
             <button className="btn btn-outline btn-warning mr-2">Modify Event</button>
           </Link>
-          <Link to={`/delete-confirmation/${id}/${eventData.eventName}`}>
+          <Link to={`/delete-confirmation/${id}/${eventData.name}`}>
             <button className="btn btn-outline btn-danger mr-2">Delete Event</button>
           </Link>
         </div>

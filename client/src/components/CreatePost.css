@@ -1,0 +1,98 @@
+/* Modal styles */
+.post-preview-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 450px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  /* Slideshow container */
+  .slideshow-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  
+  /* Navigation buttons for slideshow */
+  .nav-button {
+    position: absolute;
+    top: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    transform: translateY(-50%);
+  }
+  
+  .nav-button-left {
+    left: 10px;
+  }
+  
+  .nav-button-right {
+    right: 10px;
+  }
+  
+  /* General form styles */
+  .create-post-form {
+    margin: 20px;
+  }
+  
+  .create-post-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .create-post-form input[type="text"],
+  .create-post-form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .create-post-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  .create-post-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 14px;
+  }
+  
+  .create-post-form .cancel-button {
+    background-color: #dc3545;
+  }
+  
+  .create-post-form .cancel-button:hover {
+    background-color: #c82333;
+  }
+  
+  /* Thumbnail image styles */
+  .thumbnail-image {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+  }
+  

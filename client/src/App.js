@@ -14,9 +14,12 @@ import OrganizationProfile from './components/OrganizationProfile';
 import NewPassword from './components/NewPassword';
 import MyEvents from './components/MyEvents';
 import DeleteConfirmation from './components/DeleteConfirmation';
+import ModifyEvent from './components/ModifyEvent';
 import ccLogo from './ccLogo.png';
 import UserTypeSelectionPage from './components/UserTypeSelection';
+import SaveCredentials from './components/SaveCredentials';
 import './index.css';
+import CreatePost from './components/CreatePost';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -53,6 +56,7 @@ function App() {
             <Route path="/forgot-password" element={<ResetPassword />} />
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/my-events" element={<MyEvents />} />
+            <Route path="/modify-event/:id" element={<ModifyEvent />} /> 
             <Route path="/event-details/:id" element={<EventDetails />} />
             <Route path="/info-form" element={<UserInformationForm />} />
             <Route path="/profile" element={<UserProfile />} />
@@ -61,6 +65,8 @@ function App() {
             <Route path="/reset-password" element={<NewPassword />} />
             <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
             <Route path="/organization-profile" element={<OrganizationProfile />} />
+            <Route path="/save-credentials" element={<SaveCredentials />} />
+            <Route path="/create-post" element={<CreatePost />} />
           </Routes>
         </div>
       </div>

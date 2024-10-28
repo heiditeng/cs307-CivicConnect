@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [otp, setOTP] = useState(''); // state for OTP input
+  const [otp, setOTP] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
-  const [requiresOTP, setRequiresOTP] = useState(false); // track if OTP is required
-  const navigate = useNavigate(); // react router to navigate to other pages
+  const [requiresOTP, setRequiresOTP] = useState(false);
+  const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false);
+  const [credsLoaded, setCredsLoaded] = useState(false);
+  const navigate = useNavigate();
 
+  // Load saved credentials on component mount
+  useEffect(() => {
+    handleLoadSavedCreds();
+  }, []);
+
+  // Handle login form submission
   const handleLogin = async (e) => {
-    e.preventDefault(); // prevent the page from refreshing
+    e.preventDefault();
 
     try {
       const response = await fetch('http://localhost:5010/login', {
@@ -25,27 +33,41 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
       const data = await response.json();
 
       if (response.ok && data.message === 'OTP sent to your email.') {
-        setRequiresOTP(true); // trigger OTP input
+        setRequiresOTP(true);
         setResponseMessage(data.message);
       } else if (response.ok) {
-        setResponseMessage(data.message);
-        console.log(localStorage.token);
-        localStorage.setItem('authToken', data.token); // store token in local storage
+        // Successful login
+        setResponseMessage('Login successful!');
+        localStorage.setItem('authToken', data.token);
         localStorage.setItem('username', data.username);
-        localStorage.setItem('isOrganization', data.isOrganization); // should track whether organization or not
-        navigate('/myprofile'); // navigate to the homepage or another page
+        localStorage.setItem('isOrganization', data.isOrganization);
+
+        // Check if credentials have changed
+        const savedUsername = localStorage.getItem('savedUsername');
+        const savedPassword = localStorage.getItem('savedPassword');
+        if (savedUsername !== username || savedPassword !== password) {
+          // If credentials have changed, clear the old credentials and show the prompt
+          localStorage.removeItem('savedUsername');
+          localStorage.removeItem('savedPassword');
+          setShowSaveCredsPrompt(true);
+        } else {
+          // If credentials match, proceed to profile page
+          navigate('/myprofile');
+        }
       } else {
-        // Handle login error
-        setResponseMessage(`Error: ${data.error}`);
+        // Clear saved credentials if login fails due to mismatch
+        setResponseMessage(`Error: ${data.error}. Please enter your credentials manually.`);
+        localStorage.removeItem('savedUsername');
+        localStorage.removeItem('savedPassword');
       }
     } catch (error) {
       setResponseMessage('Error: Unable to connect to the server.');
     }
   };
 
-  // define the missing handleOTPSubmit function
+  // Handle OTP submission
   const handleOTPSubmit = async (e) => {
-    e.preventDefault(); // Prevent page refresh
+    e.preventDefault();
 
     try {
       const response = await fetch('http://localhost:5010/verify-otp', {
@@ -60,7 +82,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
 
       if (response.ok) {
         setResponseMessage('Login successful');
-        localStorage.setItem('authToken', data.token); // store token in local storage
+        localStorage.setItem('authToken', data.token);
         navigate('/myprofile');
       } else {
         setResponseMessage(`Error: ${data.error}`);
@@ -70,9 +92,41 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     }
   };
 
-  // Handle Google login redirection
+  // Handle Google login
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:5010/auth/google';
+  };
+
+  // Handle loading saved credentials
+  const handleLoadSavedCreds = () => {
+    const savedUsername = localStorage.getItem('savedUsername');
+    const savedPassword = localStorage.getItem('savedPassword');
+    if (savedUsername && savedPassword) {
+      setUsername(savedUsername);
+      setPassword(savedPassword);
+      setResponseMessage('Credentials loaded from storage.');
+      setCredsLoaded(true);
+    } else {
+      setResponseMessage('No saved credentials found.');
+    }
+  };
+
+  // Handle saving credentials
+  const handleSaveCreds = (save) => {
+    if (save) {
+      localStorage.setItem('savedUsername', username);
+      localStorage.setItem('savedPassword', password);
+      localStorage.setItem('credsSaved', 'true');
+      setResponseMessage('Credentials saved successfully!');
+    } else {
+      setResponseMessage('Credentials not saved.');
+    }
+    navigate('/myprofile');
+  };
+
+  // Handle username change
+  const handleUsernameChange = (value) => {
+    setUsername(value);
   };
 
   return (
@@ -103,7 +157,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
               className="form-input"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => handleUsernameChange(e.target.value)}
               required
             />
           </div>
@@ -120,11 +174,32 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           <button className="login-button" type="submit">
             Login
           </button>
+
+          <button
+            className="load-creds-button"
+            type="button"
+            onClick={handleLoadSavedCreds}
+            disabled={credsLoaded}
+          >
+            Load Saved Credentials
+          </button>
         </form>
       )}
 
+      {showSaveCredsPrompt && (
+        <div className="save-creds-prompt">
+          <p>Would you like to save your credentials for future logins?</p>
+          <button className="save-creds-button" onClick={() => handleSaveCreds(true)}>
+            Yes, Save Credentials
+          </button>
+          <button className="save-creds-button" onClick={() => handleSaveCreds(false)}>
+            No, Do Not Save
+          </button>
+        </div>
+      )}
+
       {responseMessage && <p className="response-message">{responseMessage}</p>}
-      
+
       <button className="switch-button" onClick={onSwitchToSignup}>
         Don't have an account? Sign Up
       </button>

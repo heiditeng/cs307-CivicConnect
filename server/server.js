@@ -14,7 +14,7 @@ const validator = require('validator'); // validates email
 const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
 const User = require('./user.js'); // import the user model
-
+const postRoutes = require('./postRoutes.js'); //import post routes
 
 // mongo db stuff
 const connectDB = require('./db');
@@ -115,8 +115,10 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         throw new Error('Passwords do not match.');
     }
 
-    // check if the user already exists through email + username
-    const existingUser = users.find(user => user.username === username || user.email === email);
+    const existingUser = await User.findOne({
+        $or: [{ username }, { email }]
+    });
+
     if (existingUser) {
         throw new Error('User with this username or email already exists.');
     }
@@ -139,9 +141,17 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         isOrganization
       });
 
-    await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
-
-    return 'User registered successfully.';
+    try {
+        await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
+        return 'User registered successfully.';
+    } catch (error) {
+        // handle duplicate key error
+        if (error.code === 11000) {
+            throw new Error('User with this username or email already exists.');
+        }
+        // rethrow any other errors
+        throw new Error('Failed to register user.');
+    }
 }
 
 app.post('/signup', async (req, res) => {
@@ -161,11 +171,10 @@ async function loginUser(username, password) {
     }
 
     // find user by username
-    const user = users.find(user => user.username === username);
+    const user = await User.findOne({ username });
     if (!user) {
-        throw new Error('Invalid username or password.');
+        return res.status(400).json({ error: 'Invalid username or password.' });
     }
-
     // compare provided password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -184,16 +193,19 @@ app.post('/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ username });
+        console.log(user);
         if (!user) {
-            return res.status(400).json({ error: 'Invalid username or password.' });
+            throw new Error('Invalid username or password.');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            throw new Error('Invalid username or password.');
+            throw new Error('Invalid username or password.'); // This will throw if passwords don't match
         }
 
         console.log("before");
+        req.session.user = user.username;
+        console.log('Session after login:', req.session);
 
         let otp;
         if (user.enableMFAEmail) {
@@ -220,6 +232,27 @@ app.post('/login', async (req, res) => {
         }
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+});
+
+// save credentials route
+app.post('/save-credentials', (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // Ensure a user is logged in
+        if (!req.session.user) {
+            return res.status(400).json({ error: 'No user in session.' });
+        }
+
+        // Store the saved credentials in the session
+        req.session.savedCredentials = { username, password };
+        console.log('Session at save-credentials:', req.session);
+
+
+        res.status(200).json({ message: 'Credentials saved successfully.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to save credentials.' });
     }
 });
 
@@ -265,6 +298,9 @@ app.use('/api/organizations', organizationRoutes);
 
 // Using the event routes
 app.use('/api/events', eventRoutes); // Integrate event routes
+
+//using post routes
+app.use('/api/PostRoutes', postRoutes);
 
 app.get("/api", (req, res) => {
     res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })

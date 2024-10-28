@@ -3,6 +3,7 @@ const multer = require('multer');
 const router = express.Router();
 const path = require('path');
 const Event = require('./event');
+const User = require('./user');
 
 const app = express();
 
@@ -44,7 +45,7 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
         description,
         image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
         video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
-        userId,
+        userId
     });
 
     try {
@@ -56,8 +57,8 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
     }
 });
 
-// Route to fetch all events
-router.get('/events', async (req, res) => {
+// note from aysu: updated this from /events to /
+router.get('/', async (req, res) => {
     try {
         const events = await Event.find();
         res.json(events);
@@ -93,6 +94,7 @@ router.delete('/events/:id', async (req, res) => {
         res.status(500).json({ error: 'Error deleting event' });
     }
 });
+
 
 // Route to modify an event
 router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
@@ -130,5 +132,40 @@ router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventV
         res.status(500).json({ error: 'Error updating event' });
     }
 });
+
+// rsvp
+router.post('/:id/rsvp', async (req, res) => {
+    const { id } = req.params; 
+    const { userId } = req.body; 
+  
+    try {
+        consol.log("aysu");
+      const event = await Event.findById(id);
+      const user = await User.findById(userId);
+  
+      if (!event || !user) {
+        return res.status(404).json({ error: 'Event or User not found' });
+      }
+  
+      // check if user in event RSVP list
+      if (!event.rsvpUsers.includes(userId)) {
+        // if not, add
+        event.rsvpUsers.push(userId);
+        await event.save();
+      }
+  
+      // check is event in user RSVP list
+      if (!user.rsvpEvents.includes(id)) {
+        // if not, add
+        user.rsvpEvents.push(id);
+        await user.save();
+      }
+  
+      res.status(200).json({ message: 'RSVP successful' });
+    } catch (error) {
+      res.status(500).json({ error: 'Error processing RSVP' });
+    }
+  });
+
 
 module.exports = router;

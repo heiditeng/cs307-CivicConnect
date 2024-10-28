@@ -10,7 +10,9 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        const res = await fetch(`http://localhost:5010/api/events/events/${id}`);
+        const res = await fetch(
+          `http://localhost:5010/api/events/events/${id}`
+        );
 
         if (res.ok) {
           const data = await res.json();
@@ -35,14 +37,14 @@ const EventDetails = () => {
   }
 
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(':');
-    const hoursIn12Format = (hours % 12) || 12; // Convert to 12-hour format
-    const amPm = hours < 12 ? 'AM' : 'PM';
+    const [hours, minutes] = timeString.split(":");
+    const hoursIn12Format = hours % 12 || 12; // Convert to 12-hour format
+    const amPm = hours < 12 ? "AM" : "PM";
     return `${hoursIn12Format}:${minutes} ${amPm}`;
   };
 
@@ -50,6 +52,7 @@ const EventDetails = () => {
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
+
         <p><strong>Date:</strong> {formatDate(eventData.date)}</p>
         <p><strong>Address:</strong> {eventData.address}</p>
         <p><strong>Zip Code:</strong> {eventData.zipcode}</p>
@@ -72,22 +75,32 @@ const EventDetails = () => {
         {/* Video section */}
         {eventData.video && (
           <div className="mb-4">
-            <video controls style={{ width: "100%", maxWidth: "600px", height: "auto" }}>
-              <source src={`http://localhost:5010/uploads/${eventData.video}`} type="video/mp4" />
+            <video
+              controls
+              style={{ width: "100%", maxWidth: "600px", height: "auto" }}
+            >
+              <source
+                src={`http://localhost:5010/uploads/${eventData.video}`}
+                type="video/mp4"
+              />
               Your browser does not support the video tag.
             </video>
           </div>
         )}
 
-        <div className="mt-4">
+        <div className="mt-4 flex gap-4">
           <Link to="/my-events">
-            <button className="btn btn-outline btn-primary">Back to My Events</button>
+            <button className="btn btn-outline btn-primary">
+              Back to My Events
+            </button>
           </Link>
           <Link to={`/modify-event/${id}`}>
-            <button className="btn btn-outline btn-warning mr-2">Modify Event</button>
+            <button className="btn btn-outline btn-warning">
+              Modify Event
+            </button>
           </Link>
           <Link to={`/delete-confirmation/${id}/${eventData.name}`}>
-            <button className="btn btn-outline btn-danger mr-2">Delete Event</button>
+            <button className="btn btn-outline btn-danger">Delete Event</button>
           </Link>
         </div>
       </div>

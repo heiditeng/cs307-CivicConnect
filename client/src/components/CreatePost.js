@@ -93,6 +93,8 @@ const CreatePost = () => {
   formData.append('location', postData.location);
   formData.append('event', postData.event);
   formData.append('timestamp', timestamp);
+  formData.append('likeCount', 0);
+  formData.append('likes', []);
 
   /*postData.files.forEach((file, index) => {
     formData.append('files', file);  // Append each file to the FormData object

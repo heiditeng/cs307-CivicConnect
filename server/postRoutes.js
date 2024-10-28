@@ -8,6 +8,16 @@ const router = express.Router();
 //set up multer
 const upload = multer({ storage: multer.memoryStorage() });
 
+
+//post fetching route
+router.get('/myposts', async(req, res) => {
+  const{ username } = req.query;
+
+  const posts = await Post.find({ username });
+  res.status(200).json(posts);
+});
+
+
 //post creation route
 router.post('/create', upload.none(), async (req, res) => {
   try {
@@ -29,6 +39,8 @@ router.post('/create', upload.none(), async (req, res) => {
       location,
       event,
       timestamp,
+      likeCount,
+      likes,
       files: [],  //file handling not implemented yet
     });
 

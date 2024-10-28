@@ -1,45 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MyProfileCM.css';
+import { useNavigate } from 'react-router-dom';
+
+
+const fetchPosts = async () => {
+  const response = await fetch('/posts');  //fetch posts
+  const data = await response.json();
+  return data;
+};
 
 const MyProfileCM = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [postData, setPostData] = useState({
-    files: [],
-    caption: '',
-    location: '',
-    event: '',
-  });
+  const navigate = useNavigate();
+  const [posts, setPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState({}); // Track which posts are liked
 
-  //form
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'files') {
-      const selectedFiles = Array.from(files); 
-      //max media is 5
-      if (selectedFiles.length > 5) {
-        alert('You can upload a maximum of 5 files.');
-        return;
-      }
-      setPostData((prev) => ({ ...prev, [name]: selectedFiles }));
-    } else {
-      setPostData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  // Fetch posts 
+  useEffect(() => {
+    fetchPosts().then(data => setPosts(data));
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    /* TODO: send to backend */
-    
-    //reset fields
-    setPostData({
-      files: [],
-      caption: '',
-      location: '',
-      event: '',
-    });
-
-    // close form
-    setShowForm(false);
+  // Handle the like button toggle
+  const toggleLike = (postId) => {
+    setLikedPosts((prevLikedPosts) => ({
+      ...prevLikedPosts,
+      [postId]: !prevLikedPosts[postId]  // Toggle the liked state for this post
+    }));
   };
 
   return (
@@ -49,67 +34,52 @@ const MyProfileCM = () => {
 
       {/* Bottom bar with the Create Post button */}
       <div className="bottom-bar">
-        <button className="create-post-button">Create Post</button>
+        <button 
+          className="create-post-button" 
+          onClick={() => navigate('/create-post')}
+        >
+          Create Post
+        </button>
         <button className="edit-profile-button">Edit Profile</button>
       </div>
 
-      {showForm && (
-        <form className="create-post-form" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="files">Upload up to 5 Images or Videos:</label>
-            <input
-              type="file"
-              id="files"
-              name="files"
-              accept="image/*,video/*"
-              multiple
-              onChange={handleInputChange}
-            />
-          </div>
+      {/* Display posts */}
+      <div className="posts-section">
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <div key={post.id} className="post-card">
+              <div className="post-media">
+                {post.files.map((file, index) => (
+                  <img key={index} src={file} alt="Post media" className="post-image" />
+                ))}
+              </div>
+              <div className="post-details">
+                <p>{post.caption}</p>
+                <p><strong>Location:</strong> {post.location}</p>
+                <p><strong>Event:</strong> {post.event}</p>
+                <p><strong>Reactions:</strong> {post.reactions}</p>
+              </div>
+              
+              {/* Like button */}
+              <button
+                className={`like-button ${likedPosts[post.id] ? 'liked' : ''}`}
+                onClick={() => toggleLike(post.id)}
+              >
+                {likedPosts[post.id] ? 'Unlike' : 'Like'}
+              </button>
 
-          <div>
-            <label htmlFor="caption">Caption:</label>
-            <input
-              type="text"
-              id="caption"
-              name="caption"
-              value={postData.caption}
-              onChange={handleInputChange}
-              placeholder="Enter caption"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="location">Location:</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              value={postData.location}
-              onChange={handleInputChange}
-              placeholder="Add location"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="event">Event:</label>
-            <input
-              type="text"
-              id="event"
-              name="event"
-              value={postData.event}
-              onChange={handleInputChange}
-              placeholder="Event name"
-            />
-          </div>
-          
-          <button type="submit"> Post</button>
-          <button type="button" onClick={() => setShowForm(false)}>
-            Cancel
-          </button>
-        </form>
-      )}
-
+              <button
+                className="comments-button"
+                onClick={navigate("/comment-page")}  //navigate to comments page
+              >
+                View Comments
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No posts available</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -62,7 +62,7 @@ const MyEvents = () => {
                     </Link>
                   </p>
                   <p className="text-sm text-gray-600">Date: {formatDate(event.date)}</p>
-                  <p className="text-sm text-gray-600 mb-3">Location: {event.location}</p>
+                  <p className="text-sm text-gray-600 mb-3">Zip Code: {event.zipcode}</p>
                 </div>
                 {event.image && (
                   <figure className="h-32 w-full overflow-hidden rounded-t-lg">

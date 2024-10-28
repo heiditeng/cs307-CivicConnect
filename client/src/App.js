@@ -20,6 +20,7 @@ import UserTypeSelectionPage from './components/UserTypeSelection';
 import SaveCredentials from './components/SaveCredentials';
 import './index.css';
 import CreatePost from './components/CreatePost';
+import UserFeed from './components/UserFeed';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -41,6 +42,7 @@ function App() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('sessionID');
   }, []);
+
 
   return (
     <Router>
@@ -71,6 +73,7 @@ function App() {
             <Route path="/organization-profile" element={<OrganizationProfile />} />
             <Route path="/save-credentials" element={<SaveCredentials />} />
             <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/feed" element={<UserFeed />} />
           </Routes>
         </div>
       </div>

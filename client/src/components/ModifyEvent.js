@@ -9,7 +9,8 @@ class ModifyEvent extends Component {
             eventDate: '',
             eventStartTime: '',
             eventEndTime: '',
-            eventLocation: '',
+            address: '',
+            zipcode: '',
             eventDescription: '',
             eventImage: null,
             eventVideo: null,
@@ -17,7 +18,8 @@ class ModifyEvent extends Component {
             eventType: '',
             successMessage: '',
             errorMessage: '',
-            locationError: '',
+            addressError: '',
+            zipcodeError: '',
             redirectToMyEvents: false,
             userId: null,
         };
@@ -43,7 +45,8 @@ class ModifyEvent extends Component {
                 eventDate: event.date,
                 eventStartTime: event.startTime,
                 eventEndTime: event.endTime,
-                eventLocation: event.location,
+                address: event.address,
+                zipcode: event.zipcode,
                 eventDescription: event.description,
                 maxCapacity: event.maxCapacity,
                 eventType: event.type,
@@ -54,7 +57,7 @@ class ModifyEvent extends Component {
     }
 
     handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value, locationError: '' });
+        this.setState({ [e.target.name]: e.target.value, addressError: '', zipcodeError: '' });
     };
 
     handleImageChange = (e) => {
@@ -65,15 +68,25 @@ class ModifyEvent extends Component {
         this.setState({ eventVideo: e.target.files[0] });
     };
 
-    validateLocation = (location) => {
-        return location.trim() !== '';
+    validateAddress = (address) => {
+        return address.trim() !== '';
+    };
+
+    validateZipcode = (zipcode) => {
+        const regex = /^(?:\d{5}|\d{5}-\d{4})$/;
+        return regex.test(zipcode);
     };
 
     handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!this.validateLocation(this.state.eventLocation)) {
-            this.setState({ locationError: 'Invalid Location' });
+        if (!this.validateAddress(this.state.address)) {
+            this.setState({ addressError: 'Invalid Address' });
+            return;
+        }
+
+        if (!this.validateZipcode(this.state.zipcode)) {
+            this.setState({ zipcodeError: 'Invalid Zip Code format (must be 5 or 9 digits)' });
             return;
         }
 
@@ -82,7 +95,8 @@ class ModifyEvent extends Component {
         formData.append('date', this.state.eventDate);
         formData.append('startTime', this.state.eventStartTime);
         formData.append('endTime', this.state.eventEndTime);
-        formData.append('location', this.state.eventLocation);
+        formData.append('address', this.state.address);
+        formData.append('zipcode', this.state.zipcode);
         formData.append('description', this.state.eventDescription);
         formData.append('maxCapacity', this.state.maxCapacity);
         formData.append('type', this.state.eventType);
@@ -105,7 +119,8 @@ class ModifyEvent extends Component {
                 this.setState({ 
                     successMessage: 'Event modified successfully!', 
                     errorMessage: '', 
-                    locationError: '',
+                    addressError: '',
+                    zipcodeError: '',
                 });
             } else {
                 const errorData = await res.json();
@@ -172,15 +187,27 @@ class ModifyEvent extends Component {
                         />
                     </div>
                     <div>
-                        <label>Event Location:</label>
+                        <label>Address:</label>
                         <input
                             type="text"
-                            name="eventLocation"
-                            value={this.state.eventLocation}
+                            name="address"
+                            value={this.state.address}
                             onChange={this.handleChange}
                         />
-                        {this.state.locationError && (
-                            <div style={{ color: 'red' }}>{this.state.locationError}</div>
+                        {this.state.addressError && (
+                            <div style={{ color: 'red' }}>{this.state.addressError}</div>
+                        )}
+                    </div>
+                    <div>
+                        <label>Zip Code:</label>
+                        <input
+                            type="text"
+                            name="zipcode"
+                            value={this.state.zipcode}
+                            onChange={this.handleChange}
+                        />
+                        {this.state.zipcodeError && (
+                            <div style={{ color: 'red' }}>{this.state.zipcodeError}</div>
                         )}
                     </div>
                     <div>

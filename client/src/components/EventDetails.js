@@ -52,25 +52,15 @@ const EventDetails = () => {
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
-        <p>
-          <strong>Date:</strong> {formatDate(eventData.date)}
-        </p>
-        <p>
-          <strong>Location:</strong> {eventData.location}
-        </p>
-        <p>
-          <strong>Start Time:</strong> {formatTime(eventData.startTime)}
-        </p>
-        <p>
-          <strong>End Time:</strong> {formatTime(eventData.endTime)}
-        </p>
-        <p>
-          <strong>Type:</strong> {eventData.type}
-        </p>
-        <p>
-          <strong>Description:</strong> {eventData.description}
-        </p>
 
+        <p><strong>Date:</strong> {formatDate(eventData.date)}</p>
+        <p><strong>Address:</strong> {eventData.address}</p>
+        <p><strong>Zip Code:</strong> {eventData.zipcode}</p>
+        <p><strong>Start Time:</strong> {formatTime(eventData.startTime)}</p>
+        <p><strong>End Time:</strong> {formatTime(eventData.endTime)}</p>
+        <p><strong>Type:</strong> {eventData.type}</p>
+        <p><strong>Description:</strong> {eventData.description}</p>
+        
         {/* Image section */}
         {eventData.image && (
           <div className="mb-4">

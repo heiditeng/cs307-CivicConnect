@@ -21,15 +21,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-console.log('Serving static files from:', path.join(__dirname,'uploads'));
+console.log('Serving static files from:', path.join(__dirname, 'uploads'));
 
 // Route to create a new event
 router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
-    const { name, date, startTime, endTime, location, maxCapacity, type, description, userId } = req.body;
+    const { name, date, startTime, endTime, address, zipcode, maxCapacity, type, description, userId } = req.body;
 
     // Validate request data
-    if (!name || !date || !description || !location || !maxCapacity || !type || !userId) {
-        return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, description, and userId are required' });
+    if (!name || !date || !description || !address || !zipcode || !maxCapacity || !type || !userId) {
+        return res.status(400).json({ error: 'Name, date, address, zipcode, maxCapacity, type, description, and userId are required' });
     }
 
     const newEvent = new Event({
@@ -37,7 +37,8 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
         date,
         startTime,
         endTime,
-        location,
+        address,
+        zipcode,
         maxCapacity,
         type,
         description,
@@ -58,7 +59,7 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
 // Route to fetch all events
 router.get('/events', async (req, res) => {
     try {
-        const events = await Event.find(); // Retrieve all events
+        const events = await Event.find();
         res.json(events);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching events' });
@@ -79,7 +80,6 @@ router.get('/events/:id', async (req, res) => {
     }
 });
 
-
 // Route to delete an event
 router.delete('/events/:id', async (req, res) => {
     const { id } = req.params;
@@ -97,11 +97,11 @@ router.delete('/events/:id', async (req, res) => {
 // Route to modify an event
 router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
     const { id } = req.params;
-    const { name, date, startTime, endTime, location, maxCapacity, type, description, userId } = req.body;
+    const { name, date, startTime, endTime, address, zipcode, maxCapacity, type, description, userId } = req.body;
 
     // Validate request data
-    if (!name || !date || !description || !location || !maxCapacity || !type || !userId) {
-        return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, description, and userId are required' });
+    if (!name || !date || !description || !address || !zipcode || !maxCapacity || !type || !userId) {
+        return res.status(400).json({ error: 'Name, date, address, zipcode, maxCapacity, type, description, and userId are required' });
     }
 
     const updatedData = {
@@ -109,7 +109,8 @@ router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventV
         date,
         startTime,
         endTime,
-        location,
+        address,
+        zipcode,
         maxCapacity,
         type,
         description,
@@ -129,6 +130,5 @@ router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventV
         res.status(500).json({ error: 'Error updating event' });
     }
 });
-
 
 module.exports = router;

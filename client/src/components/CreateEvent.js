@@ -7,7 +7,8 @@ class CreateEvent extends Component {
         eventDate: '',
         eventStartTime: '',
         eventEndTime: '',
-        location: '',
+        address: '',
+        zipcode: '',
         eventDescription: '',
         eventImage: null,
         eventVideo: null,
@@ -15,12 +16,19 @@ class CreateEvent extends Component {
         eventType: '',
         successMessage: '',
         errorMessage: '',
-        locationError: '',
+        addressError: '',
+        zipcodeError: '',
         redirectToMyEvents: false,
+        userId: '',
     };
 
+    componentDidMount() {
+        const userId = localStorage.getItem("username");
+        this.setState({ userId });
+    }
+
     handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value, locationError: '' });
+        this.setState({ [e.target.name]: e.target.value, addressError: '', zipcodeError: '' });
     };
 
     handleImageChange = (e) => {
@@ -31,12 +39,22 @@ class CreateEvent extends Component {
         this.setState({ eventVideo: e.target.files[0] });
     };
 
+    validateZipcode = (zipcode) => {
+        const regex = /^(?:\d{5}|\d{5}-\d{4})$/;
+        return regex.test(zipcode);
+    };
+
     handleSubmit = async (e) => {
         e.preventDefault();
 
         // Validate required fields
-        if (!this.state.location) {
-            this.setState({ locationError: 'Location is required' });
+        if (!this.state.address) {
+            this.setState({ addressError: 'Address is required' });
+            return;
+        }
+
+        if (!this.validateZipcode(this.state.zipcode)) {
+            this.setState({ zipcodeError: 'Invalid Zip Code format (must be 5 or 9 digits)' });
             return;
         }
 
@@ -45,17 +63,19 @@ class CreateEvent extends Component {
         formData.append('date', this.state.eventDate);
         formData.append('startTime', this.state.eventStartTime);
         formData.append('endTime', this.state.eventEndTime);
-        formData.append('location', this.state.location);
+        formData.append('address', this.state.address);
+        formData.append('zipcode', this.state.zipcode);
         formData.append('maxCapacity', Number(this.state.maxCapacity));
         formData.append('type', this.state.eventType);
         formData.append('description', this.state.eventDescription);
+        formData.append('userId', this.state.userId);
 
         // Append files only if they exist
         if (this.state.eventImage) {
-            formData.append('image', this.state.eventImage);
+            formData.append('eventImage', this.state.eventImage);
         }
         if (this.state.eventVideo) {
-            formData.append('video', this.state.eventVideo);
+            formData.append('eventVideo', this.state.eventVideo);
         }
 
         try {
@@ -68,7 +88,8 @@ class CreateEvent extends Component {
                 this.setState({ 
                     successMessage: 'Event created successfully!', 
                     errorMessage: '', 
-                    locationError: '', 
+                    addressError: '', 
+                    zipcodeError: '',
                 });
             } else {
                 const errorData = await res.json();
@@ -130,15 +151,27 @@ class CreateEvent extends Component {
                         />
                     </div>
                     <div>
-                        <label>Location:</label>
+                        <label>Address:</label>
                         <input
                             type="text"
-                            name="location"
-                            value={this.state.location}
+                            name="address"
+                            value={this.state.address}
                             onChange={this.handleChange}
                         />
-                        {this.state.locationError && (
-                            <div style={{ color: 'red' }}>{this.state.locationError}</div>
+                        {this.state.addressError && (
+                            <div style={{ color: 'red' }}>{this.state.addressError}</div>
+                        )}
+                    </div>
+                    <div>
+                        <label>Zip Code:</label>
+                        <input
+                            type="text"
+                            name="zipcode"
+                            value={this.state.zipcode}
+                            onChange={this.handleChange}
+                        />
+                        {this.state.zipcodeError && (
+                            <div style={{ color: 'red' }}>{this.state.zipcodeError}</div>
                         )}
                     </div>
                     <div>

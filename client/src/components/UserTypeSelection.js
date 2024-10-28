@@ -2,21 +2,29 @@ import React, { useState, useEffect } from 'react';
 import './UserTypeSelection.css';
 
 const UserTypeSelection = ({ onContinue }) => {
-  // retrieve the previous selection from local storage, if any
-  const initialUserType = localStorage.getItem('userType') || null;
-  const [selectedType, setSelectedType] = useState(initialUserType);
+  const [selectedType, setSelectedType] = useState(null);
 
-  // save the selection to local storage whenever it changes
+  // Set initial state from localStorage when the component mounts
+  useEffect(() => {
+    const savedType = localStorage.getItem('userType');
+    if (savedType) {
+      setSelectedType(savedType);
+    }
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Save the selection to localStorage whenever it changes
   useEffect(() => {
     if (selectedType) {
       localStorage.setItem('userType', selectedType);
     }
   }, [selectedType]);
 
+  // Handle the selection button click
   const handleSelection = (type) => {
     setSelectedType(type);
   };
 
+  // Handle the continue button click
   const handleContinue = () => {
     if (selectedType) {
       onContinue(selectedType);

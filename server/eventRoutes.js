@@ -55,18 +55,6 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
     }
 });
 
-// // Route to fetch all events for a specific user
-// router.get('/events/user/:userId', async (req, res) => {
-//     const { userId } = req.params;
-//     console.log('UserId in parent:', userId);
-//     try {
-//         const events = await Event.find({ userId });
-//         res.json(events);
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error fetching events' });
-//     }
-// });
-
 // Route to fetch all events
 router.get('/events', async (req, res) => {
     try {
@@ -105,5 +93,42 @@ router.delete('/events/:id', async (req, res) => {
         res.status(500).json({ error: 'Error deleting event' });
     }
 });
+
+// Route to modify an event
+router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
+    const { id } = req.params;
+    const { name, date, startTime, endTime, location, maxCapacity, type, description, userId } = req.body;
+
+    // Validate request data
+    if (!name || !date || !description || !location || !maxCapacity || !type || !userId) {
+        return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, description, and userId are required' });
+    }
+
+    const updatedData = {
+        name,
+        date,
+        startTime,
+        endTime,
+        location,
+        maxCapacity,
+        type,
+        description,
+        image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
+        video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
+        userId,
+    };
+
+    try {
+        const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, { new: true });
+        if (!updatedEvent) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+        res.json(updatedEvent);
+    } catch (error) {
+        console.error('Error updating event:', error.message);
+        res.status(500).json({ error: 'Error updating event' });
+    }
+});
+
 
 module.exports = router;

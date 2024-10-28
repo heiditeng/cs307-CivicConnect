@@ -9,7 +9,7 @@ class ModifyEvent extends Component {
             eventDate: '',
             eventStartTime: '',
             eventEndTime: '',
-            eventZipcode: '',
+            eventLocation: '',
             eventDescription: '',
             eventImage: null,
             eventVideo: null,
@@ -17,25 +17,36 @@ class ModifyEvent extends Component {
             eventType: '',
             successMessage: '',
             errorMessage: '',
-            zipCodeError: '',
+            locationError: '',
             redirectToMyEvents: false,
+            userId: null,
         };
     }
 
     async componentDidMount() {
-        const { id } = this.props; // Get ID from props
+        const { id } = this.props;
+        
+        // Retrieve userId from local storage
+        const userId = localStorage.getItem('username');
+        if (userId) {
+            this.setState({ userId });
+        } else {
+            this.setState({ errorMessage: 'User not logged in.' });
+            return;
+        }
+
         const res = await fetch(`http://localhost:5010/api/events/events/${id}`);
         if (res.ok) {
             const event = await res.json();
             this.setState({
                 eventName: event.name,
                 eventDate: event.date,
-                eventStartTime: event.eventStartTime,
-                eventEndTime: event.eventEndTime,
-                eventZipcode: event.eventZipcode,
+                eventStartTime: event.startTime,
+                eventEndTime: event.endTime,
+                eventLocation: event.location,
                 eventDescription: event.description,
                 maxCapacity: event.maxCapacity,
-                eventType: event.eventType,
+                eventType: event.type,
             });
         } else {
             this.setState({ errorMessage: 'Error fetching event data' });
@@ -43,7 +54,7 @@ class ModifyEvent extends Component {
     }
 
     handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value, zipCodeError: '' });
+        this.setState({ [e.target.name]: e.target.value, locationError: '' });
     };
 
     handleImageChange = (e) => {
@@ -54,28 +65,28 @@ class ModifyEvent extends Component {
         this.setState({ eventVideo: e.target.files[0] });
     };
 
-    validateZipcode = (zipcode) => {
-        const regex = /^[0-9]{5}(?:-[0-9]{4})?$/;
-        return regex.test(zipcode);
+    validateLocation = (location) => {
+        return location.trim() !== '';
     };
 
     handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!this.validateZipcode(this.state.eventZipcode)) {
-            this.setState({ zipCodeError: 'Invalid Zip Code' });
+        if (!this.validateLocation(this.state.eventLocation)) {
+            this.setState({ locationError: 'Invalid Location' });
             return;
         }
 
         const formData = new FormData();
         formData.append('name', this.state.eventName);
         formData.append('date', this.state.eventDate);
-        formData.append('eventStartTime', this.state.eventStartTime);
-        formData.append('eventEndTime', this.state.eventEndTime);
-        formData.append('eventZipcode', this.state.eventZipcode);
+        formData.append('startTime', this.state.eventStartTime);
+        formData.append('endTime', this.state.eventEndTime);
+        formData.append('location', this.state.eventLocation);
         formData.append('description', this.state.eventDescription);
         formData.append('maxCapacity', this.state.maxCapacity);
-        formData.append('eventType', this.state.eventType);
+        formData.append('type', this.state.eventType);
+        formData.append('userId', this.state.userId);
 
         if (this.state.eventImage) {
             formData.append('eventImage', this.state.eventImage);
@@ -94,7 +105,7 @@ class ModifyEvent extends Component {
                 this.setState({ 
                     successMessage: 'Event modified successfully!', 
                     errorMessage: '', 
-                    zipCodeError: '', 
+                    locationError: '',
                 });
             } else {
                 const errorData = await res.json();
@@ -107,6 +118,11 @@ class ModifyEvent extends Component {
 
     handleBackToMyEvents = () => {
         this.setState({ redirectToMyEvents: true });
+    };
+
+    formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
     render() {
@@ -128,7 +144,8 @@ class ModifyEvent extends Component {
                         />
                     </div>
                     <div>
-                        <label>Event Date:</label>
+                        <p>Current Date: {this.formatDate(this.state.eventDate)}</p>
+                        <label>New Event Date:</label>
                         <input
                             type="date"
                             name="eventDate"
@@ -155,15 +172,15 @@ class ModifyEvent extends Component {
                         />
                     </div>
                     <div>
-                        <label>Event Zip Code:</label>
+                        <label>Event Location:</label>
                         <input
                             type="text"
-                            name="eventZipcode"
-                            value={this.state.eventZipcode}
+                            name="eventLocation"
+                            value={this.state.eventLocation}
                             onChange={this.handleChange}
                         />
-                        {this.state.zipCodeError && (
-                            <div style={{ color: 'red' }}>{this.state.zipCodeError}</div>
+                        {this.state.locationError && (
+                            <div style={{ color: 'red' }}>{this.state.locationError}</div>
                         )}
                     </div>
                     <div>
@@ -187,7 +204,6 @@ class ModifyEvent extends Component {
                             <option value="environmental">Environmental</option>
                             <option value="education">Education</option>
                             <option value="health">Health</option>
-                            {/* Add more options as needed */}
                         </select>
                     </div>
                     <div>
@@ -215,7 +231,7 @@ class ModifyEvent extends Component {
                         />
                     </div>
                     <button type="submit">Submit</button>
-                    <button type="button" onClick={this.handleCancel} style={{ marginLeft: '10px' }}>
+                    <button type="button" onClick={this.handleBackToMyEvents} style={{ marginLeft: '10px' }}>
                         Cancel
                     </button>
                 </form>
@@ -238,7 +254,6 @@ class ModifyEvent extends Component {
     }
 }
 
-// Create a wrapper to provide the ID from the URL
 const ModifyEventWrapper = () => {
     const { id } = useParams();
     return <ModifyEvent id={id} />;

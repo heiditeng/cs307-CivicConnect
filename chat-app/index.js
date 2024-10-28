@@ -59,6 +59,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Set up storage in MongoDB
 const upload = multer({ storage: multer.memoryStorage() });
 
+// API to get all rooms for a user
+app.get('/users/:user_id/rooms', async (req, res) => {
+  try {
+    const user = await User.findOne({ user_id: req.params.user_id }).populate('rooms', 'room_id');
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    const rooms = user.rooms.map(room => room.room_id);
+    res.json(rooms);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 // Serve uploaded images from MongoDB
 app.get('/uploads/:id', async (req, res) => {
   try {
@@ -122,9 +136,10 @@ app.post('/upload', upload.single('photo'), async (req, res) => {
       link: ''
     });
     await message.save();
+    await message.populate('user', 'user_id');
 
-    // Send the image message to all connected clients in the room
-    io.to(rm.room_id).emit('message', { ...message.toObject(), sender: usr.user_id });
+    // Emit the image message to all connected clients in the room
+    io.to(room).emit('message', message.toObject());
 
     res.status(200).json({ message: 'Image uploaded successfully', data: message });
   } catch (err) {
@@ -174,7 +189,6 @@ io.on('connection', (socket) => {
 
   socket.on('joinRoom', async ({ user_id, room_id }) => {
     try {
-      // Ensure the user is added to the room
       await addUserToRoom(user_id, room_id).catch(err => { console.error('Error in addUserToRoom:', err.message); });
       socket.join(room_id);
       console.log(`User ${user_id} joined room: ${room_id}`);
@@ -198,9 +212,10 @@ io.on('connection', (socket) => {
         link: data.link || ''
       });
       await message.save();
+      await message.populate('user', 'user_id');
 
-      // Emit message to the specific room to ensure all clients get it
-      io.to(data.room_id).emit('message', { ...message.toObject(), sender: user.user_id });
+      // Emit message to the specific room
+      io.to(data.room).emit('message', message.toObject());
     } catch (err) {
       console.error('Error saving message:', err.message);
     }

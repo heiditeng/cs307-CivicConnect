@@ -41,7 +41,7 @@ const SaveCredentials = () => {
             <button onClick={handleSaveCredentials} style={{ padding: '10px 20px', cursor: 'pointer' }}>
                 Save Credentials
             </button>
-            {message && <p>{message}</p>}
+            {message && <p style={{ color: message.includes('Failed') ? 'red' : 'green' }}>{message}</p>}
         </div>
     );
 };

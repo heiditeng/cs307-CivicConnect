@@ -99,61 +99,184 @@
     .upload-icon {
       cursor: pointer;
     }
+    #add-user-container, #connect-container, #room-list-container, #chat-container {
+      display: none;
+    }
+    #back-button {
+      margin: 10px;
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+    }
+    #room-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    #room-list li {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      cursor: pointer;
+    }
+    #room-list li:hover {
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
-  <div id="chat-container">
-    <div id="inputs">
-      <input id="user_id" placeholder="User ID">
-      <input id="room_id" placeholder="Room ID">
-      <button onclick="joinRoom()">Join Room</button>
+  <div id="main-container">
+    <div id="add-user-container">
+      <h2>Add User to Room</h2>
+      <input id="add-user_id" placeholder="User ID">
+      <input id="add-room_id" placeholder="Room ID">
       <button onclick="addUserToRoom()">Add User to Room</button>
     </div>
-    <div id="tabs" style="display: none;">
-      <button onclick="showTab('chat')">Chat (<span id="unread-count"></span>)</button>
-      <button onclick="showTab('notifications')">Notifications</button>
-      <button onclick="showTab('blank')">Blank</button>
+
+    <div id="connect-container">
+      <h2>Connect</h2>
+      <input id="connect-user_id" placeholder="User ID">
+      <button onclick="connectUser()">Connect</button>
     </div>
-    <div id="content">
-      <div id="chat-tab" class="tab" style="display: none;">
-        <div id="messages" class="messages"></div>
-      </div>
-      <div id="notifications-tab" class="tab" style="display: none;">
-        <p>Notifications</p>
-        <p>Unread Messages: <span id="unread-count"></span></p>
-        <button onclick="clearNotifications()">Clear Notifications</button>
-      </div>
-      <div id="blank-tab" class="tab" style="display: none;">
-        <button onclick="sendUnreadEmail()">Send Email with Unread Messages</button>
+
+    <div id="room-list-container">
+      <h2>Your Rooms</h2>
+      <ul id="room-list"></ul>
+    </div>
+    <div id="chat-container">
+      <div id="back-button" onclick="showRoomList()">← Back to Rooms</div>
+      <div id="chat-content">
+        <div id="tabs" style="display: none;">
+          <button onclick="showTab('chat')">Chat (<span id="unread-count"></span>)</button>
+          <button onclick="showTab('notifications')">Notifications</button>
+          <button onclick="showTab('blank')">Blank</button>
+        </div>
+        <div id="content">
+          <div id="chat-tab" class="tab" style="display: none;">
+            <div id="messages" class="messages"></div>
+          </div>
+          <div id="notifications-tab" class="tab" style="display: none;">
+            <p>Notifications</p>
+            <p>Unread Messages: <span id="unread-count"></span></p>
+            <button onclick="clearNotifications()">Clear Notifications</button>
+          </div>
+          <div id="blank-tab" class="tab" style="display: none;">
+            <button onclick="sendUnreadEmail()">Send Email with Unread Messages</button>
+          </div>
+        </div>
+        <div id="inputs" class="message-inputs" style="display: none;">
+          <input id="messageInput" placeholder="Type a message or paste a link">
+          <label for="imageInput" class="upload-icon">
+            <img src="upload-icon.png" alt="Upload" style="width: 24px; height: 24px; cursor: pointer;">
+          </label>
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+
       </div>
     </div>
-    <div id="inputs" class="message-inputs" style="display: none;">
-      <input id="messageInput" placeholder="Type a message or paste a link">
-      <label for="imageInput" class="upload-icon">
-        <img src="upload-icon.png" alt="Upload" style="width: 24px; height: 24px; cursor: pointer;">
-      </label>
-      <input type="file" id="imageInput" accept="image/*" style="display: none;">
-      <button onclick="sendMessage()">Send</button>
-    </div>
-  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     let socket;
     let unreadMessages = 0;
     let currentTab = 'chat';
+    let user;
+    let room;
 
-    function joinRoom() {
-      const user = document.getElementById('user_id').value;
-      const room = document.getElementById('room_id').value;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show the initial views
+      document.getElementById('add-user-container').style.display = 'block';
+      document.getElementById('connect-container').style.display = 'block';
+    });
 
-      if (!user || !room) {
-        alert('Please enter both User ID and Room ID to join a room.');
+    function connectUser() {
+      user = document.getElementById('connect-user_id').value.trim();
+      if (!user) {
+        alert('Please enter your User ID to connect.');
+        return;
+      }
+      // Fetch the list of rooms for the user
+      fetch(`/users/${user}/rooms`)
+        .then(response => response.json())
+        .then(rooms => {
+          showRoomList(rooms);
+        })
+        .catch(error => {
+          console.error('Error fetching user rooms:', error);
+          alert('Error fetching your rooms. Please try again.');
+        });
+    }
+
+    function showRoomList(rooms) {
+      if (!user) {
+        alert('User is not defined. Please reconnect.');
         return;
       }
 
+      // If rooms are not provided, fetch them from the server
+      if (!rooms) {
+        fetch(`/users/${user}/rooms`)
+          .then(response => response.json())
+          .then(rooms => {
+            displayRoomList(rooms);
+          })
+          .catch(error => {
+            console.error('Error fetching user rooms:', error);
+            alert('Error fetching your rooms. Please try again.');
+          });
+      } else {
+        displayRoomList(rooms);
+      }
+    }
+
+
+    function displayRoomList(rooms) {
+      // Hide other containers
+      document.getElementById('add-user-container').style.display = 'none';
+      document.getElementById('connect-container').style.display = 'none';
+      document.getElementById('chat-container').style.display = 'none';
+
+      // Show room list container
+      document.getElementById('room-list-container').style.display = 'block';
+
+      const roomList = document.getElementById('room-list');
+      roomList.innerHTML = '';
+
+      if (rooms.length === 0) {
+        roomList.innerHTML = '<li>No rooms found. Please add yourself to a room first.</li>';
+      } else {
+        rooms.forEach(room_id => {
+          const li = document.createElement('li');
+          li.textContent = room_id;
+          li.onclick = () => joinRoom(room_id);
+          roomList.appendChild(li);
+        });
+      }
+    }
+
+    function joinRoom(selectedRoom) {
+      room = selectedRoom;
+
+      // Hide room list and show chat container
+      document.getElementById('room-list-container').style.display = 'none';
+      document.getElementById('chat-container').style.display = 'block';
+
+      // Initialize chat
+      initializeChat();
+    }
+
+    function initializeChat() {
+      if (!user || !room) {
+        alert('User or Room is not defined.');
+        return;
+      }
+
+      // Disconnect existing socket if any
+      if (socket) {
+        socket.disconnect();
+      }
+
       socket = io.connect('http://localhost:4000');
-      socket.emit('joinRoom', { user, room });
+      socket.emit('joinRoom', { user_id: user, room_id: room });
 
       document.getElementById('tabs').style.display = 'flex';
       updateUnreadCount();
@@ -179,23 +302,26 @@
         }
         renderMessage(data, user);
       });
+
+      // Show message input fields
+      document.querySelector('.message-inputs').style.display = 'flex';
     }
 
     function addUserToRoom() {
-      const user = document.getElementById('user_id').value;
-      const room = document.getElementById('room_id').value;
+      const user_id = document.getElementById('add-user_id').value.trim();
+      const room_id = document.getElementById('add-room_id').value.trim();
 
-      if (!user || !room) {
+      if (!user_id || !room_id) {
         alert('Please enter both User ID and Room ID to add user to a room.');
         return;
       }
 
-      fetch(`/rooms/${room}/add-member`, {
+      fetch(`/rooms/${room_id}/add-member`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ user })
+        body: JSON.stringify({ user_id })
       })
         .then(response => {
           if (!response.ok) {
@@ -204,20 +330,70 @@
           return response.json();
         })
         .then(data => {
+          alert('User added to room successfully.');
           console.log('User added to room:', data.message);
+
+          if (user && user === user_id) {
+            showRoomList();
+          }
         })
         .catch(error => {
           console.error('Error adding user to room:', error);
+          alert('Error adding user to room. Please try again.');
         });
+    }
+
+    function showTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(tabContent => {
+        tabContent.style.display = 'none';
+      });
+      document.getElementById(`${tab}-tab`).style.display = 'block';
+      if (tab === 'chat') {
+        document.querySelector('.message-inputs').style.display = 'flex';
+        unreadMessages = 0;
+        updateUnreadCount();
+      } else {
+        document.querySelector('.message-inputs').style.display = 'none';
+      }
+    }
+
+    function sendMessage() {
+      const content = document.getElementById('messageInput').value.trim();
+      const imageInput = document.getElementById('imageInput');
+
+      if (content) {
+        socket.emit('message', { room, user, content });
+        document.getElementById('messageInput').value = '';
+      } else if (imageInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('photo', imageInput.files[0]);
+        formData.append('room', room);
+        formData.append('user', user);
+
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Image uploaded successfully:', data);
+          })
+          .catch(error => {
+            console.error('Error uploading image:', error);
+          });
+
+        imageInput.value = '';
+      }
     }
 
     function renderMessage(data, user) {
       const messagesDiv = document.getElementById('messages');
       const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message', (data.user.user_id === user || data.sender === user) ? 'right' : 'left');
 
-      // Handle missing sender
-      const senderName = data.sender ? data.sender : (data.user_id && data.user.user_id) ? data.user_id : data.user.user_id;
+      const senderName = (data.user && data.user.user_id) || data.sender || 'Unknown';
+
+      messageDiv.classList.add('message', senderName === user ? 'right' : 'left');
 
       const senderDiv = document.createElement('div');
       senderDiv.classList.add('sender');
@@ -252,8 +428,6 @@
     }
 
     function sendMessage() {
-      const user = document.getElementById('user_id').value;
-      const room = document.getElementById('room_id').value;
       const content = document.getElementById('messageInput').value.trim();
       const imageInput = document.getElementById('imageInput');
 
@@ -312,6 +486,27 @@
         window.open(`mailto:${emailAddress}?subject=Unread Messages&body=You have ${unreadMessages} unread messages.`);
       }
     }
+
+    // Back button handler
+  function showRoomList() {
+    // Disconnect from the room
+    if (socket) {
+      socket.emit('leaveRoom', { room_id: room });
+      socket.disconnect();
+      socket = null;
+    }
+    room = null;
+    // Fetch and display the room list
+    fetch(`/users/${user}/rooms`)
+      .then(response => response.json())
+      .then(rooms => {
+        displayRoomList(rooms);
+      })
+      .catch(error => {
+        console.error('Error fetching user rooms:', error);
+        alert('Error fetching your rooms. Please try again.');
+      });
+  }
   </script>
 </body>
 </html>

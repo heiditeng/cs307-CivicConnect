@@ -4,16 +4,27 @@ import { Link } from "react-router-dom";
 const MyEvents = () => {
   const [eventsData, setEventsData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const userId = localStorage.getItem("username");
 
-  // Fetch user events
   useEffect(() => {
-    const fetchMyEvents = async () => {
-      try {
-        const res = await fetch("http://localhost:5010/api/events/events");
+    if (!userId) {
+      console.log('No userId provided');
+      return;
+    }
 
+    const fetchAllEvents = async () => {
+      console.log('Fetching events for user:', userId);
+      try {
+        const res = await fetch(`http://localhost:5010/api/events/events`);
+
+        console.log('Response status:', res.status);
+  
         if (res.ok) {
           const data = await res.json();
-          setEventsData(data);
+
+          // Filter events by userId
+          const userEvents = data.filter(event => event.userId === userId);
+          setEventsData(userEvents);
         } else {
           setErrorMessage("Error fetching events data");
         }
@@ -21,9 +32,9 @@ const MyEvents = () => {
         setErrorMessage("Error fetching events data");
       }
     };
-
-    fetchMyEvents();
-  }, []);
+  
+    fetchAllEvents();
+  }, [userId]);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -45,6 +56,11 @@ const MyEvents = () => {
               >
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg font-semibold text-gray-800">{event.name}</h3>
+                  <p className="text-sm text-gray-600">Organization: 
+                    <Link to={`/profile`}>
+                      <strong className="text-blue-600 hover:underline">{event.userId}</strong>
+                    </Link>
+                  </p>
                   <p className="text-sm text-gray-600">Date: {formatDate(event.date)}</p>
                   <p className="text-sm text-gray-600 mb-3">Location: {event.location}</p>
                 </div>

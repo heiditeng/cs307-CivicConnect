@@ -26,11 +26,11 @@ console.log('Serving static files from:', path.join(__dirname,'uploads'));
 
 // Route to create a new event
 router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
-    const { name, date, startTime, endTime, location, maxCapacity, type, description } = req.body;
+    const { name, date, startTime, endTime, location, maxCapacity, type, description, userId } = req.body;
 
     // Validate request data
-    if (!name || !date || !description || !location || !maxCapacity || !type) {
-        return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, and description are required' });
+    if (!name || !date || !description || !location || !maxCapacity || !type || !userId) {
+        return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, description, and userId are required' });
     }
 
     const newEvent = new Event({
@@ -51,7 +51,7 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
         const savedEvent = await newEvent.save();
         res.status(201).json(savedEvent);
     } catch (error) {
-        console.error('Error saving event:', error); // Log the error for debugging
+        console.error('Error saving event:', error.message);
         res.status(500).json({ error: 'Error saving event' });
     }
 });
@@ -59,7 +59,7 @@ router.post('/events', upload.fields([{ name: 'eventImage' }, { name: 'eventVide
 // note from aysu: updated this from /events to /
 router.get('/', async (req, res) => {
     try {
-        const events = await Event.find();
+        const events = await Event.find(); // Retrieve all events
         res.json(events);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching events' });
@@ -95,6 +95,44 @@ router.delete('/events/:id', async (req, res) => {
     }
 });
 
+
+// Route to modify an event
+router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventVideo' }]), async (req, res) => {
+    const { id } = req.params;
+    const { name, date, startTime, endTime, location, maxCapacity, type, description, userId } = req.body;
+
+    // Validate request data
+    if (!name || !date || !description || !location || !maxCapacity || !type || !userId) {
+        return res.status(400).json({ error: 'Name, date, location, maxCapacity, type, description, and userId are required' });
+    }
+
+    const updatedData = {
+        name,
+        date,
+        startTime,
+        endTime,
+        location,
+        maxCapacity,
+        type,
+        description,
+        image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
+        video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
+        userId,
+    };
+
+    try {
+        const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, { new: true });
+        if (!updatedEvent) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+        res.json(updatedEvent);
+    } catch (error) {
+        console.error('Error updating event:', error.message);
+        res.status(500).json({ error: 'Error updating event' });
+    }
+});
+
+
 // rsvp
 router.post('/:id/rsvp', async (req, res) => {
     const { id } = req.params; 
@@ -128,5 +166,6 @@ router.post('/:id/rsvp', async (req, res) => {
       res.status(500).json({ error: 'Error processing RSVP' });
     }
   });
+
 
 module.exports = router;

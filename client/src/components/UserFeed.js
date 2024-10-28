@@ -24,14 +24,16 @@ const UserFeed = () => {
     fetchAllEvents();
   }, []);
 
-  // Format date for display
+    // Format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+
   // Handle RSVP for an event
   const handleRSVP = async (eventId) => {
+    const username = localStorage.getItem("username");
     try {
       const res = await fetch(
         `http://localhost:5010/api/events/${eventId}/rsvp`,
@@ -41,13 +43,14 @@ const UserFeed = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: localStorage.getItem("savedUsername"),
+            username: username,
           }),
         }
       );
 
       if (res.ok) {
-        fetchAllEvents(); // Refresh the feed to reflect RSVP changes
+        fetchAllEvents();
+        console.log("aysu");
       } else {
         setErrorMessage("Error RSVPing to the event");
       }

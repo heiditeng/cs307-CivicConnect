@@ -132,40 +132,40 @@ router.put('/events/:id', upload.fields([{ name: 'eventImage' }, { name: 'eventV
     }
 });
 
-
 // rsvp
 router.post('/:id/rsvp', async (req, res) => {
-    const { id } = req.params; 
-    const { userId } = req.body; 
-  
-    try {
-        consol.log("aysu");
-      const event = await Event.findById(id);
-      const user = await User.findById(userId);
-  
-      if (!event || !user) {
-        return res.status(404).json({ error: 'Event or User not found' });
-      }
-  
-      // check if user in event RSVP list
-      if (!event.rsvpUsers.includes(userId)) {
-        // if not, add
-        event.rsvpUsers.push(userId);
-        await event.save();
-      }
-  
-      // check is event in user RSVP list
-      if (!user.rsvpEvents.includes(id)) {
-        // if not, add
-        user.rsvpEvents.push(id);
-        await user.save();
-      }
-  
-      res.status(200).json({ message: 'RSVP successful' });
-    } catch (error) {
-      res.status(500).json({ error: 'Error processing RSVP' });
-    }
-  });
+  const { id } = req.params;
+  const { username } = req.body;
 
+  try {
+    // get event by id
+    const event = await Event.findById(id);
+
+    // get user by username
+    const user = await User.findOne({ username });
+    console.log("Fetched User:", user);
+
+    if (!event || !user) {
+      return res.status(404).json({ error: "Event or User not found" });
+    }
+
+    // check if user in event RSVP list, if not add
+    if (!event.rsvpUsers.includes(user._id.toString())) {
+      event.rsvpUsers.push(user._id);
+      await event.save();
+      console.log("User added RSVP list");
+    }
+     // check is event in user RSVP list, if not add
+    if (!user.rsvpEvents.includes(event._id.toString())) {
+      user.rsvpEvents.push(event._id);
+      await user.save();
+    }
+
+    res.status(200).json({ message: "RSVP successful" });
+  } catch (error) {
+    console.error("Error processing RSVP:", error);
+    res.status(500).json({ error: "Error processing RSVP" });
+  }
+});
 
 module.exports = router;

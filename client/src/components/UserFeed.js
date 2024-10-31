@@ -31,6 +31,7 @@ const UserFeed = () => {
     fetchUserBookmarks();
   }, []);
 
+
   // format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -51,7 +52,7 @@ const UserFeed = () => {
     }
   };
 
-  // handle RSVP for an event
+  // Handle RSVP for an event
   const handleRSVP = async (eventId) => {
     const username = localStorage.getItem("username");
     try {
@@ -78,39 +79,73 @@ const UserFeed = () => {
     }
   };
 
-  // handle bookmarking/unbookmarking of an event
-  const handleBookmark = async (eventId, eventName) => {
+/ handle bookmarking/unbookmarking of an event
+  const handleBookmark = async (eventId, eventName) => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/profiles/bookmark`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, eventId }),
+        }
+      );
+
+      if (res.ok) {
+        const isRemoving = bookmarkedEvents.includes(eventId);
+        setBookmarkedEvents((prev) =>
+          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
+        );
+
+        // show confirmation message based on action
+        if (isRemoving) {
+          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
+        } else {
+          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
+        }
+        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
+      } else {
+        setErrorMessage("Error updating bookmark status.");
+      }
+    } catch (error) {
+      setErrorMessage("Error updating bookmark status.");
+    }
+  };
+  
+  
+  const handleRemoveRSVP = async (eventId) => {
     const username = localStorage.getItem("username");
+    console.log("Remove RSVP clicked with Event ID:", eventId);
+    if (!username) {
+      setErrorMessage("User is not logged in");
+      return;
+    }
+
     try {
       const res = await fetch(
-        `http://localhost:5010/api/profiles/bookmark`,
+        `http://localhost:5010/api/events/${eventId}/remove-rsvp`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ username, eventId }),
+          body: JSON.stringify({
+            username: username,
+          }),
         }
       );
 
       if (res.ok) {
-        const isRemoving = bookmarkedEvents.includes(eventId);
-        setBookmarkedEvents((prev) =>
-          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
-        );
-
-        // show confirmation message based on action
-        if (isRemoving) {
-          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
-        } else {
-          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
-        }
-        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
+        fetchAllEvents();
+        console.log("aysu");
       } else {
-        setErrorMessage("Error updating bookmark status.");
+        setErrorMessage("Error removing RSVP from the event");
       }
     } catch (error) {
-      setErrorMessage("Error updating bookmark status.");
+      setErrorMessage("Error removing RSVP from the event");
     }
   };
 
@@ -182,10 +217,14 @@ const UserFeed = () => {
                     </button>
                   </Link>
                   <button
-                    className="btn btn-outline btn-success btn-sm ml-2"
-                    onClick={() => handleRSVP(event._id)}
+                    className={`btn btn-outline btn-sm ml-2 ${event.rsvpUsers.includes(localStorage.getItem('userId')) ? 'btn-danger' : 'btn-success'}`}
+                    onClick={() =>
+                      event.rsvpUsers.includes(localStorage.getItem('userId'))
+                        ? handleRemoveRSVP(event._id)
+                        : handleRSVP(event._id)
+                    }
                   >
-                    RSVP
+                    {event.rsvpUsers.includes(localStorage.getItem('userId')) ? 'Un-RSVP' : 'RSVP'}
                   </button>
                 </div>
               </div>

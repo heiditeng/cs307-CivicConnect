@@ -14,6 +14,7 @@ const NavBar = () => {
           <div className="dropdown-content">
             <Link to="/profile">My Profile</Link>
             <Link to="/my-events">My Events</Link>
+            <Link to="/feed">Feed</Link>
             <Link to="/">Log Out</Link>
           </div>
         </div>

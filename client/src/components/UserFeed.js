@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBookmark } from "@fortawesome/free-solid-svg-icons";
 
 const UserFeed = () => {
   const [feedData, setFeedData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
 
+  // fetch all events
   const fetchAllEvents = async () => {
     try {
       const res = await fetch("http://localhost:5010/api/events");
@@ -20,14 +25,31 @@ const UserFeed = () => {
     }
   };
 
+  // fetch user's bookmarks on component mount
   useEffect(() => {
     fetchAllEvents();
+    fetchUserBookmarks();
   }, []);
 
-  // Format date for display
+
+  // format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  // fetch user's existing bookmarks to highlight them on load
+  const fetchUserBookmarks = async () => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedEvents(data.bookmarks.map(event => event._id)); // Store only event IDs
+      }
+    } catch (error) {
+      console.error("Error fetching user bookmarks:", error);
+    }
   };
 
   // Handle RSVP for an event
@@ -48,8 +70,7 @@ const UserFeed = () => {
       );
 
       if (res.ok) {
-        fetchAllEvents();
-        console.log("aysu");
+        fetchAllEvents(); // refresh events after RSVP
       } else {
         setErrorMessage("Error RSVPing to the event");
       }
@@ -58,6 +79,43 @@ const UserFeed = () => {
     }
   };
 
+/ handle bookmarking/unbookmarking of an event
+  const handleBookmark = async (eventId, eventName) => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/profiles/bookmark`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, eventId }),
+        }
+      );
+
+      if (res.ok) {
+        const isRemoving = bookmarkedEvents.includes(eventId);
+        setBookmarkedEvents((prev) =>
+          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
+        );
+
+        // show confirmation message based on action
+        if (isRemoving) {
+          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
+        } else {
+          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
+        }
+        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
+      } else {
+        setErrorMessage("Error updating bookmark status.");
+      }
+    } catch (error) {
+      setErrorMessage("Error updating bookmark status.");
+    }
+  };
+  
+  
   const handleRemoveRSVP = async (eventId) => {
     const username = localStorage.getItem("username");
     console.log("Remove RSVP clicked with Event ID:", eventId);
@@ -97,6 +155,11 @@ const UserFeed = () => {
         <h2 className="text-3xl font-bold text-center mb-6 text-primary">
           Community Feed
         </h2>
+        {confirmationMessage && (
+          <div className="text-center mb-4 text-green-500 font-semibold">
+            {confirmationMessage}
+          </div>
+        )}
         <button
           className="btn btn-outline btn-primary mb-4 self-center"
           onClick={fetchAllEvents}
@@ -109,8 +172,20 @@ const UserFeed = () => {
             {feedData.map((event) => (
               <div
                 key={event._id}
-                className="card bg-base-100 aspect-square flex flex-col justify-between"
+                className="card bg-base-100 aspect-square flex flex-col justify-between relative"
               >
+                {/* Bookmark Button */}
+                <button
+                  className={`absolute top-2 right-2 ${
+                    bookmarkedEvents.includes(event._id) ? "text-blue-500" : "text-gray-500"
+                  } hover:text-primary focus:outline-none`}
+                  onClick={() => handleBookmark(event._id, event.name)}
+                  aria-label="Bookmark"
+                >
+                  <FontAwesomeIcon icon={faBookmark} size="lg" />
+                </button>
+
+                {/* Event Details */}
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg font-semibold text-gray-800">
                     {event.name}
@@ -122,6 +197,8 @@ const UserFeed = () => {
                     Location: {event.location}
                   </p>
                 </div>
+
+                {/* Event Image */}
                 {event.image && (
                   <figure className="h-32 w-full overflow-hidden rounded-t-lg">
                     <img
@@ -131,6 +208,8 @@ const UserFeed = () => {
                     />
                   </figure>
                 )}
+
+                {/* Actions: Show Details and RSVP */}
                 <div className="card-actions justify-end p-4">
                   <Link to={`/event-details/${event._id}`}>
                     <button className="btn btn-primary btn-sm">

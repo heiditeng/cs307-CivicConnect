@@ -27,7 +27,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:userprofile": "react-scripts test src/test/UserProfile.test.js",
+    "test:bookmark": "react-scripts test src/test/Bookmark.test.js"
   },
   "eslintConfig": {
     "extends": [

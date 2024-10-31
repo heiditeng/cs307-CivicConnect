@@ -59,6 +59,11 @@ const UserFeed = () => {
     }
   };
 
+  const handleBookmark = (eventId) => {
+    // Function to handle bookmarking logic
+    console.log(`Bookmarked event with ID: ${eventId}`);
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen p-8 bg-gray-50">
       <div className="flex flex-col w-full max-w-5xl gap-6">
@@ -77,8 +82,16 @@ const UserFeed = () => {
             {feedData.map((event) => (
               <div
                 key={event._id}
-                className="card bg-base-100 aspect-square flex flex-col justify-between"
+                className="card bg-base-100 aspect-square flex flex-col justify-between relative"
               >
+                <button
+                  className="absolute top-2 right-2 text-gray-500 hover:text-primary focus:outline-none"
+                  onClick={() => handleBookmark(event._id)}
+                  aria-label="Bookmark"
+                >
+                  ⭐ {/* Replace with a bookmark icon if preferred */}
+                </button>
+
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg font-semibold text-gray-800">
                     {event.name}

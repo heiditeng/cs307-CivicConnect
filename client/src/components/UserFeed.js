@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBookmark } from "@fortawesome/free-solid-svg-icons";
 
 const UserFeed = () => {
   const [feedData, setFeedData] = useState([]);
@@ -89,7 +91,7 @@ const UserFeed = () => {
                   onClick={() => handleBookmark(event._id)}
                   aria-label="Bookmark"
                 >
-                  ⭐ {/* Replace with a bookmark icon if preferred */}
+                  <FontAwesomeIcon icon={faBookmark} />
                 </button>
 
                 <div className="card-body p-4">

@@ -7,7 +7,9 @@ const UserFeed = () => {
   const [feedData, setFeedData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
 
+  // fetch all events
   const fetchAllEvents = async () => {
     try {
       const res = await fetch("http://localhost:5010/api/events");
@@ -23,19 +25,33 @@ const UserFeed = () => {
     }
   };
 
+  // fetch user's bookmarks on component mount
   useEffect(() => {
     fetchAllEvents();
     fetchUserBookmarks();
   }, []);
 
-    // Format date for display
+  // format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // fetch user's existing bookmarks to highlight them on load
+  const fetchUserBookmarks = async () => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedEvents(data.bookmarks.map(event => event._id)); // Store only event IDs
+      }
+    } catch (error) {
+      console.error("Error fetching user bookmarks:", error);
+    }
+  };
 
-  // Handle RSVP for an event
+  // handle RSVP for an event
   const handleRSVP = async (eventId) => {
     const username = localStorage.getItem("username");
     try {
@@ -53,8 +69,7 @@ const UserFeed = () => {
       );
 
       if (res.ok) {
-        fetchAllEvents();
-        console.log("aysu");
+        fetchAllEvents(); // refresh events after RSVP
       } else {
         setErrorMessage("Error RSVPing to the event");
       }
@@ -63,22 +78,8 @@ const UserFeed = () => {
     }
   };
 
-  // fetch user's existing bookmarks to highlight them on load
-  const fetchUserBookmarks = async () => {
-    const username = localStorage.getItem("username");
-    try {
-      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
-      if (res.ok) {
-        const data = await res.json();
-        setBookmarkedEvents(data.bookmarks.map(event => event._id)); // store only event IDs
-      }
-    } catch (error) {
-      console.error("Error fetching user bookmarks:", error);
-    }
-  };
-
-  // handle bookmarking of an Event
-  const handleBookmark = async (eventId) => {
+  // handle bookmarking/unbookmarking of an event
+  const handleBookmark = async (eventId, eventName) => {
     const username = localStorage.getItem("username");
     try {
       const res = await fetch(
@@ -93,17 +94,23 @@ const UserFeed = () => {
       );
 
       if (res.ok) {
-        // toggle bookmark in the local state for visual feedback
+        const isRemoving = bookmarkedEvents.includes(eventId);
         setBookmarkedEvents((prev) =>
-          prev.includes(eventId)
-            ? prev.filter((id) => id !== eventId)
-            : [...prev, eventId]
+          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
         );
+
+        // show confirmation message based on action
+        if (isRemoving) {
+          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
+        } else {
+          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
+        }
+        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
       } else {
-        setErrorMessage("Error bookmarking the event");
+        setErrorMessage("Error updating bookmark status.");
       }
     } catch (error) {
-      setErrorMessage("Error bookmarking the event");
+      setErrorMessage("Error updating bookmark status.");
     }
   };
 
@@ -113,6 +120,11 @@ const UserFeed = () => {
         <h2 className="text-3xl font-bold text-center mb-6 text-primary">
           Community Feed
         </h2>
+        {confirmationMessage && (
+          <div className="text-center mb-4 text-green-500 font-semibold">
+            {confirmationMessage}
+          </div>
+        )}
         <button
           className="btn btn-outline btn-primary mb-4 self-center"
           onClick={fetchAllEvents}
@@ -127,23 +139,18 @@ const UserFeed = () => {
                 key={event._id}
                 className="card bg-base-100 aspect-square flex flex-col justify-between relative"
               >
+                {/* Bookmark Button */}
                 <button
                   className={`absolute top-2 right-2 ${
                     bookmarkedEvents.includes(event._id) ? "text-blue-500" : "text-gray-500"
                   } hover:text-primary focus:outline-none`}
-                  onClick={() => handleBookmark(event._id)}
+                  onClick={() => handleBookmark(event._id, event.name)}
                   aria-label="Bookmark"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    className="w-6 h-6"
-                  >
-                    <path d="M5 3a2 2 0 012-2h10a2 2 0 012 2v18l-7-3-7 3V3z" />
-                  </svg>
+                  <FontAwesomeIcon icon={faBookmark} size="lg" />
                 </button>
 
+                {/* Event Details */}
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg font-semibold text-gray-800">
                     {event.name}
@@ -155,6 +162,8 @@ const UserFeed = () => {
                     Location: {event.location}
                   </p>
                 </div>
+
+                {/* Event Image */}
                 {event.image && (
                   <figure className="h-32 w-full overflow-hidden rounded-t-lg">
                     <img
@@ -164,6 +173,8 @@ const UserFeed = () => {
                     />
                   </figure>
                 )}
+
+                {/* Actions: Show Details and RSVP */}
                 <div className="card-actions justify-end p-4">
                   <Link to={`/event-details/${event._id}`}>
                     <button className="btn btn-primary btn-sm">
@@ -172,7 +183,7 @@ const UserFeed = () => {
                   </Link>
                   <button
                     className="btn btn-outline btn-success btn-sm ml-2"
-                    onClick={() => handleBookmark(event._id)}
+                    onClick={() => handleRSVP(event._id)}
                   >
                     RSVP
                   </button>
@@ -193,6 +204,5 @@ const UserFeed = () => {
     </div>
   );
 };
-
 
 export default UserFeed;

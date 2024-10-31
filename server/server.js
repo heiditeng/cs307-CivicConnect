@@ -75,6 +75,39 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// bookmark an event for a user
+app.post('/api/profiles/bookmark', async (req, res) => {
+    const { username, eventId } = req.body;
+
+    try {
+        // find the user by username
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // check if event is already bookmarked
+        const isBookmarked = user.bookmarks.includes(eventId);
+
+        if (isBookmarked) {
+            // if already bookmarked, remove it
+            user.bookmarks = user.bookmarks.filter((id) => id.toString() !== eventId);
+        } else {
+            // if not bookmarked, add it
+            user.bookmarks.push(eventId);
+        }
+
+        // save the updated user document
+        await user.save();
+
+        res.status(200).json({
+            message: isBookmarked ? "Bookmark removed" : "Bookmark added",
+            bookmarks: user.bookmarks,
+        });
+    } catch (error) {
+        console.error("Error bookmarking event:", error);
+        res.status(500).json({ error: "An error occurred while bookmarking" });
+    }
+});
+
 // Use password routes
 app.use('/', passwordRoutes);
 

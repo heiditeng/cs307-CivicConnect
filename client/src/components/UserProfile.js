@@ -5,6 +5,7 @@ const UserProfile = () => {
   const [profileData, setProfileData] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [mlSuggestions, setMlSuggestions] = useState("");
+  const [bookmarkedEvents, setBookmarkedEvents] = useState([]); // New state for bookmarks
   const routeLocation = useLocation();
 
   useEffect(() => {
@@ -21,8 +22,8 @@ const UserProfile = () => {
             const data = await res.json();
             setProfileData(data);
             fetchMlSuggestions(data);
+            fetchBookmarkedEvents(username); // Fetch bookmarked events
           } else {
-            // If profile is not found, create a new one
             await addNewProfile(username);
           }
         } catch (error) {
@@ -54,6 +55,22 @@ const UserProfile = () => {
         }
       } catch (error) {
         setErrorMessage("Error adding new profile");
+      }
+    };
+
+    const fetchBookmarkedEvents = async (username) => {
+      try {
+        const res = await fetch(
+          `http://localhost:5010/api/profiles/bookmarks/${username}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setBookmarkedEvents(data); // Set bookmarked events data
+        } else {
+          console.error("Error fetching bookmarked events");
+        }
+      } catch (error) {
+        console.error("Error fetching bookmarked events:", error);
       }
     };
 
@@ -132,32 +149,32 @@ const UserProfile = () => {
                 </p>
               </div>
               <div className="mb-4">
-              <p className="text-lg font-semibold">Attendance Rating:</p>
-                <div class="rating gap-1">
+                <p className="text-lg font-semibold">Attendance Rating:</p>
+                <div className="rating gap-1">
                   <input
                     type="radio"
                     name="rating-3"
-                    class="mask mask-heart bg-red-400"
+                    className="mask mask-heart bg-red-400"
                   />
                   <input
                     type="radio"
                     name="rating-3"
-                    class="mask mask-heart bg-orange-400"
+                    className="mask mask-heart bg-orange-400"
                   />
                   <input
                     type="radio"
                     name="rating-3"
-                    class="mask mask-heart bg-yellow-400"
+                    className="mask mask-heart bg-yellow-400"
                   />
                   <input
                     type="radio"
                     name="rating-3"
-                    class="mask mask-heart bg-lime-400"
+                    className="mask mask-heart bg-lime-400"
                   />
                   <input
                     type="radio"
                     name="rating-3"
-                    class="mask mask-heart bg-green-400"
+                    className="mask mask-heart bg-green-400"
                   />
                 </div>
               </div>
@@ -189,6 +206,24 @@ const UserProfile = () => {
               </p>
             ) : (
               <p className="text-gray-500">Loading suggestions...</p>
+            )}
+          </div>
+
+          {/* Bookmarked Events Section */}
+          <div className="p-6 bg-base-100 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Bookmarked Events</h2>
+            {bookmarkedEvents.length > 0 ? (
+              <ul>
+                {bookmarkedEvents.map((event) => (
+                  <li key={event._id} className="mb-2">
+                    <Link to={`/event-details/${event._id}`} className="text-primary hover:underline">
+                      {event.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No bookmarked events found.</p>
             )}
           </div>
         </div>

@@ -6,6 +6,7 @@ import { faBookmark } from "@fortawesome/free-solid-svg-icons";
 const UserFeed = () => {
   const [feedData, setFeedData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
 
   const fetchAllEvents = async () => {
     try {
@@ -61,9 +62,48 @@ const UserFeed = () => {
     }
   };
 
-  const handleBookmark = (eventId) => {
-    // Function to handle bookmarking logic
-    console.log(`Bookmarked event with ID: ${eventId}`);
+  // fetch user's existing bookmarks to highlight them on load
+  const fetchUserBookmarks = async () => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedEvents(data.bookmarks);
+      }
+    } catch (error) {
+      console.error("Error fetching user bookmarks:", error);
+    }
+  };
+
+  // handle bookmarking of an Event
+  const handleBookmark = async (eventId) => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/profiles/bookmark`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, eventId }),
+        }
+      );
+
+      if (res.ok) {
+        // toggle bookmark in the local state for visual feedback
+        setBookmarkedEvents((prev) =>
+          prev.includes(eventId)
+            ? prev.filter((id) => id !== eventId)
+            : [...prev, eventId]
+        );
+      } else {
+        setErrorMessage("Error bookmarking the event");
+      }
+    } catch (error) {
+      setErrorMessage("Error bookmarking the event");
+    }
   };
 
   return (
@@ -87,11 +127,20 @@ const UserFeed = () => {
                 className="card bg-base-100 aspect-square flex flex-col justify-between relative"
               >
                 <button
-                  className="absolute top-2 right-2 text-gray-500 hover:text-primary focus:outline-none"
+                  className={`absolute top-2 right-2 ${
+                    bookmarkedEvents.includes(event._id) ? "text-blue-500" : "text-gray-500"
+                  } hover:text-primary focus:outline-none`}
                   onClick={() => handleBookmark(event._id)}
                   aria-label="Bookmark"
                 >
-                  <FontAwesomeIcon icon={faBookmark} />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    className="w-6 h-6"
+                  >
+                    <path d="M5 3a2 2 0 012-2h10a2 2 0 012 2v18l-7-3-7 3V3z" />
+                  </svg>
                 </button>
 
                 <div className="card-body p-4">
@@ -143,5 +192,6 @@ const UserFeed = () => {
     </div>
   );
 };
+
 
 export default UserFeed;

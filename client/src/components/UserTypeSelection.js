@@ -13,15 +13,18 @@ const UserTypeSelection = ({ onContinue }) => {
   }, []); // Empty dependency array ensures this runs only once
 
   // Save the selection to localStorage whenever it changes
-  useEffect(() => {
+   useEffect(() => {
     if (selectedType) {
       localStorage.setItem('userType', selectedType);
+    } else {
+      localStorage.removeItem('userType'); // Clear if no selection
     }
   }, [selectedType]);
 
   // Handle the selection button click
   const handleSelection = (type) => {
-    setSelectedType(type);
+    // toggle selection if the same button is clicked
+    setSelectedType((prevType) => (prevType === type ? null : type));
   };
 
   // Handle the continue button click

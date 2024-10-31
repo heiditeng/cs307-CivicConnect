@@ -228,7 +228,7 @@ app.post('/login', async (req, res) => {
         else {
             // Standard login without MFA
             const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
-            res.status(200).json({ message: 'Login successful.', token, username: user.username, isOrganization: user.isOrganization });
+            res.status(200).json({ message: 'Login successful.', token, userId: user._id, username: user.username, isOrganization: user.isOrganization });
         }
     } catch (error) {
         res.status(400).json({ error: error.message });

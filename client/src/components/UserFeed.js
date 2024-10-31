@@ -24,12 +24,11 @@ const UserFeed = () => {
     fetchAllEvents();
   }, []);
 
-    // Format date for display
+  // Format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
-
 
   // Handle RSVP for an event
   const handleRSVP = async (eventId) => {
@@ -56,6 +55,39 @@ const UserFeed = () => {
       }
     } catch (error) {
       setErrorMessage("Error RSVPing to the event");
+    }
+  };
+
+  const handleRemoveRSVP = async (eventId) => {
+    const username = localStorage.getItem("username");
+    console.log("Remove RSVP clicked with Event ID:", eventId);
+    if (!username) {
+      setErrorMessage("User is not logged in");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/events/${eventId}/remove-rsvp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+          }),
+        }
+      );
+
+      if (res.ok) {
+        fetchAllEvents();
+        console.log("aysu");
+      } else {
+        setErrorMessage("Error removing RSVP from the event");
+      }
+    } catch (error) {
+      setErrorMessage("Error removing RSVP from the event");
     }
   };
 
@@ -106,10 +138,14 @@ const UserFeed = () => {
                     </button>
                   </Link>
                   <button
-                    className="btn btn-outline btn-success btn-sm ml-2"
-                    onClick={() => handleRSVP(event._id)}
+                    className={`btn btn-outline btn-sm ml-2 ${event.rsvpUsers.includes(localStorage.getItem('userId')) ? 'btn-danger' : 'btn-success'}`}
+                    onClick={() =>
+                      event.rsvpUsers.includes(localStorage.getItem('userId'))
+                        ? handleRemoveRSVP(event._id)
+                        : handleRSVP(event._id)
+                    }
                   >
-                    RSVP
+                    {event.rsvpUsers.includes(localStorage.getItem('userId')) ? 'Un-RSVP' : 'RSVP'}
                   </button>
                 </div>
               </div>

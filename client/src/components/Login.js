@@ -40,6 +40,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         setResponseMessage('Login successful!');
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('username', data.username);
+        localStorage.setItem('userId', data.userId);
         localStorage.setItem('isOrganization', data.isOrganization);
 
         // Check if credentials have changed
@@ -51,8 +52,8 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           localStorage.removeItem('savedPassword');
           setShowSaveCredsPrompt(true);
         } else {
-          // If credentials match, proceed to profile page
-          navigate('/myprofile');
+          // If credentials match, proceed to feed
+          navigate('/feed');
         }
       } else {
         // Clear saved credentials if login fails due to mismatch

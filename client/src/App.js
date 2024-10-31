@@ -21,6 +21,8 @@ import SaveCredentials from './components/SaveCredentials';
 import './index.css';
 import CreatePost from './components/CreatePost';
 import UserFeed from './components/UserFeed';
+import RSVPList from './components/RSVPList';
+import MyProfile from './components/MyProfile';
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -65,7 +67,8 @@ function App() {
             <Route path="/modify-event/:id" element={<ModifyEvent />} /> 
             <Route path="/event-details/:id" element={<EventDetails />} />
             <Route path="/info-form" element={<UserInformationForm />} />
-            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/myprofile" element={<MyProfile />} />
+            <Route path="/profile/:userId" element={<UserProfile />} />
             <Route path="/login" element={<Login isPasswordChanged={isPasswordChanged} />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} />
@@ -74,6 +77,8 @@ function App() {
             <Route path="/save-credentials" element={<SaveCredentials />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/feed" element={<UserFeed />} />
+            <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
+
           </Routes>
         </div>
       </div>

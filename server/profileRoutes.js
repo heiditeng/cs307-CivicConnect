@@ -71,4 +71,18 @@ router.post('/add-member', (req, res) => {
     return res.status(201).json({ message: 'New member added successfully!', member: newMember });
 });
 
+router.get('/profile/:userId', (req, res) => {
+    const { userId } = req.params;
+
+    // Find the user by userId in communityMembers array
+    const member = communityMembers.find(member => member.userId === userId);
+    if (!member) {
+        return res.status(404).json({ error: 'Community member not found' });
+    }
+
+    // Return the member data
+    res.json(member);
+});
+
+
 module.exports = router;

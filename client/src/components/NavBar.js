@@ -12,7 +12,7 @@ const NavBar = () => {
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-            <Link to="/profile">My Profile</Link>
+            <Link to="/myprofile">My Profile</Link>
             <Link to="/my-events">My Events</Link>
             <Link to="/feed">Feed</Link>
             <Link to="/">Log Out</Link>

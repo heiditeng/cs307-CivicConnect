@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const UserProfile = () => {
-  // Extract userId from the URL using useParams
-  const { userId } = useParams();
+const MyProfile = () => {
   const [profileData, setProfileData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [mlSuggestions, setMlSuggestions] = useState("");
@@ -11,26 +9,27 @@ const UserProfile = () => {
   const [rsvpEvents, setRsvpEvents] = useState([]); // New state for RSVPs
 
   useEffect(() => {
-    if (!userId) {
-      setErrorMessage("User ID not found. Please check the URL.");
-      return;
-    }
-
     // Fetch profile, RSVPs, and bookmarks on component mount
     const fetchProfileData = async () => {
+      const username = localStorage.getItem("username");
+      if (!username) {
+        setErrorMessage("No username found. Please log in again.");
+        return;
+      }
+
       try {
         const profileResponse = await fetch(
-          `http://localhost:5010/api/profiles/profile/${userId}`
+          `http://localhost:5010/api/profiles/profile/${username}`
         );
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
           setProfileData(profileData);
           fetchMlSuggestions(profileData); // Fetch machine learning suggestions
-          setBookmarkedEvents(profileData.bookmarks || []); // Assume profileData contains bookmarks
-          setRsvpEvents(profileData.rsvpEvents || []); // Assume profileData contains rsvpEvents
+          fetchBookmarkedEvents(username); // Fetch bookmarked events
+          fetchRsvpEvents(username); // Fetch RSVP'd events
         } else {
           console.log("Profile not found, adding new profile");
-          setErrorMessage("Profile not found.");
+          addNewProfile(username); // create new profile if not found
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -39,7 +38,60 @@ const UserProfile = () => {
     };
 
     fetchProfileData();
-  }, [userId]);
+  }, []);
+
+  // Function to add a new profile if it doesn't exist
+  const addNewProfile = async (username) => {
+    try {
+      const res = await fetch(
+        "http://localhost:5010/api/profiles/add-member",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        }
+      );
+
+      if (res.ok) {
+        const newProfile = await res.json();
+        setProfileData(newProfile.member);
+      } else {
+        setErrorMessage("Error adding new profile");
+      }
+    } catch (error) {
+      setErrorMessage("Error adding new profile");
+    }
+  };
+
+  // Function to fetch bookmarked events
+  const fetchBookmarkedEvents = async (username) => {
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedEvents(data.bookmarks); // Assume response returns an array of event objects
+      } else {
+        console.error("Error fetching bookmarked events");
+      }
+    } catch (error) {
+      console.error("Error fetching bookmarked events:", error);
+    }
+  };
+
+  // Function to fetch RSVP'd events
+  const fetchRsvpEvents = async (username) => {
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/${username}/rsvpEvents`);
+      if (res.ok) {
+        const data = await res.json();
+        setRsvpEvents(data.rsvps); // Assume response returns an array of RSVP'd event objects
+      } else {
+        console.error("Error fetching RSVP'd events");
+      }
+    } catch (error) {
+      console.error("Error fetching RSVP'd events:", error);
+    }
+  };
 
   // Function to fetch machine learning suggestions
   const fetchMlSuggestions = async (profileData) => {
@@ -168,4 +220,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default MyProfile;

@@ -91,6 +91,24 @@ app.get('/api/profiles/:username/bookmarks', async (req, res) => {
     }
 });
 
+// Get all RSVP'd events for a user with event details
+app.get('/api/profiles/:username/rsvpEvents', async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        // Find the user and populate the 'rsvpEvents' field with full event details
+        const user = await User.findOne({ username }).populate('rsvpEvents');
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json({ rsvps: user.rsvpEvents });
+    } catch (error) {
+        console.error("Error fetching RSVP'd events:", error);
+        res.status(500).json({ error: "An error occurred while fetching RSVP'd events" });
+    }
+});
+
+
+
 // bookmark an event for a user
 app.post('/api/profiles/bookmark', async (req, res) => {
     const { username, eventId } = req.body;

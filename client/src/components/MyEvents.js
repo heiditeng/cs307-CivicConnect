@@ -56,13 +56,17 @@ const MyEvents = () => {
               >
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg font-semibold text-gray-800">{event.name}</h3>
-                  <p className="text-sm text-gray-600">Organization: 
-                    <Link to={`/profile`}>
+                  <p className="text-sm text-gray-600">Organization
+                    <Link to={`/profile/${event.userId}`}>
                       <strong className="text-blue-600 hover:underline">{event.userId}</strong>
                     </Link>
                   </p>
                   <p className="text-sm text-gray-600">Date: {formatDate(event.date)}</p>
                   <p className="text-sm text-gray-600 mb-3">Zip Code: {event.zipcode}</p>
+                  <p className="text-sm text-gray-600 mb-3">RSVPs: {event.rsvpUsers ? event.rsvpUsers.length : 0}</p>
+                  <Link to={`/event/${event._id}/rsvp-list`} className="text-blue-600 hover:underline">
+                    View RSVP List
+                  </Link>
                 </div>
                 {event.image && (
                   <figure className="h-32 w-full overflow-hidden rounded-t-lg">

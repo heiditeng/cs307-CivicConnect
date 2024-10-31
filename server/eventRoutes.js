@@ -269,4 +269,20 @@ router.post("/:id/remove-rsvp", async (req, res) => {
   }
 });
 
+router.get("/rsvp-list/:id", async (req, res) => {
+  const { id } = req.params;  // Corrected to `id`
+  try {
+    // Find the event by its ID and populate the rsvpUsers field with full user details
+    const event = await Event.findById(id).populate('rsvpUsers');
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    res.status(200).json({ rsvpUsers: event.rsvpUsers });
+  } catch (error) {
+    console.error('Error fetching RSVP list:', error);
+    res.status(500).json({ error: 'An error occurred while fetching the RSVP list' });
+  }
+});
+
 module.exports = router;

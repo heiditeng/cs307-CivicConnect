@@ -75,27 +75,38 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// get all bookmarks for a user with event details
+app.get('/api/profiles/:username/bookmarks', async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        // find the user and populate the 'bookmarks' field with full event details
+        const user = await User.findOne({ username }).populate('bookmarks');
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json({ bookmarks: user.bookmarks });
+    } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+        res.status(500).json({ error: "An error occurred while fetching bookmarks" });
+    }
+});
+
 // bookmark an event for a user
 app.post('/api/profiles/bookmark', async (req, res) => {
     const { username, eventId } = req.body;
 
     try {
-        // find the user by username
         const user = await User.findOne({ username });
         if (!user) return res.status(404).json({ error: "User not found" });
 
-        // check if event is already bookmarked
         const isBookmarked = user.bookmarks.includes(eventId);
 
         if (isBookmarked) {
-            // if already bookmarked, remove it
             user.bookmarks = user.bookmarks.filter((id) => id.toString() !== eventId);
         } else {
-            // if not bookmarked, add it
             user.bookmarks.push(eventId);
         }
 
-        // save the updated user document
         await user.save();
 
         res.status(200).json({

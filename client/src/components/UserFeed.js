@@ -25,6 +25,7 @@ const UserFeed = () => {
 
   useEffect(() => {
     fetchAllEvents();
+    fetchUserBookmarks();
   }, []);
 
     // Format date for display
@@ -69,7 +70,7 @@ const UserFeed = () => {
       const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
       if (res.ok) {
         const data = await res.json();
-        setBookmarkedEvents(data.bookmarks);
+        setBookmarkedEvents(data.bookmarks.map(event => event._id)); // store only event IDs
       }
     } catch (error) {
       console.error("Error fetching user bookmarks:", error);
@@ -171,7 +172,7 @@ const UserFeed = () => {
                   </Link>
                   <button
                     className="btn btn-outline btn-success btn-sm ml-2"
-                    onClick={() => handleRSVP(event._id)}
+                    onClick={() => handleBookmark(event._id)}
                   >
                     RSVP
                   </button>

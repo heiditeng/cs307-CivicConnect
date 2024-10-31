@@ -79,42 +79,43 @@ const UserFeed = () => {
     }
   };
 
-/ handle bookmarking/unbookmarking of an event
-  const handleBookmark = async (eventId, eventName) => {
-    const username = localStorage.getItem("username");
-    try {
-      const res = await fetch(
-        `http://localhost:5010/api/profiles/bookmark`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, eventId }),
-        }
-      );
+// handle bookmarking/unbookmarking of an event
+  const handleBookmark = async (eventId, eventName) => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/profiles/bookmark`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, eventId }),
+        }
+      );
 
-      if (res.ok) {
-        const isRemoving = bookmarkedEvents.includes(eventId);
-        setBookmarkedEvents((prev) =>
-          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
-        );
+      if (res.ok) {
+        const isRemoving = bookmarkedEvents.includes(eventId);
+        setBookmarkedEvents((prev) =>
+          isRemoving
+            ? prev.filter((id) => id !== eventId)
+            : [...prev, eventId]
+        );
 
-        // show confirmation message based on action
-        if (isRemoving) {
-          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
-        } else {
-          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
-        }
-        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
-      } else {
-        setErrorMessage("Error updating bookmark status.");
-      }
-    } catch (error) {
-      setErrorMessage("Error updating bookmark status.");
-    }
-  };
-  
+        // Show confirmation message based on action
+        if (isRemoving) {
+          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
+        } else {
+          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
+        }
+        setTimeout(() => setConfirmationMessage(""), 5000); // Hide message after 5 seconds
+      } else {
+        setErrorMessage("Error updating bookmark status.");
+      }
+    } catch (error) {
+      setErrorMessage("Error updating bookmark status.");
+    }
+  };
   
   const handleRemoveRSVP = async (eventId) => {
     const username = localStorage.getItem("username");

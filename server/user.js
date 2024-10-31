@@ -12,7 +12,8 @@ const UserSchema = new mongoose.Schema({
   enableMFAEmail: { type: Boolean, default: false },
   enableMFAPhone: { type: Boolean, default: false },
   isOrganization: { type: Boolean, default: false },
-  rsvpEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }]
+  rsvpEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
+  bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
 });
 
 module.exports = mongoose.model('User', UserSchema);

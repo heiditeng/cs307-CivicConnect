@@ -15,7 +15,7 @@ const MyEvents = () => {
     const fetchAllEvents = async () => {
       console.log('Fetching events for user:', userId);
       try {
-        const res = await fetch(`http://localhost:5010/api/events/events`);
+        const res = await fetch(`http://localhost:5010/api/events`);
 
         console.log('Response status:', res.status);
   

@@ -8,6 +8,13 @@ const UserFeed = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
   const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [transportationFilter, setTransportationFilter] = useState("");
+  const [profileData, setProfileData] = useState(null);
+
+  useEffect(() => {
+    fetchAllEvents();
+    fetchUserBookmarks();
+  }, []);
 
   // fetch all events
   const fetchAllEvents = async () => {
@@ -16,7 +23,7 @@ const UserFeed = () => {
 
       if (res.ok) {
         const data = await res.json();
-        setFeedData(data);
+        setFeedData(filterEventsByTransportation(data));
       } else {
         setErrorMessage("Error fetching events data");
       }
@@ -25,12 +32,40 @@ const UserFeed = () => {
     }
   };
 
-  // fetch user's bookmarks on component mount
-  useEffect(() => {
-    fetchAllEvents();
-    fetchUserBookmarks();
-  }, []);
+  // fetch user's zip code on component mount
+  const fetchUserZipCode = async () => {
+    const username = localStorage.getItem("userId");
+    try {
+      const res = await fetch(`http://localhost:5010/api/users/${username}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.userProfile) {
+          setProfileData(data.userProfile);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user zip code:", error);
+    }
+  };
 
+  // filter events by transportation preference
+  const filterEventsByTransportation = (events) => {
+    if (!transportationFilter) return events;
+    fetchUserZipCode();
+    return events.filter((event) => {
+      if (transportationFilter === "walking") {
+        return parseInt(event.zipcode, 10) === parseInt(profileData.location);
+      } else if (transportationFilter === "flying") {
+        return parseInt(event.zipcode, 10) !== parseInt(profileData.location);
+      }
+      return true;
+    });
+  };
+
+  // handle transportation filter changes
+  const handleTransportationFilterChange = (e) => {
+    setTransportationFilter(e.target.value);
+  };
 
   // format date for display
   const formatDate = (dateString) => {
@@ -45,7 +80,7 @@ const UserFeed = () => {
       const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
       if (res.ok) {
         const data = await res.json();
-        setBookmarkedEvents(data.bookmarks.map(event => event._id)); // Store only event IDs
+        setBookmarkedEvents(data.bookmarks.map((event) => event._id)); // Store only event IDs
       }
     } catch (error) {
       console.error("Error fetching user bookmarks:", error);
@@ -79,46 +114,44 @@ const UserFeed = () => {
     }
   };
 
- //handle bookmarking/unbookmarking of an event
-  const handleBookmark = async (eventId, eventName) => {
-    const username = localStorage.getItem("username");
-    try {
-      const res = await fetch(
-        `http://localhost:5010/api/profiles/bookmark`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, eventId }),
-        }
-      );
+  //handle bookmarking/unbookmarking of an event
+  const handleBookmark = async (eventId, eventName) => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/profiles/bookmark`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, eventId }),
+        }
+      );
 
-      if (res.ok) {
-        const isRemoving = bookmarkedEvents.includes(eventId);
-        setBookmarkedEvents((prev) =>
-          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
-        );
+      if (res.ok) {
+        const isRemoving = bookmarkedEvents.includes(eventId);
+        setBookmarkedEvents((prev) =>
+          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
+        );
 
-        // show confirmation message based on action
-        if (isRemoving) {
-          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
-        } else {
-          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
-        }
-        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
-      } else {
-        setErrorMessage("Error updating bookmark status.");
-      }
-    } catch (error) {
-      setErrorMessage("Error updating bookmark status.");
-    }
-  };
-  
-  
+        // show confirmation message based on action
+        if (isRemoving) {
+          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
+        } else {
+          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
+        }
+        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
+      } else {
+        setErrorMessage("Error updating bookmark status.");
+      }
+    } catch (error) {
+      setErrorMessage("Error updating bookmark status.");
+    }
+  };
+
   const handleRemoveRSVP = async (eventId) => {
     const username = localStorage.getItem("username");
-    console.log("Remove RSVP clicked with Event ID:", eventId);
     if (!username) {
       setErrorMessage("User is not logged in");
       return;
@@ -140,7 +173,6 @@ const UserFeed = () => {
 
       if (res.ok) {
         fetchAllEvents();
-        console.log("aysu");
       } else {
         setErrorMessage("Error removing RSVP from the event");
       }
@@ -166,6 +198,21 @@ const UserFeed = () => {
         >
           Refresh Feed
         </button>
+
+        <div className="flex gap-4 mb-4">
+          <label className="flex items-center gap-2">
+            <span>Transportation Preference:</span>
+            <select
+              className="select select-primary"
+              value={transportationFilter}
+              onChange={handleTransportationFilterChange}
+            >
+              <option value="">None</option>
+              <option value="walking">Walking</option>
+              <option value="flying">Flying</option>
+            </select>
+          </label>
+        </div>
 
         {feedData.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[600px]">
@@ -194,7 +241,7 @@ const UserFeed = () => {
                     Date: {formatDate(event.date)}
                   </p>
                   <p className="text-sm text-gray-600 mb-3">
-                    Location: {event.location}
+                    Location: {event.address}
                   </p>
                 </div>
 

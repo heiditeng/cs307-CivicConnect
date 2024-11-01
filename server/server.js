@@ -14,6 +14,8 @@ const validator = require('validator'); // validates email
 const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
 const User = require('./user.js'); // import the user model
+const UserProfile = require('./userprofile.js');
+
 const postRoutes = require('./postRoutes.js'); //import post routes
 
 // mongo db stuff
@@ -90,6 +92,24 @@ app.get('/api/profiles/:username/bookmarks', async (req, res) => {
         res.status(500).json({ error: "An error occurred while fetching bookmarks" });
     }
 });
+
+// Get all RSVP'd events for a user with event details
+app.get('/api/profiles/:username/rsvpEvents', async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        // Find the user and populate the 'rsvpEvents' field with full event details
+        const user = await User.findOne({ username }).populate('rsvpEvents');
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json({ rsvps: user.rsvpEvents });
+    } catch (error) {
+        console.error("Error fetching RSVP'd events:", error);
+        res.status(500).json({ error: "An error occurred while fetching RSVP'd events" });
+    }
+});
+
+
 
 // bookmark an event for a user
 app.post('/api/profiles/bookmark', async (req, res) => {
@@ -172,7 +192,6 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
 
     // store user in the list with MFA settings
     // users.push({username, password: hashedPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone});
-
     // create instance of user model in user.js
     // User object represents a new record to be saved in db
     const user = new User({
@@ -183,10 +202,29 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         enableMFAEmail,
         enableMFAPhone,
         isOrganization
-      });
-
+    });
+    
     try {
-        await user.save(); // save record in mongo, check collections in mongo to see if stored correctly
+        console.log('1');
+        await user.save(); // save user record in mongo
+    
+        console.log('2');
+        // create associated user profile with default values
+        const userProfile = new UserProfile({
+            userId: user._id,
+            availability: null,
+            location: null,
+            occupation: null,
+            interests: null,
+            hobbies: null
+        });
+        
+        await userProfile.save(); // save user profile in mongo
+    
+        // update user to reference the created profile
+        user.userProfile = userProfile._id;
+        await user.save();
+    
         return 'User registered successfully.';
     } catch (error) {
         // handle duplicate key error
@@ -320,6 +358,25 @@ app.post('/verify-otp', (req, res) => {
         res.status(400).json({error: error.message});
     }
 });
+
+// route to fetch user profile by userId
+app.get('/api/users/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findById(userId).populate('userProfile');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+       
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the user profile' });
+    }
+});
+
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

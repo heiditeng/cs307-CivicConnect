@@ -1,38 +1,48 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './NavBar.css';
 
 const NavBar = () => {
   const isOrganization = localStorage.getItem('isOrganization') === 'true';
+  // get curr location
+  const location = useLocation(); 
+
+  React.useEffect(() => {
+    console.log('to change navbar');
+  }, [location]);
 
   return (
     <nav className="navbar">
-      {/* Navbar start section */}
       <div className="navbar-start">
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-            <Link to="/profile">My Profile</Link>
-            <Link to="/my-events">My Events</Link>
-            <Link to="/feed">Feed</Link>
+            <Link to="/myprofile">My Profile</Link>
+            {isOrganization && (
+              <Link to="/my-events">My Events</Link>
+            )}
             <Link to="/">Log Out</Link>
           </div>
         </div>
       </div>
 
-      {/* Navbar center section */}
+      {/* center */}
       <div className="navbar-center">
         <p className="navbar-title">CivicConnect</p>
       </div>
 
-      {/* Navbar end section */}
-      {isOrganization && (
-        <div className="navbar-end">
-          <Link to="/create-event" className="create-event-btn">
+      {/*either create even or go to feed */}
+      <div className="navbar-end">
+        {isOrganization ? (
+          <Link to="/create-event" className="btn glass">
             Create an Event
           </Link>
-        </div>
-      )}
+        ) : (
+          <Link to="/feed" className="btn glass">
+            Go to Feed
+          </Link>
+        )}
+      </div>
     </nav>
   );
 };

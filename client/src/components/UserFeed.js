@@ -79,7 +79,7 @@ const UserFeed = () => {
     }
   };
 
-/ handle bookmarking/unbookmarking of an event
+ //handle bookmarking/unbookmarking of an event
   const handleBookmark = async (eventId, eventName) => {
     const username = localStorage.getItem("username");
     try {

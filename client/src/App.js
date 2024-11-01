@@ -23,6 +23,8 @@ import CreatePost from './components/CreatePost';
 import UserFeed from './components/UserFeed';
 import RSVPList from './components/RSVPList';
 import MyProfile from './components/MyProfile';
+import NewsletterSignup from './components/NewsletterSignup';
+import Subscribers from './components/Subscribers';
 import { useLocation } from 'react-router-dom';
 
 function AppContainer() {
@@ -83,6 +85,8 @@ function App() {
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/feed" element={<UserFeed />} />
             <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
+            <Route path="/newsletter" element={<NewsletterSignup />} /> 
+            <Route path="/subscribers" element={<Subscribers />} />
           </Routes>
         </div>
       </div>

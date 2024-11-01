@@ -46,7 +46,7 @@ const MyEvents = () => {
     <div className="flex justify-center items-center min-h-screen p-8 bg-gray-50">
       <div className="flex flex-col w-full max-w-5xl gap-6">
         <h2 className="text-3xl font-bold text-center mb-6 text-primary">
-          My Events
+          <span className="font-extrabold">My Events</span>
         </h2>
 
         {eventsData.length > 0 ? (
@@ -54,59 +54,59 @@ const MyEvents = () => {
             {eventsData.map((event) => (
               <div
                 key={event._id}
-                className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow duration-300 aspect-square flex flex-col justify-between"
+                className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden"
               >
-                <div className="card-body p-4">
-                  <h3 className="card-title text-lg font-semibold text-gray-800">
+                {event.thumbnailImage && (
+                  <figure className="h-48 w-full overflow-hidden">
+                    <img
+                      src={`http://localhost:5010/uploads/${event.thumbnailImage}`}
+                      alt={event.name}
+                      className="object-cover w-full h-full"
+                    />
+                  </figure>
+                )}
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
                     {event.name}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Organization:{" "}
-                    <Link to={`/profile/${event.userId}`}>
+                    <strong>Organization:</strong>{" "}
+                    <Link to={`/organization-profile`}>
                       <strong className="text-blue-600 hover:underline">
                         {event.userId}
                       </strong>
                     </Link>
                   </p>
                   <p className="text-sm text-gray-600">
-                    Date: {formatDate(event.date)}
+                    <strong>Date:</strong> {formatDate(event.date)}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    <strong>Zip Code:</strong> {event.zipcode}
                   </p>
                   <p className="text-sm text-gray-600 mb-3">
-                    Zip Code: {event.zipcode}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-3">
-                    RSVPs: {event.rsvpUsers ? event.rsvpUsers.length : 0}
+                    <strong>RSVPs:</strong> {event.rsvpUsers ? event.rsvpUsers.length : 0}
                   </p>
                   <Link
                     to={`/event/${event._id}/rsvp-list`}
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 hover:underline mb-2 block"
                   >
                     View RSVP List
                   </Link>
-                </div>
-                {event.image && (
-                  <figure className="h-32 w-full overflow-hidden rounded-t-lg">
-                    <img
-                      src={`http://localhost:5010/uploads/${event.image}`}
-                      alt={event.name}
-                      className="object-cover w-full h-full"
-                    />
-                  </figure>
-                )}
-                <div className="card-actions flex justify-center p-4">
-                  <Link to={`/event-details/${event._id}`}>
-                    <button className="btn btn-primary btn-sm">Details</button>
-                  </Link>
-                  <Link to={`/modify-event/${event._id}`}>
-                    <button className="btn btn-secondary btn-sm ml-2">
-                      Modify
-                    </button>
-                  </Link>
-                  <Link to={`/delete-confirmation/${event._id}/${event.name}`}>
-                    <button className="btn btn-error btn-sm ml-2">
-                      Delete
-                    </button>
-                  </Link>
+                  <div className="flex justify-between">
+                    <Link to={`/event-details/${event._id}`}>
+                      <button className="btn btn-primary btn-sm">Details</button>
+                    </Link>
+                    <Link to={`/modify-event/${event._id}`}>
+                      <button className="btn btn-secondary btn-sm ml-2">
+                        Modify
+                      </button>
+                    </Link>
+                    <Link to={`/delete-confirmation/${event._id}/${event.name}`}>
+                      <button className="btn btn-error btn-sm ml-2">
+                        Delete
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

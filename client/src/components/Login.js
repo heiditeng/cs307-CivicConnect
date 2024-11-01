@@ -42,6 +42,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('isOrganization', data.isOrganization);
+        console.log(localStorage.getItem('isOrganization'));
 
         // Check if credentials have changed
         const savedUsername = localStorage.getItem('savedUsername');
@@ -53,7 +54,11 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           setShowSaveCredsPrompt(true);
         } else {
           // If credentials match, proceed to feed
-          navigate('/feed');
+          if (localStorage.getItem('isOrganization')) {
+            navigate('/my-events');
+          } else {
+            navigate('/feed');
+          }
         }
       } else {
         // Clear saved credentials if login fails due to mismatch
@@ -84,7 +89,11 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
       if (response.ok) {
         setResponseMessage('Login successful');
         localStorage.setItem('authToken', data.token);
-        navigate('/myprofile');
+        if (localStorage.getItem('isOrganization')) {
+          navigate('/my-events');
+        } else {
+          navigate('/feed');
+        }
       } else {
         setResponseMessage(`Error: ${data.error}`);
       }
@@ -122,7 +131,11 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     } else {
       setResponseMessage('Credentials not saved.');
     }
-    navigate('/myprofile');
+    if (localStorage.getItem('isOrganization') === 'true') {
+      navigate('/my-events');
+    } else {
+      navigate('/feed');
+    }
   };
 
   // Handle username change

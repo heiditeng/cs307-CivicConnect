@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MyEvents from "./MyEvents";
+import { useNavigate } from 'react-router-dom';
 
 const OrganizationProfile = () => {
   const [orgData, setOrgData] = useState("");
@@ -24,6 +25,13 @@ const OrganizationProfile = () => {
 
     fetchOrgData();
   }, []);
+
+  const navigate = useNavigate();
+
+  const handleNewsletterSignup = () => {
+    // Navigate to the newsletter signup page
+    navigate('/newsletter');
+  };
 
   return (
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
@@ -61,6 +69,26 @@ const OrganizationProfile = () => {
                     </p>
                   </div>
                 )}
+              </div>
+              {/* Newsletter Signup Section */}
+              <div className="mb-4">
+                <p className="text-lg font-semibold">Sign Up for Our Newsletter:</p>
+                <button 
+                  onClick={handleNewsletterSignup}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Sign Up
+                </button>
+              </div>
+              {/* Link to view subscribers */}
+              <div className="mb-4">
+                <p className="text-lg font-semibold">View Newsletter Subscribers:</p>
+                <button 
+                  onClick={() => navigate('/subscribers')}
+                  className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  View Subscribers
+                </button>
               </div>
             </div>
           ) : (

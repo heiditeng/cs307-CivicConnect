@@ -294,9 +294,9 @@ const UserFeed = () => {
                 {event.image && (
                   <figure className="h-32 w-full overflow-hidden rounded-t-lg">
                     <img
-                      src={`http://localhost:5010/uploads/${event.image}`}
+                      src={`http://localhost:5010/uploads/${event.thumbnailImage}`}
                       alt={event.name}
-                      className="object-cover w-full h-full"
+                      className="object-contain w-full h-full"
                     />
                   </figure>
                 )}

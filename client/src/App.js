@@ -30,10 +30,7 @@ function AppContainer() {
 
   useEffect(() => {
     console.log('Clearing login-related localStorage items...');
-    localStorage.removeItem('authToken');
     localStorage.removeItem('sessionID');
-    localStorage.removeItem('isOrganization');
-    localStorage.removeItem('username');
   }, [location]);
 
   return null;

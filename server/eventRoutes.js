@@ -96,6 +96,8 @@ router.get("/", async (req, res) => {
   }
 });
 
+
+
 // Route to fetch a single event by ID
 router.get("/events/:id", async (req, res) => {
   const { id } = req.params;

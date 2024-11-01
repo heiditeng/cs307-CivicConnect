@@ -7,75 +7,58 @@
 </head>
 <body>
   <div id="main-container">
-    <!-- Add User to Room -->
-    <div id="add-user-container" class="container">
+    <div id="add-user-container">
       <h2>Add User to Room</h2>
       <input id="add-user_id" placeholder="User ID">
       <input id="add-room_id" placeholder="Room ID">
       <button onclick="addUserToRoom()">Add User to Room</button>
     </div>
 
-    <!-- Connect User -->
-    <div id="connect-container" class="container">
+    <div id="connect-container">
       <h2>Connect</h2>
       <input id="connect-user_id" placeholder="User ID">
       <button onclick="connectUser()">Connect</button>
     </div>
 
-    <!-- Room List -->
-    <div id="room-list-container" class="container">
+    <div id="room-list-container">
       <h2>Your Rooms</h2>
       <ul id="room-list"></ul>
     </div>
-
-    <!-- Chat Container -->
-    <div id="chat-container" class="container">
+    <div id="chat-container">
       <div id="back-button" onclick="showRoomList()">
         <img src="back-icon.png" alt="Back" class="back-icon">
         Back to Rooms
       </div>
-
-      <!-- Chat Content -->
       <div id="chat-content">
-        <!-- Tabs -->
-        <div id="tabs">
+        <div id="tabs" style="display: none;">
           <button onclick="showTab('chat')">Chat (<span id="unread-count"></span>)</button>
           <button onclick="showTab('notifications')">Notifications</button>
           <button onclick="showTab('blank')">Blank</button>
         </div>
-
-        <!-- Content -->
         <div id="content">
-          <!-- Chat Tab -->
-          <div id="chat-tab" class="tab">
+          <div id="chat-tab" class="tab" style="display: none;">
             <div id="messages" class="messages"></div>
           </div>
-
-          <!-- Notifications Tab -->
-          <div id="notifications-tab" class="tab">
+          <div id="notifications-tab" class="tab" style="display: none;">
             <p>Notifications</p>
             <p>Unread Messages: <span id="unread-count"></span></p>
             <button onclick="clearNotifications()">Clear Notifications</button>
           </div>
-
-          <!-- Blank Tab -->
-          <div id="blank-tab" class="tab">
+          <div id="blank-tab" class="tab" style="display: none;">
             <button onclick="sendUnreadEmail()">Send Email with Unread Messages</button>
           </div>
         </div>
-
-        <!-- Message Input -->
-        <div id="inputs" class="message-inputs">
+        <div id="inputs" class="message-inputs" style="display: none;">
+          <input id="messageInput" type="text" placeholder="Type a message or paste a link">
           <label for="imageInput" class="upload-icon">
             <img src="upload-icon.png" alt="Upload">
           </label>
           <input type="file" id="imageInput" accept="image/*">
-          <input id="messageInput" type="text" placeholder="Type a message or paste a link">
           <button onclick="sendMessage()">Send</button>
         </div>
+
       </div>
     </div>
-  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -256,10 +239,9 @@
     function showTab(tab) {
       currentTab = tab;
       document.querySelectorAll('.tab').forEach(tabContent => {
-        tabContent.classList.remove('active');
+        tabContent.style.display = 'none';
       });
-      document.getElementById(`${tab}-tab`).classList.add('active');
-
+      document.getElementById(`${tab}-tab`).style.display = 'block';
       if (tab === 'chat') {
         document.querySelector('.message-inputs').style.display = 'flex';
         unreadMessages = 0;

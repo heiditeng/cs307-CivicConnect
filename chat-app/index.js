@@ -51,6 +51,13 @@ const UploadSchema = new mongoose.Schema({
 });
 const Upload = mongoose.model('Upload', UploadSchema);
 
+const NotificationSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  message: String,
+  timestamp: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model('Notification', NotificationSchema);
+
 // Middleware for serving static files
 app.use(express.static('public'));
 app.use(bodyParser.json());
@@ -183,6 +190,59 @@ app.post('/rooms/:room_id/add-member', async (req, res) => {
   }
 });
 
+// Get notifications for a user
+app.get('/notifications/:user_id', async (req, res) => {
+  try {
+    const user = await User.findOne({ user_id: req.params.user_id });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    const notifications = await Notification.find({ user: user._id }).sort({ timestamp: -1 });
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// Create a new notification and emit via Socket.IO
+app.post('/notifications', async (req, res) => {
+  try {
+    const { user_id, message } = req.body;
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    const notification = new Notification({
+      user: user._id,
+      message
+    });
+    await notification.save();
+
+    // Emit the notification to the specific user
+    io.to(user_id).emit('notification', {
+      message: notification.message,
+      timestamp: notification.timestamp
+    });
+
+    res.status(201).json(notification);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+// Delete notifications for a user
+app.delete('/notifications/:user_id', async (req, res) => {
+  try {
+    const user = await User.findOne({ user_id: req.params.user_id });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    await Notification.deleteMany({ user: user._id });
+    res.status(200).send('Notifications cleared');
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 // Socket.IO for real-time messaging
 io.on('connection', (socket) => {
   console.log('New user connected');
@@ -191,7 +251,8 @@ io.on('connection', (socket) => {
     try {
       await addUserToRoom(user_id, room_id).catch(err => { console.error('Error in addUserToRoom:', err.message); });
       socket.join(room_id);
-      console.log(`User ${user_id} joined room: ${room_id}`);
+      socket.join(user_id);
+      console.log(`User ${user_id} joined room: ${room_id} and user room: ${user_id}`);
     } catch (err) {
       console.error('Error joining room:', err.message);
     }
@@ -218,6 +279,27 @@ io.on('connection', (socket) => {
       io.to(data.room).emit('message', message.toObject());
     } catch (err) {
       console.error('Error saving message:', err.message);
+    }
+  });
+
+  socket.on('sendNotification', async ({ targetUser, message }) => {
+    try {
+      const user = await User.findOne({ user_id: targetUser });
+      if (user) {
+        const notification = new Notification({
+          user: user._id,
+          message
+        });
+        await notification.save();
+  
+        // Emit the notification to the specific user
+        io.to(targetUser).emit('notification', {
+          message: notification.message,
+          timestamp: notification.timestamp
+        });
+      }
+    } catch (err) {
+      console.error('Error sending notification:', err.message);
     }
   });
 

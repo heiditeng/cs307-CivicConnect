@@ -42,6 +42,14 @@
           <div id="notifications-tab" class="tab" style="display: none;">
             <p>Notifications</p>
             <p>Unread Messages: <span id="unread-count"></span></p>
+            <button onclick="sendUnreadMessagesNotification()">Send Unread Messages Notification</button>
+            <button onclick="startTimerNotifications()">Start Timer Notifications</button>
+            <label class="switch">
+              <input type="checkbox" id="notificationToggle" checked onchange="toggleNotifications()">
+              <span class="slider round"></span>
+            </label>
+            <button onclick="viewProfile('user123')">View user123's Profile</button>
+            <div id="notification-feed"></div>
             <button onclick="clearNotifications()">Clear Notifications</button>
           </div>
           <div id="blank-tab" class="tab" style="display: none;">
@@ -67,6 +75,8 @@
     let currentTab = 'chat';
     let user;
     let room;
+    let notificationsEnabled = true;
+    let timer1, timer2; // To store timer IDs
 
     document.addEventListener('DOMContentLoaded', () => {
       // Show the initial views
@@ -196,6 +206,10 @@
         renderMessage(data, user);
       });
 
+      socket.on('notification', (data) => {
+        renderNotification(data);
+      });
+
       // Show message input fields
       document.querySelector('.message-inputs').style.display = 'flex';
     }
@@ -248,6 +262,9 @@
         updateUnreadCount();
       } else {
         document.querySelector('.message-inputs').style.display = 'none';
+        if (tab === 'notifications') {
+          fetchNotifications();
+        }
       }
     }
 
@@ -364,9 +381,150 @@
       }
     }
 
+    function renderNotification(data) {
+      const feed = document.getElementById('notification-feed');
+
+      const div = document.createElement('div');
+      div.classList.add('notification-item');
+
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = data.message;
+      div.appendChild(messageDiv);
+
+      const timestampDiv = document.createElement('div');
+      timestampDiv.classList.add('timestamp');
+      timestampDiv.textContent = new Date(data.timestamp).toLocaleString();
+      div.appendChild(timestampDiv);
+
+      feed.insertBefore(div, feed.firstChild);
+    }
+
+    function sendNotification(message) {
+      fetch('/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: user, message })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Notification sent:', data);
+        fetchNotifications();
+      })
+      .catch(error => {
+        console.error('Error sending notification:', error);
+      });
+    }
+
+    function fetchNotifications() {
+      fetch(`/notifications/${user}`)
+        .then(response => response.json())
+        .then(notifications => {
+          const feed = document.getElementById('notification-feed');
+          feed.innerHTML = '';
+          notifications.forEach(notification => {
+            const div = document.createElement('div');
+            div.classList.add('notification-item');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = notification.message;
+            div.appendChild(messageDiv);
+            
+            const timestampDiv = document.createElement('div');
+            timestampDiv.classList.add('timestamp');
+            timestampDiv.textContent = new Date(notification.timestamp).toLocaleString();
+            div.appendChild(timestampDiv);
+            
+            feed.appendChild(div);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching notifications:', error);
+        });
+    }
+
+
     function clearNotifications() {
       unreadMessages = 0;
       updateUnreadCount();
+      // Delete notifications from backend
+      fetch(`/notifications/${user}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Notifications cleared');
+          fetchNotifications();
+        } else {
+          throw new Error('Error clearing notifications');
+        }
+      })
+      .catch(error => {
+        console.error('Error clearing notifications:', error);
+      });
+    }
+
+    function sendUnreadMessagesNotification() {
+      if (unreadMessages > 0 && notificationsEnabled) {
+        const message = `You have ${unreadMessages} unread messages.`;
+        socket.emit('sendNotification', {
+          targetUser: user,
+          message: message
+        });
+      } else {
+        console.log('Not enough unread messages to send a notification.');
+      }
+    }
+
+    function startTimerNotifications() {
+      if (!notificationsEnabled) return;
+      if (timer1 || timer2) {
+        alert('Timer notifications already started.');
+        return;
+      }
+      timer1 = setTimeout(() => {
+        if (notificationsEnabled) {
+          socket.emit('sendNotification', {
+            targetUser: user,
+            message: '10 seconds have passed'
+          });
+        }
+        timer1 = null;
+      }, 10000);
+      timer2 = setTimeout(() => {
+        if (notificationsEnabled) {
+          socket.emit('sendNotification', {
+            targetUser: user,
+            message: '30 seconds have passed'
+          });
+        }
+        timer2 = null;
+      }, 30000);
+    }
+
+    function toggleNotifications() {
+      notificationsEnabled = document.getElementById('notificationToggle').checked;
+      if (!notificationsEnabled) {
+        if (timer1) {
+          clearTimeout(timer1);
+          timer1 = null;
+        }
+        if (timer2) {
+          clearTimeout(timer2);
+          timer2 = null;
+        }
+      }
+    }
+
+    function viewProfile(viewedUserId) {
+      const message = `${user} viewed your profile!`;
+      if (notificationsEnabled) {
+        socket.emit('sendNotification', {
+          targetUser: viewedUserId,
+          message: message
+        });
+      }
     }
 
     function updateUnreadCount() {

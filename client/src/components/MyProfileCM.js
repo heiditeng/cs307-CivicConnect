@@ -1,115 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MyProfileCM.css';
+import { useNavigate } from 'react-router-dom';
+
+// Setting username 
+const username = localStorage.getItem('username');
+
+const fetchPosts = async (user) => {
+  const response = await fetch(`http://localhost:5010/api/PostRoutes/myposts?username=${user}`);
+  const data = await response.json();
+  return data;
+};
 
 const MyProfileCM = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [postData, setPostData] = useState({
-    files: [],
-    caption: '',
-    location: '',
-    event: '',
-  });
+  const navigate = useNavigate();
+  const [posts, setPosts] = useState([]);
 
-  //form
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'files') {
-      const selectedFiles = Array.from(files); 
-      //max media is 5
-      if (selectedFiles.length > 5) {
-        alert('You can upload a maximum of 5 files.');
-        return;
-      }
-      setPostData((prev) => ({ ...prev, [name]: selectedFiles }));
-    } else {
-      setPostData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  // Fetch posts 
+  useEffect(() => {
+    fetchPosts(username).then(data => setPosts(data));
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    /* TODO: send to backend */
-    
-    //reset fields
-    setPostData({
-      files: [],
-      caption: '',
-      location: '',
-      event: '',
-    });
-
-    // close form
-    setShowForm(false);
+  // Navigate to comments page for a specific post
+  const openComments = (postId) => {
+    navigate(`/comments/${postId}`);
   };
 
   return (
-    <div className="profile-page">
+    <div className="myposts">
       {/* Profile Header */}
-      <h1>My Profile</h1>
+      <h1>My Posts</h1>
 
       {/* Bottom bar with the Create Post button */}
-      <div className="bottom-bar">
-        <button className="create-post-button">Create Post</button>
-        <button className="edit-profile-button">Edit Profile</button>
+      <div className="bottom-bar">    
+        <button 
+          className="create-post-button" 
+          onClick={() => navigate('/create-post')}
+        >
+          New Post
+        </button>
       </div>
 
-      {showForm && (
-        <form className="create-post-form" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="files">Upload up to 5 Images or Videos:</label>
-            <input
-              type="file"
-              id="files"
-              name="files"
-              accept="image/*,video/*"
-              multiple
-              onChange={handleInputChange}
-            />
-          </div>
+      {/* Display posts */}
+      <div className="posts-section">
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[600px]">
+            {posts.map((post) => (
+              <div key={post._id} className="post-card card bg-base-100 aspect-square flex flex-col justify-between relative">
+                {/* Post Media */}
+                <div className="post-media">
+                  {post.files && post.files.map((file, index) => (
+                    <img key={index} src={`http://localhost:5010${file}`} alt="Post media" className="post-image object-cover w-full h-32 rounded-t-lg" />
+                  ))}
+                </div>
 
-          <div>
-            <label htmlFor="caption">Caption:</label>
-            <input
-              type="text"
-              id="caption"
-              name="caption"
-              value={postData.caption}
-              onChange={handleInputChange}
-              placeholder="Enter caption"
-            />
-          </div>
+                {/* Post Details */}
+                <div className="post-details card-body p-4">
+                  <p className="post-caption text-lg font-semibold text-gray-800">{post.caption}</p>
+                  <p className="text-sm text-gray-600"><strong>Location:</strong> {post.location}</p>
+                  <p className="text-sm text-gray-600"><strong>Event:</strong> {post.event}</p>
+                </div>
 
-          <div>
-            <label htmlFor="location">Location:</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              value={postData.location}
-              onChange={handleInputChange}
-              placeholder="Add location"
-            />
+                {/* Like and Comment Actions */}
+                <div className="card-actions justify-end p-4">
+                  {/* Uncomment and implement handleLike if you want like functionality */}
+                  {/* <button
+                    className={`like-button btn btn-outline btn-sm ${post.likes && post.likes.includes(username) ? 'text-red-500' : 'text-gray-500'}`}
+                    onClick={() => handleLike(post._id)}
+                    aria-label="Like"
+                  >
+                    {post.likes && post.likes.includes(username) ? 'Unlike' : 'Like'} ({post.likes ? post.likes.length : 0})
+                  </button> */}
+                  <button
+                    className="comments-button btn btn-outline btn-sm ml-2"
+                    onClick={() => openComments(post._id)}
+                    aria-label="Comments"
+                  >
+                    Comments
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-
-          <div>
-            <label htmlFor="event">Event:</label>
-            <input
-              type="text"
-              id="event"
-              name="event"
-              value={postData.event}
-              onChange={handleInputChange}
-              placeholder="Event name"
-            />
-          </div>
-          
-          <button type="submit"> Post</button>
-          <button type="button" onClick={() => setShowForm(false)}>
-            Cancel
-          </button>
-        </form>
-      )}
-
+        ) : (
+          <p className="text-center text-gray-500">No posts available</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -167,7 +167,11 @@ const MyProfile = () => {
 
           {/* RSVP'd Events Section */}
           <div className="p-6 bg-base-100 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">RSVP'd Events</h2>
+            <h2 className="text-xl font-semibold mb-4">
+            <Link to="/rsvp-page" className="text-primary hover:underline">
+            RSVP'd Events
+            </Link>
+            </h2>
             {rsvpEvents.length > 0 ? (
               <ul>
                 {rsvpEvents.map((event) => (
@@ -199,6 +203,15 @@ const MyProfile = () => {
             ) : (
               <p className="text-gray-500">No bookmarked events found.</p>
             )}
+          </div>
+
+          {/* My Posts Section */}
+          <div className="p-6 bg-base-100 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">
+            <Link to="/myposts" className="text-primary hover:underline">
+              My Posts
+            </Link>
+            </h2>
           </div>
         </div>
       </div>

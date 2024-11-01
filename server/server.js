@@ -39,7 +39,8 @@ const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -406,6 +407,9 @@ app.use('/api/newsletter', subscribers);
 
 //using post routes
 app.use('/api/PostRoutes', postRoutes);
+
+//using comment routes
+app.use('/api/comments', commentRoutes);
 
 app.use("/api", recommendationsRouter);
 

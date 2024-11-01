@@ -1,0 +1,28 @@
+.like-button {
+  margin-right: 10px; /* Space between Like and Reply buttons */
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.like-button.liked {
+  background-color: #669fdc; /* Highlighted color when liked */
+}
+
+.reply-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.comment-item {
+  margin-bottom: 20px; /* Space between comments */
+}
+
+.reply-form {
+  margin-top: 10px;
+}
+
+.submit-reply-button {
+  margin-top: 5px;
+}

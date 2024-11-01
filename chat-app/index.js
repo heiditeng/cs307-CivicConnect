@@ -183,6 +183,23 @@ app.post('/rooms/:room_id/add-member', async (req, res) => {
     }
 
     console.log(`User ${user.user_id} added to room ${room.room_id}`);
+
+    // Create a notification message
+    const notificationMessage = `You have been added to room ${room.room_id}.`;
+
+    // Save the notification to the database
+    const notification = new Notification({
+      user: user._id,
+      message: notificationMessage
+    });
+    await notification.save();
+
+    // Emit the notification to the specific user
+    io.to(user_id).emit('notification', {
+      message: notification.message,
+      timestamp: notification.timestamp
+    });
+
     res.status(200).json({ message: 'User added to room successfully' });
   } catch (err) {
     console.error('Error adding user to room:', err.message);
@@ -252,7 +269,7 @@ io.on('connection', (socket) => {
       await addUserToRoom(user_id, room_id).catch(err => { console.error('Error in addUserToRoom:', err.message); });
       socket.join(room_id);
       socket.join(user_id);
-      console.log(`User ${user_id} joined room: ${room_id} and user room: ${user_id}`);
+      console.log(`User ${user_id} joined room: ${room_id}`);
     } catch (err) {
       console.error('Error joining room:', err.message);
     }
@@ -297,6 +314,9 @@ io.on('connection', (socket) => {
           message: notification.message,
           timestamp: notification.timestamp
         });
+
+        //stub for email notifications
+        console.log(`Notification sent to ${targetUser}: ${notification.message}`);
       }
     } catch (err) {
       console.error('Error sending notification:', err.message);

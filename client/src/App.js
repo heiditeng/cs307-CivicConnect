@@ -89,6 +89,8 @@ function App() {
             <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
             <Route path="/newsletter" element={<NewsletterSignup />} /> 
             <Route path="/subscribers" element={<Subscribers />} />
+            <Route path="/comments/:postId" element={<CommentsPage />} />
+            <Route path="/rsvp-page" element={<RSVPPage />} />
           </Routes>
         </div>
       </div>

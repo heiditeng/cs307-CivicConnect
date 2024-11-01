@@ -2,66 +2,50 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const MyProfile = () => {
+  const [userData, setUserData] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [mlSuggestions, setMlSuggestions] = useState("");
-  const [bookmarkedEvents, setBookmarkedEvents] = useState([]); // New state for bookmarks
-  const [rsvpEvents, setRsvpEvents] = useState([]); // New state for RSVPs
+  const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
+  const [rsvpEvents, setRsvpEvents] = useState([]);
 
   useEffect(() => {
-    // Fetch profile, RSVPs, and bookmarks on component mount
-    const fetchProfileData = async () => {
+    const fetchUserData = async () => {
+      const userId = localStorage.getItem("userId");
       const username = localStorage.getItem("username");
-      if (!username) {
-        setErrorMessage("No username found. Please log in again.");
+      if (!userId || !username) {
+        setErrorMessage("No user ID or username found. Please log in again.");
         return;
       }
 
       try {
-        const profileResponse = await fetch(
-          `http://localhost:5010/api/profiles/profile/${username}`
-        );
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          setProfileData(profileData);
-          fetchMlSuggestions(profileData); // Fetch machine learning suggestions
-          fetchBookmarkedEvents(username); // Fetch bookmarked events
-          fetchRsvpEvents(username); // Fetch RSVP'd events
+        // fetch user data including the populated userProfile field
+        const userResponse = await fetch(`http://localhost:5010/api/users/${userId}`);
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserData(userData);
+
+          // set profile data if it exists
+          if (userData.userProfile) {
+            setProfileData(userData.userProfile);
+            fetchMlSuggestions(userData.userProfile);
+          }
+
+          // fetch other associated data
+          fetchBookmarkedEvents(username);
+          fetchRsvpEvents(username);
         } else {
-          console.log("Profile not found, adding new profile");
-          addNewProfile(username); // create new profile if not found
+          console.error("User not found");
+          setErrorMessage("User not found. Please contact support.");
         }
       } catch (error) {
-        console.error("Error fetching profile data:", error);
-        setErrorMessage("Error fetching profile data");
+        console.error("Error fetching user data:", error);
+        setErrorMessage("Error fetching user data");
       }
     };
 
-    fetchProfileData();
+    fetchUserData();
   }, []);
-
-  // Function to add a new profile if it doesn't exist
-  const addNewProfile = async (username) => {
-    try {
-      const res = await fetch(
-        "http://localhost:5010/api/profiles/add-member",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username }),
-        }
-      );
-
-      if (res.ok) {
-        const newProfile = await res.json();
-        setProfileData(newProfile.member);
-      } else {
-        setErrorMessage("Error adding new profile");
-      }
-    } catch (error) {
-      setErrorMessage("Error adding new profile");
-    }
-  };
 
   // Function to fetch bookmarked events
   const fetchBookmarkedEvents = async (username) => {
@@ -125,7 +109,7 @@ const MyProfile = () => {
         <div className="w-full md:w-1/3 p-6 bg-base-200 rounded-lg shadow-lg">
           <h2 className="flex items-center text-2xl font-bold mb-4">
             <span className="mr-4">
-              {profileData ? `${profileData.username}'s Profile` : "Profile"}
+              {profileData ? `${userData.username}'s Profile` : "Profile"}
             </span>
             <div className="avatar">
               <div className="w-24 rounded">
@@ -141,16 +125,26 @@ const MyProfile = () => {
             <div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Username:</p>
-                <p className="text-base text-gray-700">{profileData.username}</p>
+                <p className="text-base text-gray-700">{userData.username}</p>
               </div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Location:</p>
-                <p className="text-base text-gray-700">{profileData.location}</p>
+                <p className="text-base text-gray-700">{profileData.location || "Not provided"}</p>
               </div>
               <div className="mb-4">
                 <p className="text-lg font-semibold">Interests & Hobbies:</p>
-                <p className="text-base text-gray-700">{profileData.interests}</p>
-                <p className="text-base text-gray-700">{profileData.hobbies}</p>
+                <p className="text-base text-gray-700">{profileData.interests || "Not provided"}</p>
+                <p className="text-base text-gray-700">{profileData.hobbies || "Not provided"}</p>
+              </div>
+              <div className="mb-4">
+                <p className="text-lg font-semibold">Attendance Rating:</p>
+                <div className="rating gap-1">
+                  <input type="radio" name="rating-3" className="mask mask-heart bg-red-400" />
+                  <input type="radio" name="rating-3" className="mask mask-heart bg-orange-400" />
+                  <input type="radio" name="rating-3" className="mask mask-heart bg-yellow-400" />
+                  <input type="radio" name="rating-3" className="mask mask-heart bg-lime-400" />
+                  <input type="radio" name="rating-3" className="mask mask-heart bg-green-400" />
+                </div>
               </div>
               <Link to="/info-form">
                 <button className="btn btn-outline btn-accent">Edit Profile</button>
@@ -170,7 +164,7 @@ const MyProfile = () => {
         <div className="w-full md:w-2/3 flex flex-col gap-4">
           <div className="p-6 bg-base-100 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">
-              {profileData ? `${profileData.username}'s Recommendation` : "Recommendation"}
+              {profileData ? `${userData.username}'s Recommendation` : "Recommendation"}
             </h2>
             {mlSuggestions ? (
               <p className="text-base text-gray-700">We suggest: {mlSuggestions}</p>

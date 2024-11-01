@@ -40,10 +40,15 @@ const UserInformationForm = () => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      const username = localStorage.getItem("username");
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        setErrorMessage("No user ID found. Please log in again.");
+        return;
+      }
+
       try {
         const res = await fetch(
-          `http://localhost:5010/api/profiles/profile/${username}`
+          `http://localhost:5010/api/profiles/profile/${userId}`
         );
         if (res.ok) {
           const data = await res.json();
@@ -79,7 +84,11 @@ const UserInformationForm = () => {
     setErrorMessage("");
 
     try {
-      const username = localStorage.getItem("username");
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        setErrorMessage("error");
+        return;
+      }
 
       const response = await fetch(
         "http://localhost:5010/api/profiles/update-profile",
@@ -89,7 +98,7 @@ const UserInformationForm = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: username, // Use the username retrieved from local storage
+            userId, 
             availability,
             location,
             occupation,
@@ -207,7 +216,7 @@ const UserInformationForm = () => {
             </button>
           </div>
           <div className="form-control mt-2">
-            <Link to="/profile">
+            <Link to="/myprofile">
               <button type="button" className="btn btn-secondary w-full">
                 Exit
               </button>

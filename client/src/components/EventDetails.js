@@ -54,7 +54,7 @@ const EventDetails = () => {
         <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
         <p>
           <strong>Organization:</strong>{" "}
-          <Link to={`/profile/${eventData.userId}`}>
+          <Link to={`/organization-profile`}>
             <span className="text-blue-600 hover:underline">
               {eventData.userId}
             </span>

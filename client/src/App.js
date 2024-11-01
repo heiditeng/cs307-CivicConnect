@@ -21,6 +21,22 @@ import SaveCredentials from './components/SaveCredentials';
 import './index.css';
 import CreatePost from './components/CreatePost';
 import UserFeed from './components/UserFeed';
+import RSVPList from './components/RSVPList';
+import MyProfile from './components/MyProfile';
+import NewsletterSignup from './components/NewsletterSignup';
+import Subscribers from './components/Subscribers';
+import { useLocation } from 'react-router-dom';
+
+function AppContainer() {
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log('Clearing login-related localStorage items...');
+    localStorage.removeItem('sessionID');
+  }, [location]);
+
+  return null;
+}
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -36,19 +52,12 @@ function App() {
     }
   };
 
-  // Clear only login-related localStorage items
-  useEffect(() => {
-    console.log('Clearing login-related localStorage items...');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('sessionID');
-  }, []);
-
-
   return (
     <Router>
       <div className="App">
         <NavBar />
         <div className="content">
+          <AppContainer />
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', marginBottom: '30px' }}>
             <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
           </div>
@@ -65,7 +74,8 @@ function App() {
             <Route path="/modify-event/:id" element={<ModifyEvent />} /> 
             <Route path="/event-details/:id" element={<EventDetails />} />
             <Route path="/info-form" element={<UserInformationForm />} />
-            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/myprofile" element={<MyProfile />} />
+            <Route path="/profile/:userId" element={<UserProfile />} />
             <Route path="/login" element={<Login isPasswordChanged={isPasswordChanged} />} />
             <Route path="/myprofile" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} />
@@ -74,6 +84,9 @@ function App() {
             <Route path="/save-credentials" element={<SaveCredentials />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/feed" element={<UserFeed />} />
+            <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
+            <Route path="/newsletter" element={<NewsletterSignup />} /> 
+            <Route path="/subscribers" element={<Subscribers />} />
           </Routes>
         </div>
       </div>

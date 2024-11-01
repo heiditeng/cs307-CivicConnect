@@ -8,22 +8,22 @@ const MyEvents = () => {
 
   useEffect(() => {
     if (!userId) {
-      console.log('No userId provided');
+      console.log("No userId provided");
       return;
     }
 
     const fetchAllEvents = async () => {
-      console.log('Fetching events for user:', userId);
+      console.log("Fetching events for user:", userId);
       try {
         const res = await fetch(`http://localhost:5010/api/events`);
 
-        console.log('Response status:', res.status);
-  
+        console.log("Response status:", res.status);
+
         if (res.ok) {
           const data = await res.json();
 
           // Filter events by userId
-          const userEvents = data.filter(event => event.userId === userId);
+          const userEvents = data.filter((event) => event.userId === userId);
           setEventsData(userEvents);
         } else {
           setErrorMessage("Error fetching events data");
@@ -32,57 +32,81 @@ const MyEvents = () => {
         setErrorMessage("Error fetching events data");
       }
     };
-  
+
     fetchAllEvents();
   }, [userId]);
 
   // Format date for display
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen p-8 bg-gray-50">
       <div className="flex flex-col w-full max-w-5xl gap-6">
-        <h2 className="text-3xl font-bold text-center mb-6 text-primary">My Events</h2>
+        <h2 className="text-3xl font-bold text-center mb-6 text-primary">
+          <span className="font-extrabold">My Events</span>
+        </h2>
 
         {eventsData.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {eventsData.map((event) => (
               <div
                 key={event._id}
-                className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow duration-300 aspect-square flex flex-col justify-between"
+                className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden"
               >
-                <div className="card-body p-4">
-                  <h3 className="card-title text-lg font-semibold text-gray-800">{event.name}</h3>
-                  <p className="text-sm text-gray-600">Organization: 
-                    <Link to={`/profile`}>
-                      <strong className="text-blue-600 hover:underline">{event.userId}</strong>
-                    </Link>
-                  </p>
-                  <p className="text-sm text-gray-600">Date: {formatDate(event.date)}</p>
-                  <p className="text-sm text-gray-600 mb-3">Zip Code: {event.zipcode}</p>
-                </div>
-                {event.image && (
-                  <figure className="h-32 w-full overflow-hidden rounded-t-lg">
+                {event.thumbnailImage && (
+                  <figure className="h-48 w-full overflow-hidden">
                     <img
-                      src={`http://localhost:5010/uploads/${event.image}`}
+                      src={`http://localhost:5010/uploads/${event.thumbnailImage}`}
                       alt={event.name}
                       className="object-cover w-full h-full"
                     />
                   </figure>
                 )}
-                <div className="card-actions justify-end p-4">
-                  <Link to={`/event-details/${event._id}`}>
-                    <button className="btn btn-primary btn-sm">Show Details</button>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {event.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    <strong>Organization:</strong>{" "}
+                    <Link to={`/organization-profile`}>
+                      <strong className="text-blue-600 hover:underline">
+                        {event.userId}
+                      </strong>
+                    </Link>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Date:</strong> {formatDate(event.date)}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    <strong>Zip Code:</strong> {event.zipcode}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    <strong>RSVPs:</strong> {event.rsvpUsers ? event.rsvpUsers.length : 0}
+                  </p>
+                  <Link
+                    to={`/event/${event._id}/rsvp-list`}
+                    className="text-blue-600 hover:underline mb-2 block"
+                  >
+                    View RSVP List
                   </Link>
-                  <Link to={`/modify-event/${event._id}`}>
-                    <button className="btn btn-secondary btn-sm ml-2">Modify Event</button>
-                  </Link>
-                  <Link to={`/delete-confirmation/${event._id}/${event.name}`}>
-                    <button className="btn btn-error btn-sm ml-2">Delete Event</button>
-                  </Link>
+                  <div className="flex justify-between">
+                    <Link to={`/event-details/${event._id}`}>
+                      <button className="btn btn-primary btn-sm">Details</button>
+                    </Link>
+                    <Link to={`/modify-event/${event._id}`}>
+                      <button className="btn btn-secondary btn-sm ml-2">
+                        Modify
+                      </button>
+                    </Link>
+                    <Link to={`/delete-confirmation/${event._id}/${event.name}`}>
+                      <button className="btn btn-error btn-sm ml-2">
+                        Delete
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

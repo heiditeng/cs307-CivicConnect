@@ -27,7 +27,7 @@ console.log("Serving static files from:", path.join(__dirname, "uploads"));
 // Route to create a new event
 router.post(
   "/events",
-  upload.fields([{ name: "eventImage" }, { name: "eventVideo" }]),
+  upload.fields([{ name: "eventImages" }, { name: "thumbnailImage" }, { name: "eventVideo" }]),
   async (req, res) => {
     const {
       name,
@@ -71,7 +71,8 @@ router.post(
       maxCapacity,
       type,
       description,
-      image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
+      image: req.files.eventImages ? req.files.eventImages.map(file => file.originalname) : [],
+      thumbnailImage: req.files.thumbnailImage ? req.files.thumbnailImage[0].originalname : null,
       video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
       userId,
     });
@@ -127,7 +128,7 @@ router.delete("/events/:id", async (req, res) => {
 // Route to modify an event
 router.put(
   "/events/:id",
-  upload.fields([{ name: "eventImage" }, { name: "eventVideo" }]),
+  upload.fields([{ name: "eventImages" }, { name: "eventVideo" }, { name: "thumbnailImage" }]),
   async (req, res) => {
     const { id } = req.params;
     const {
@@ -172,7 +173,8 @@ router.put(
       maxCapacity,
       type,
       description,
-      image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
+      image: req.files.eventImages ? req.files.eventImages.map(file => file.originalname) : [],
+      thumbnailImage: req.files.thumbnailImage ? req.files.thumbnailImage[0].originalname : null,
       video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
       userId,
     };
@@ -266,6 +268,22 @@ router.post("/:id/remove-rsvp", async (req, res) => {
   } catch (error) {
     console.error("Error removing RSVP:", error);
     res.status(500).json({ error: "Error removing RSVP" });
+  }
+});
+
+router.get("/rsvp-list/:id", async (req, res) => {
+  const { id } = req.params;  // Corrected to `id`
+  try {
+    // Find the event by its ID and populate the rsvpUsers field with full user details
+    const event = await Event.findById(id).populate('rsvpUsers');
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    res.status(200).json({ rsvpUsers: event.rsvpUsers });
+  } catch (error) {
+    console.error('Error fetching RSVP list:', error);
+    res.status(500).json({ error: 'An error occurred while fetching the RSVP list' });
   }
 });
 

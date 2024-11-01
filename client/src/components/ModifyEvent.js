@@ -188,190 +188,209 @@ class ModifyEvent extends Component {
         }
 
         return (
-            <div>
-                <h2>Modify Event</h2>
-                <form onSubmit={this.handleSubmit}>
-                    <div>
-                        <label>Event Name:</label>
-                        <input
-                            type="text"
-                            name="eventName"
-                            value={this.state.eventName}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <p>Current Date: {this.formatDate(this.state.eventDate)}</p>
-                        <label>New Event Date:</label>
-                        <input
-                            type="date"
-                            name="eventDate"
-                            value={this.state.eventDate}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>Start Time:</label>
-                        <input
-                            type="time"
-                            name="eventStartTime"
-                            value={this.state.eventStartTime}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>End Time:</label>
-                        <input
-                            type="time"
-                            name="eventEndTime"
-                            value={this.state.eventEndTime}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>Address:</label>
-                        <input
-                            type="text"
-                            name="address"
-                            value={this.state.address}
-                            onChange={this.handleChange}
-                        />
-                        {this.state.addressError && (
-                            <div style={{ color: 'red' }}>{this.state.addressError}</div>
-                        )}
-                    </div>
-                    <div>
-                        <label>Zip Code:</label>
-                        <input
-                            type="text"
-                            name="zipcode"
-                            value={this.state.zipcode}
-                            onChange={this.handleChange}
-                        />
-                        {this.state.zipcodeError && (
-                            <div style={{ color: 'red' }}>{this.state.zipcodeError}</div>
-                        )}
-                    </div>
-                    <div>
-                        <label>Max Capacity:</label>
-                        <input
-                            type="number"
-                            name="maxCapacity"
-                            value={this.state.maxCapacity}
-                            onChange={this.handleChange}
-                            min="1"
-                        />
-                    </div>
-                    <div>
-                        <label>Event Type:</label>
-                        <select
-                            name="eventType"
-                            value={this.state.eventType}
-                            onChange={this.handleChange}
-                        >
-                            <option value="">Select an event type</option>
-                            <option value="environmental">Environmental</option>
-                            <option value="education">Education</option>
-                            <option value="health">Health</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Event Description:</label>
-                        <textarea
-                            name="eventDescription"
-                            value={this.state.eventDescription}
-                            onChange={this.handleChange}
-                        />
-                    </div>
+            <div className="flex justify-center items-center min-h-screen p-4 bg-gray-100">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
+                    <h2 className="text-2xl font-bold mb-4">Modify Event</h2>
+                    <form onSubmit={this.handleSubmit}>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Event Name:</label>
+                            <input
+                                type="text"
+                                name="eventName"
+                                value={this.state.eventName}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <p>Current Date: {this.formatDate(this.state.eventDate)}</p>
+                            <label className="block font-semibold">New Event Date:</label>
+                            <input
+                                type="date"
+                                name="eventDate"
+                                value={this.state.eventDate}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Start Time:</label>
+                            <input
+                                type="time"
+                                name="eventStartTime"
+                                value={this.state.eventStartTime}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">End Time:</label>
+                            <input
+                                type="time"
+                                name="eventEndTime"
+                                value={this.state.eventEndTime}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Address:</label>
+                            <input
+                                type="text"
+                                name="address"
+                                value={this.state.address}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                            {this.state.addressError && (
+                                <div className="text-red-600">{this.state.addressError}</div>
+                            )}
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Zip Code:</label>
+                            <input
+                                type="text"
+                                name="zipcode"
+                                value={this.state.zipcode}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                            {this.state.zipcodeError && (
+                                <div className="text-red-600">{this.state.zipcodeError}</div>
+                            )}
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Max Capacity:</label>
+                            <input
+                                type="number"
+                                name="maxCapacity"
+                                value={this.state.maxCapacity}
+                                onChange={this.handleChange}
+                                min="1"
+                                className="border rounded w-full p-2"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Event Type:</label>
+                            <select
+                                name="eventType"
+                                value={this.state.eventType}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                required
+                            >
+                                <option value="">Select an event type</option>
+                                <option value="environmental">Environmental</option>
+                                <option value="education">Education</option>
+                                <option value="health">Health</option>
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Event Description:</label>
+                            <textarea
+                                name="eventDescription"
+                                value={this.state.eventDescription}
+                                onChange={this.handleChange}
+                                className="border rounded w-full p-2"
+                                rows="4"
+                                required
+                            />
+                        </div>
 
-                    {/* Displaying Images and Videos */}
-                    <div>
-                        <h3 className="text-lg font-semibold">Current Images:</h3>
-                        {this.state.eventImages.length > 0 ? (
-                            <ul className="mb-4">
-                                {this.state.eventImages.map((image, index) => (
-                                    <li key={index} className="flex items-center justify-between mb-2">
-                                        <span>{image.name || image}</span>
-                                        <button type="button" onClick={() => this.handleDeleteImage(index)} className="text-red-600 ml-2">Delete</button>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p>No images uploaded.</p>
-                        )}
-                    </div>
+                        {/* Displaying Images and Videos */}
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold">Current Images:</h3>
+                            {this.state.eventImages.length > 0 ? (
+                                <ul className="mb-2">
+                                    {this.state.eventImages.map((image, index) => (
+                                        <li key={index} className="flex items-center justify-between mb-2">
+                                            <span>{image.name || image}</span>
+                                            <button type="button" onClick={() => this.handleDeleteImage(index)} className="text-red-600">Delete</button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p>No images uploaded.</p>
+                            )}
+                        </div>
 
-                    <div>
-                        <h3 className="text-lg font-semibold">Current Thumbnail Image:</h3>
-                        {this.state.thumbnailImage ? (
-                            <div className="flex items-center justify-between mb-4">
-                                <span>{this.state.thumbnailImage.name || this.state.thumbnailImage}</span>
-                                <button type="button" onClick={this.handleDeleteThumbnail} className="text-red-600 ml-2">Delete</button>
-                            </div>
-                        ) : (
-                            <p>No thumbnail image uploaded.</p>
-                        )}
-                    </div>
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold">Current Thumbnail Image:</h3>
+                            {this.state.thumbnailImage ? (
+                                <div className="flex items-center justify-between mb-2">
+                                    <span>{this.state.thumbnailImage.name || this.state.thumbnailImage}</span>
+                                    <button type="button" onClick={this.handleDeleteThumbnail} className="text-red-600">Delete</button>
+                                </div>
+                            ) : (
+                                <p>No thumbnail image uploaded.</p>
+                            )}
+                        </div>
 
-                    <div>
-                        <h3 className="text-lg font-semibold">Current Event Video:</h3>
-                        {this.state.eventVideo ? (
-                            <div className="flex items-center justify-between mb-4">
-                                <span>{this.state.eventVideo}</span>
-                                <button type="button" onClick={this.handleDeleteVideo} className="text-red-600 ml-2">Delete</button>
-                            </div>
-                        ) : (
-                            <p>No video uploaded.</p>
-                        )}
-                    </div>
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold">Current Event Video:</h3>
+                            {this.state.eventVideo ? (
+                                <div className="flex items-center justify-between mb-2">
+                                    <span>{this.state.eventVideo.name || this.state.eventVideo}</span>
+                                    <button type="button" onClick={this.handleDeleteVideo} className="text-red-600">Delete</button>
+                                </div>
+                            ) : (
+                                <p>No video uploaded.</p>
+                            )}
+                        </div>
 
-                    <div>
-                        <label className="block mb-2">Upload Images:</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={this.handleImageChange}
-                            className="border rounded p-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-2">Upload Thumbnail Image:</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={this.handleThumbnailChange}
-                            className="border rounded p-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-2">Upload Video:</label>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            onChange={this.handleVideoChange}
-                            className="border rounded p-2"
-                        />
-                    </div>
-                    <button type="submit">Submit</button>
-                    <button type="button" onClick={this.handleBackToMyEvents} style={{ marginLeft: '10px' }}>
-                        Cancel
-                    </button>
-                </form>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Upload Images:</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={this.handleImageChange}
+                                className="border rounded w-full p-2"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Upload Thumbnail Image:</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={this.handleThumbnailChange}
+                                className="border rounded w-full p-2"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block font-semibold">Upload Video:</label>
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={this.handleVideoChange}
+                                className="border rounded w-full p-2"
+                            />
+                        </div>
+                        <div className="flex justify-between mt-6">
+                            <button type="submit" className="btn btn-primary">Submit</button>
+                            <button type="button" onClick={this.handleBackToMyEvents} className="btn btn-secondary">Cancel</button>
+                        </div>
+                    </form>
 
-                {this.state.successMessage && (
-                    <div style={{ marginTop: '20px', color: 'green' }}>
-                        {this.state.successMessage}
-                        <button onClick={this.handleBackToMyEvents} style={{ marginLeft: '10px' }}>
-                            Back to My Events
-                        </button>
-                    </div>
-                )}
-                {this.state.errorMessage && (
-                    <div style={{ marginTop: '20px', color: 'red' }}>
-                        {this.state.errorMessage}
-                    </div>
-                )}
+                    {this.state.successMessage && (
+                        <div className="mt-6 text-green-600">
+                            {this.state.successMessage}
+                            <button onClick={this.handleBackToMyEvents} className="ml-2 underline">Back to My Events</button>
+                        </div>
+                    )}
+                    {this.state.errorMessage && (
+                        <div className="mt-6 text-red-600">
+                            {this.state.errorMessage}
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }

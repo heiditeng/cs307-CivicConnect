@@ -1,8 +1,10 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useLoadScript, Autocomplete } from '@react-google-maps/api';
+import './CreateEvent.css';
 
-class CreateEvent extends Component {
-    state = {
+const CreateEvent = () => {
+    const [eventData, setEventData] = useState({
         eventName: '',
         eventDate: '',
         eventStartTime: '',
@@ -21,77 +23,99 @@ class CreateEvent extends Component {
         zipcodeError: '',
         redirectToMyEvents: false,
         userId: '',
-    };
+    });
 
-    componentDidMount() {
+    const autocompleteRef = useRef(null);
+    const { isLoaded, loadError } = useLoadScript({
+        googleMapsApiKey: 'AIzaSyBi4Q1s_l02slRnhUigHLzKff5UKpYAtHM',
+        libraries: ['places'],
+    });
+
+    useEffect(() => {
         const userId = localStorage.getItem("username");
-        this.setState({ userId });
-    }
+        setEventData((prev) => ({ ...prev, userId }));
+    }, []);
 
-    handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value, addressError: '', zipcodeError: '' });
+    const handlePlaceSelect = () => {
+        if (autocompleteRef.current) {
+            const place = autocompleteRef.current.getPlace();
+            if (place && place.address_components) {
+                const address = place.formatted_address;
+                const zipcode = place.address_components.find(component =>
+                    component.types.includes("postal_code")
+                )?.long_name || '';
+                setEventData((prev) => ({ ...prev, address, zipcode, addressError: '' }));
+            }
+        }
     };
 
-    handleImageChange = (e) => {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEventData((prev) => ({ ...prev, [name]: value, addressError: '', zipcodeError: '' }));
+    };
+
+    const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        this.setState({ 
+        setEventData((prev) => ({
+            ...prev,
             eventImages: files,
             thumbnailImage: files[0] || null,
-        });
-    };
-
-    handleThumbnailChange = (e) => {
-        const file = e.target.files[0];
-        this.setState((prevState) => ({
-            thumbnailImage: file,
-            eventImages: [file, ...prevState.eventImages.filter(img => img !== file)],
         }));
     };
 
-    handleVideoChange = (e) => {
-        this.setState({ eventVideo: e.target.files[0] });
+    const handleThumbnailChange = (e) => {
+        const file = e.target.files[0];
+        setEventData((prev) => ({
+            ...prev,
+            thumbnailImage: file,
+            eventImages: [file, ...prev.eventImages.filter(img => img !== file)],
+        }));
     };
 
-    validateZipcode = (zipcode) => {
+    const handleVideoChange = (e) => {
+        setEventData((prev) => ({ ...prev, eventVideo: e.target.files[0] }));
+    };
+
+    const validateZipcode = (zipcode) => {
         const regex = /^(?:\d{5}|\d{5}-\d{4})$/;
         return regex.test(zipcode);
     };
 
-    handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!this.state.address) {
-            this.setState({ addressError: 'Address is required' });
+        if (!eventData.address) {
+            setEventData((prev) => ({ ...prev, addressError: 'Address is required' }));
             return;
         }
 
-        if (!this.validateZipcode(this.state.zipcode)) {
-            this.setState({ zipcodeError: 'Invalid Zip Code format (must be 5 or 9 digits)' });
+        if (!validateZipcode(eventData.zipcode)) {
+            setEventData((prev) => ({ ...prev, zipcodeError: 'Invalid Zip Code format (must be 5 or 9 digits)' }));
             return;
         }
 
         const formData = new FormData();
-        formData.append('name', this.state.eventName);
-        formData.append('date', this.state.eventDate);
-        formData.append('startTime', this.state.eventStartTime);
-        formData.append('endTime', this.state.eventEndTime);
-        formData.append('address', this.state.address);
-        formData.append('zipcode', this.state.zipcode);
-        formData.append('maxCapacity', Number(this.state.maxCapacity));
-        formData.append('type', this.state.eventType);
-        formData.append('description', this.state.eventDescription);
-        formData.append('userId', this.state.userId);
+        formData.append('name', eventData.eventName);
+        formData.append('date', eventData.eventDate);
+        formData.append('startTime', eventData.eventStartTime);
+        formData.append('endTime', eventData.eventEndTime);
+        formData.append('address', eventData.address);
+        formData.append('zipcode', eventData.zipcode);
+        formData.append('maxCapacity', Number(eventData.maxCapacity));
+        formData.append('type', eventData.eventType);
+        formData.append('description', eventData.eventDescription);
+        formData.append('userId', eventData.userId);
 
-        this.state.eventImages.forEach((image) => {
+        eventData.eventImages.forEach((image) => {
             formData.append('eventImages', image);
         });
 
-        if (this.state.thumbnailImage) {
-            formData.append('thumbnailImage', this.state.thumbnailImage);
+        if (eventData.thumbnailImage) {
+            formData.append('thumbnailImage', eventData.thumbnailImage);
         }
 
-        if (this.state.eventVideo) {
-            formData.append('eventVideo', this.state.eventVideo);
+        if (eventData.eventVideo) {
+            formData.append('eventVideo', eventData.eventVideo);
         }
 
         try {
@@ -101,182 +125,196 @@ class CreateEvent extends Component {
             });
 
             if (res.ok) {
-                this.setState({ 
-                    successMessage: 'Event created successfully!', 
-                    errorMessage: '', 
-                    addressError: '', 
+                setEventData((prev) => ({
+                    ...prev,
+                    successMessage: 'Event created successfully!',
+                    errorMessage: '',
+                    addressError: '',
                     zipcodeError: '',
-                });
+                }));
             } else {
                 const errorData = await res.json();
-                this.setState({ errorMessage: errorData.error || 'Error creating event', successMessage: '' });
+                setEventData((prev) => ({
+                    ...prev,
+                    errorMessage: errorData.error || 'Error creating event',
+                    successMessage: '',
+                }));
             }
         } catch (error) {
-            this.setState({ errorMessage: 'Error creating event', successMessage: '' });
+            setEventData((prev) => ({
+                ...prev,
+                errorMessage: 'Error creating event',
+                successMessage: '',
+            }));
         }
     };
 
-    handleBackToMyEvents = () => {
-        this.setState({ redirectToMyEvents: true });
+    const handleBackToMyEvents = () => {
+        setEventData((prev) => ({ ...prev, redirectToMyEvents: true }));
     };
 
-    render() {
-        if (this.state.redirectToMyEvents) {
-            return <Navigate to="/my-events" />;
-        }
+    if (eventData.redirectToMyEvents) {
+        return <Navigate to="/my-events" />;
+    }
 
-        return (
-            <div>
-                <h2>Create Event</h2>
-                <form onSubmit={this.handleSubmit}>
-                    <div>
-                        <label>Event Name:</label>
-                        <input
-                            type="text"
-                            name="eventName"
-                            value={this.state.eventName}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>Event Date:</label>
-                        <input
-                            type="date"
-                            name="eventDate"
-                            value={this.state.eventDate}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>Start Time:</label>
-                        <input
-                            type="time"
-                            name="eventStartTime"
-                            value={this.state.eventStartTime}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>End Time:</label>
-                        <input
-                            type="time"
-                            name="eventEndTime"
-                            value={this.state.eventEndTime}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>Address:</label>
+    if (loadError) return <div>Error loading maps</div>;
+    if (!isLoaded) return <div>Loading Maps...</div>;
+
+    return (
+        <div className="create-event-container">
+            <h2>Create Event</h2>
+            <form onSubmit={handleSubmit} className="event-form">
+                <div className="form-group">
+                    <label>Event Name:</label>
+                    <input
+                        type="text"
+                        name="eventName"
+                        value={eventData.eventName}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Event Date:</label>
+                    <input
+                        type="date"
+                        name="eventDate"
+                        value={eventData.eventDate}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Start Time:</label>
+                    <input
+                        type="time"
+                        name="eventStartTime"
+                        value={eventData.eventStartTime}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>End Time:</label>
+                    <input
+                        type="time"
+                        name="eventEndTime"
+                        value={eventData.eventEndTime}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Address:</label>
+                    <Autocomplete
+                        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                        onPlaceChanged={handlePlaceSelect}
+                    >
                         <input
                             type="text"
                             name="address"
-                            value={this.state.address}
-                            onChange={this.handleChange}
+                            value={eventData.address}
+                            onChange={handleChange}
+                            required
                         />
-                        {this.state.addressError && (
-                            <div style={{ color: 'red' }}>{this.state.addressError}</div>
-                        )}
-                    </div>
-                    <div>
-                        <label>Zip Code:</label>
-                        <input
-                            type="text"
-                            name="zipcode"
-                            value={this.state.zipcode}
-                            onChange={this.handleChange}
-                        />
-                        {this.state.zipcodeError && (
-                            <div style={{ color: 'red' }}>{this.state.zipcodeError}</div>
-                        )}
-                    </div>
-                    <div>
-                        <label>Max Capacity:</label>
-                        <input
-                            type="number"
-                            name="maxCapacity"
-                            value={this.state.maxCapacity}
-                            onChange={this.handleChange}
-                            min="1"
-                        />
-                    </div>
-                    <div>
-                        <label>Event Type:</label>
-                        <select
-                            name="eventType"
-                            value={this.state.eventType}
-                            onChange={this.handleChange}
-                        >
-                            <option value="">Select an event type</option>
-                            <option value="environmental">Environmental</option>
-                            <option value="education">Education</option>
-                            <option value="health">Health</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Event Description:</label>
-                        <textarea
-                            name="eventDescription"
-                            value={this.state.eventDescription}
-                            onChange={this.handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label>Event Images:</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={this.handleImageChange}
-                        />
-                        {this.state.eventImages.length > 0 && (
-                            <div>
-                                <h4>Selected Images:</h4>
-                                <ul>
-                                    {this.state.eventImages.map((image, index) => (
-                                        <li key={index}>{image.name}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                    <div>
-                        <label>Select Thumbnail Image:</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={this.handleThumbnailChange}
-                        />
-                        {this.state.thumbnailImage && (
-                            <div>Thumbnail Selected: {this.state.thumbnailImage.name}</div>
-                        )}
-                    </div>
-                    <div>
-                        <label>Event Video:</label>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            onChange={this.handleVideoChange}
-                        />
-                    </div>
-                    <button type="submit">Create Event</button>
-                </form>
+                    </Autocomplete>
+                    {eventData.addressError && (
+                        <div className="error-message">{eventData.addressError}</div>
+                    )}
+                </div>
+                <div className="form-group">
+                    <label>Zip Code:</label>
+                    <input
+                        type="text"
+                        name="zipcode"
+                        value={eventData.zipcode}
+                        onChange={handleChange}
+                        required
+                    />
+                    {eventData.zipcodeError && (
+                        <div className="error-message">{eventData.zipcodeError}</div>
+                    )}
+                </div>
+                <div className="form-group">
+                    <label>Max Capacity:</label>
+                    <input
+                        type="number"
+                        name="maxCapacity"
+                        value={eventData.maxCapacity}
+                        onChange={handleChange}
+                        min="1"
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Event Type:</label>
+                    <select
+                        name="eventType"
+                        value={eventData.eventType}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Select an event type</option>
+                        <option value="environmental">Environmental</option>
+                        <option value="education">Education</option>
+                        <option value="health">Health</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label>Event Description:</label>
+                    <textarea
+                        name="eventDescription"
+                        value={eventData.eventDescription}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Event Images:</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                    />
+                    {eventData.eventImages.length > 0 && (
+                        <div>
+                            <h4>Selected Images:</h4>
+                            <ul>
+                                {eventData.eventImages.map((image, index) => (
+                                    <li key={index}>{image.name}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+                <div className="form-group">
+                    <label>Select Thumbnail Image:</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleThumbnailChange}
+                    />
+                    {eventData.thumbnailImage && (
+                        <div>Thumbnail Selected: {eventData.thumbnailImage.name}</div>
+                    )}
+                </div>
+                <div className="form-group">
+                    <label>Event Video:</label>
+                    <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoChange}
+                    />
+                </div>
+                <button type="submit" className="submit-button">Create Event</button>
+            </form>
 
-                {this.state.successMessage && (
-                    <div style={{ marginTop: '20px', color: 'green' }}>
-                        {this.state.successMessage}
-                        <button onClick={this.handleBackToMyEvents} style={{ marginLeft: '10px' }}>
-                            Back to My Events
-                        </button>
-                    </div>
-                )}
-                {this.state.errorMessage && (
-                    <div style={{ marginTop: '20px', color: 'red' }}>
-                        {this.state.errorMessage}
-                    </div>
-                )}
-            </div>
-        );
-    }
-}
+            {eventData.successMessage && <div className="success-message">{eventData.successMessage}</div>}
+            {eventData.errorMessage && <div className="error-message">{eventData.errorMessage}</div>}
+            <button onClick={handleBackToMyEvents} className="back-button">Back to My Events</button>
+        </div>
+    );
+};
 
 export default CreateEvent;

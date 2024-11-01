@@ -18,6 +18,7 @@ const UserProfile = require('./userprofile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
 const subscribers = require('./subscribers.js');
+const commentRoutes = require('./commentRoutes.js'); 
 
 // mongo db stuff
 const connectDB = require('./db');

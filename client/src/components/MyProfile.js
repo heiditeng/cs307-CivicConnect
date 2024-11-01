@@ -28,7 +28,7 @@ const MyProfile = () => {
           // set profile data if it exists
           if (userData.userProfile) {
             setProfileData(userData.userProfile);
-            fetchMlSuggestions(userData.userProfile);
+            // fetchMlSuggestions(userData.userProfile);
           }
 
           // fetch other associated data
@@ -77,8 +77,8 @@ const MyProfile = () => {
     }
   };
 
-  // Function to fetch machine learning suggestions
-  const fetchMlSuggestions = async (profileData) => {
+  /*const fetchMlSuggestions = async (profileData) => {
+    console.log("Sending profile data:", profileData); // Log the data being sent
     try {
       const res = await fetch("http://localhost:5020/predict", {
         method: "POST",
@@ -91,9 +91,10 @@ const MyProfile = () => {
           hobbies: profileData.hobbies,
         }),
       });
-
+  
       if (res.ok) {
         const result = await res.json();
+        console.log("ML suggestion received:", result.prediction); // Log the received prediction
         setMlSuggestions(result.prediction);
       } else {
         console.error("Error fetching ML suggestions");
@@ -101,7 +102,7 @@ const MyProfile = () => {
     } catch (error) {
       console.error("Error fetching ML suggestions:", error);
     }
-  };
+  };*/
 
   return (
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
@@ -162,16 +163,7 @@ const MyProfile = () => {
         </div>
 
         <div className="w-full md:w-2/3 flex flex-col gap-4">
-          <div className="p-6 bg-base-100 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">
-              {profileData ? `${userData.username}'s Recommendation` : "Recommendation"}
-            </h2>
-            {mlSuggestions ? (
-              <p className="text-base text-gray-700">We suggest: {mlSuggestions}</p>
-            ) : (
-              <p className="text-gray-500">Loading suggestions...</p>
-            )}
-          </div>
+         
 
           {/* RSVP'd Events Section */}
           <div className="p-6 bg-base-100 rounded-lg shadow-lg">

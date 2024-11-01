@@ -15,7 +15,7 @@ const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
 const User = require('./user.js'); // import the user model
 const UserProfile = require('./userprofile.js');
-
+const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
 
 // mongo db stuff
@@ -403,9 +403,7 @@ app.use('/api/events', eventRoutes); // Integrate event routes
 //using post routes
 app.use('/api/PostRoutes', postRoutes);
 
-app.get("/api", (req, res) => {
-    res.json({ "members": ["aysu", "heidi", "jammy", "avishi", "roohee"] })
-})
+app.use("/api", recommendationsRouter);
 
 // using port 5010 bc 5000 taken
 // app.listen(5010, () => {console.log("Server has started on port 5010")})

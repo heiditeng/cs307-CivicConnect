@@ -10,7 +10,8 @@ class CreateEvent extends Component {
         address: '',
         zipcode: '',
         eventDescription: '',
-        eventImage: null,
+        eventImages: [],
+        thumbnailImage: null,
         eventVideo: null,
         maxCapacity: '',
         eventType: '',
@@ -32,7 +33,19 @@ class CreateEvent extends Component {
     };
 
     handleImageChange = (e) => {
-        this.setState({ eventImage: e.target.files[0] });
+        const files = Array.from(e.target.files);
+        this.setState({ 
+            eventImages: files,
+            thumbnailImage: files[0] || null,
+        });
+    };
+
+    handleThumbnailChange = (e) => {
+        const file = e.target.files[0];
+        this.setState((prevState) => ({
+            thumbnailImage: file,
+            eventImages: [file, ...prevState.eventImages.filter(img => img !== file)],
+        }));
     };
 
     handleVideoChange = (e) => {
@@ -47,7 +60,6 @@ class CreateEvent extends Component {
     handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate required fields
         if (!this.state.address) {
             this.setState({ addressError: 'Address is required' });
             return;
@@ -70,10 +82,14 @@ class CreateEvent extends Component {
         formData.append('description', this.state.eventDescription);
         formData.append('userId', this.state.userId);
 
-        // Append files only if they exist
-        if (this.state.eventImage) {
-            formData.append('eventImage', this.state.eventImage);
+        this.state.eventImages.forEach((image) => {
+            formData.append('eventImages', image);
+        });
+
+        if (this.state.thumbnailImage) {
+            formData.append('thumbnailImage', this.state.thumbnailImage);
         }
+
         if (this.state.eventVideo) {
             formData.append('eventVideo', this.state.eventVideo);
         }
@@ -105,7 +121,6 @@ class CreateEvent extends Component {
     };
 
     render() {
-        // Check if redirect flag is true, then redirect to /my-events
         if (this.state.redirectToMyEvents) {
             return <Navigate to="/my-events" />;
         }
@@ -206,12 +221,34 @@ class CreateEvent extends Component {
                         />
                     </div>
                     <div>
-                        <label>Event Image:</label>
+                        <label>Event Images:</label>
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             onChange={this.handleImageChange}
                         />
+                        {this.state.eventImages.length > 0 && (
+                            <div>
+                                <h4>Selected Images:</h4>
+                                <ul>
+                                    {this.state.eventImages.map((image, index) => (
+                                        <li key={index}>{image.name}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <label>Select Thumbnail Image:</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={this.handleThumbnailChange}
+                        />
+                        {this.state.thumbnailImage && (
+                            <div>Thumbnail Selected: {this.state.thumbnailImage.name}</div>
+                        )}
                     </div>
                     <div>
                         <label>Event Video:</label>

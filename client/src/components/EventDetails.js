@@ -43,7 +43,7 @@ const EventDetails = () => {
 
   const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(":");
-    const hoursIn12Format = hours % 12 || 12; // Convert to 12-hour format
+    const hoursIn12Format = hours % 12 || 12;
     const amPm = hours < 12 ? "AM" : "PM";
     return `${hoursIn12Format}:${minutes} ${amPm}`;
   };
@@ -52,7 +52,14 @@ const EventDetails = () => {
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
-
+        <p>
+          <strong>Organization:</strong>{" "}
+          <Link to={`/profile/${eventData.userId}`}>
+            <span className="text-blue-600 hover:underline">
+              {eventData.userId}
+            </span>
+          </Link>
+        </p>
         <p><strong>Date:</strong> {formatDate(eventData.date)}</p>
         <p><strong>Address:</strong> {eventData.address}</p>
         <p><strong>Zip Code:</strong> {eventData.zipcode}</p>
@@ -61,30 +68,39 @@ const EventDetails = () => {
         <p><strong>Type:</strong> {eventData.type}</p>
         <p><strong>Description:</strong> {eventData.description}</p>
         
-        {/* Image section */}
-        {eventData.image && (
+        {/* Images section */}
+        {eventData.image && eventData.image.length > 0 && (
           <div className="mb-4">
-            <img
-              src={`http://localhost:5010/uploads/${eventData.image}`}
-              alt={eventData.name}
-              style={{ width: "200px", height: "200px", objectFit: "cover" }}
-            />
+            <h3 className="text-lg font-semibold">Images:</h3>
+            <div className="flex flex-wrap gap-4">
+              {eventData.image.map((image, index) => (
+                <img
+                  key={index}
+                  src={`http://localhost:5010/uploads/${image}`}
+                  alt={`Event Image ${index + 1}`}
+                  className="w-32 h-32 object-contain"
+                />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Video section */}
-        {eventData.video && (
+        {/* Videos section */}
+        {eventData.video && eventData.video.length > 0 && (
           <div className="mb-4">
-            <video
-              controls
-              style={{ width: "100%", maxWidth: "600px", height: "auto" }}
-            >
-              <source
-                src={`http://localhost:5010/uploads/${eventData.video}`}
-                type="video/mp4"
-              />
-              Your browser does not support the video tag.
-            </video>
+            <h3 className="text-lg font-semibold">Video:</h3>
+            <div className="flex flex-wrap gap-4">
+              <video
+                controls
+                style={{ width: "100%", maxWidth: "300px", height: "auto" }}
+              >
+                <source
+                  src={`http://localhost:5010/uploads/${eventData.video}`}
+                  type="video/mp4"
+                />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
         )}
 

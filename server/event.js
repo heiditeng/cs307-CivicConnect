@@ -10,7 +10,8 @@ const EventSchema = new mongoose.Schema({
   maxCapacity: { type: Number, required: true },
   type: { type: String, required: true },
   description: { type: String, required: true },
-  image: { type: String },
+  image: [{ type: String }],
+  thumbnailImage: { type: String },
   video: { type: String },
   userId: { type: String, required: true },
   rsvpUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]

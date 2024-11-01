@@ -27,7 +27,7 @@ console.log("Serving static files from:", path.join(__dirname, "uploads"));
 // Route to create a new event
 router.post(
   "/events",
-  upload.fields([{ name: "eventImage" }, { name: "eventVideo" }]),
+  upload.fields([{ name: "eventImages" }, { name: "thumbnailImage" }, { name: "eventVideo" }]),
   async (req, res) => {
     const {
       name,
@@ -71,7 +71,8 @@ router.post(
       maxCapacity,
       type,
       description,
-      image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
+      image: req.files.eventImages ? req.files.eventImages.map(file => file.originalname) : [],
+      thumbnailImage: req.files.thumbnailImage ? req.files.thumbnailImage[0].originalname : null,
       video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
       userId,
     });
@@ -95,8 +96,6 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error fetching events" });
   }
 });
-
-
 
 // Route to fetch a single event by ID
 router.get("/events/:id", async (req, res) => {
@@ -129,7 +128,7 @@ router.delete("/events/:id", async (req, res) => {
 // Route to modify an event
 router.put(
   "/events/:id",
-  upload.fields([{ name: "eventImage" }, { name: "eventVideo" }]),
+  upload.fields([{ name: "eventImages" }, { name: "eventVideo" }, { name: "thumbnailImage" }]),
   async (req, res) => {
     const { id } = req.params;
     const {
@@ -174,7 +173,8 @@ router.put(
       maxCapacity,
       type,
       description,
-      image: req.files.eventImage ? req.files.eventImage[0].originalname : null,
+      image: req.files.eventImages ? req.files.eventImages.map(file => file.originalname) : [],
+      thumbnailImage: req.files.thumbnailImage ? req.files.thumbnailImage[0].originalname : null,
       video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
       userId,
     };

@@ -12,7 +12,8 @@ class ModifyEvent extends Component {
             address: '',
             zipcode: '',
             eventDescription: '',
-            eventImage: null,
+            eventImages: [],
+            thumbnailImage: null,
             eventVideo: null,
             maxCapacity: '',
             eventType: '',
@@ -27,7 +28,7 @@ class ModifyEvent extends Component {
 
     async componentDidMount() {
         const { id } = this.props;
-        
+
         // Retrieve userId from local storage
         const userId = localStorage.getItem('username');
         if (userId) {
@@ -50,6 +51,9 @@ class ModifyEvent extends Component {
                 eventDescription: event.description,
                 maxCapacity: event.maxCapacity,
                 eventType: event.type,
+                eventImages: event.image || [],
+                thumbnailImage: event.thumbnailImage || null,
+                eventVideo: event.video || null,
             });
         } else {
             this.setState({ errorMessage: 'Error fetching event data' });
@@ -61,11 +65,46 @@ class ModifyEvent extends Component {
     };
 
     handleImageChange = (e) => {
-        this.setState({ eventImage: e.target.files[0] });
+        const files = Array.from(e.target.files);
+        this.setState((prevState) => {
+            const updatedImages = [...prevState.eventImages, ...files];
+            const newThumbnail = prevState.thumbnailImage || (files.length > 0 ? files[0] : null);
+            return {
+                eventImages: updatedImages,
+                thumbnailImage: newThumbnail,
+            };
+        });
     };
-
+    
+    handleThumbnailChange = (e) => {
+        const thumbnail = e.target.files[0];
+        if (thumbnail) {
+            this.setState((prevState) => {
+                const updatedImages = prevState.eventImages.filter(image => image !== prevState.thumbnailImage);
+                updatedImages.unshift(thumbnail);
+                return {
+                    thumbnailImage: thumbnail,
+                    eventImages: updatedImages,
+                };
+            });
+        }
+    };
+    
     handleVideoChange = (e) => {
         this.setState({ eventVideo: e.target.files[0] });
+    };
+
+    handleDeleteImage = (index) => {
+        const updatedImages = this.state.eventImages.filter((_, i) => i !== index);
+        this.setState({ eventImages: updatedImages });
+    };
+
+    handleDeleteThumbnail = () => {
+        this.setState({ thumbnailImage: null });
+    };
+    
+    handleDeleteVideo = () => {
+        this.setState({ eventVideo: null });
     };
 
     validateAddress = (address) => {
@@ -102,8 +141,11 @@ class ModifyEvent extends Component {
         formData.append('type', this.state.eventType);
         formData.append('userId', this.state.userId);
 
-        if (this.state.eventImage) {
-            formData.append('eventImage', this.state.eventImage);
+        this.state.eventImages.forEach((image) => {
+            formData.append('eventImages', image);
+        });
+        if (this.state.thumbnailImage) {
+            formData.append('thumbnailImage', this.state.thumbnailImage);
         }
         if (this.state.eventVideo) {
             formData.append('eventVideo', this.state.eventVideo);
@@ -116,9 +158,9 @@ class ModifyEvent extends Component {
             });
 
             if (res.ok) {
-                this.setState({ 
-                    successMessage: 'Event modified successfully!', 
-                    errorMessage: '', 
+                this.setState({
+                    successMessage: 'Event modified successfully!',
+                    errorMessage: '',
                     addressError: '',
                     zipcodeError: '',
                 });
@@ -241,20 +283,74 @@ class ModifyEvent extends Component {
                             onChange={this.handleChange}
                         />
                     </div>
+
+                    {/* Displaying Images and Videos */}
                     <div>
-                        <label>Event Image:</label>
+                        <h3 className="text-lg font-semibold">Current Images:</h3>
+                        {this.state.eventImages.length > 0 ? (
+                            <ul className="mb-4">
+                                {this.state.eventImages.map((image, index) => (
+                                    <li key={index} className="flex items-center justify-between mb-2">
+                                        <span>{image.name || image}</span>
+                                        <button type="button" onClick={() => this.handleDeleteImage(index)} className="text-red-600 ml-2">Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No images uploaded.</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <h3 className="text-lg font-semibold">Current Thumbnail Image:</h3>
+                        {this.state.thumbnailImage ? (
+                            <div className="flex items-center justify-between mb-4">
+                                <span>{this.state.thumbnailImage.name || this.state.thumbnailImage}</span>
+                                <button type="button" onClick={this.handleDeleteThumbnail} className="text-red-600 ml-2">Delete</button>
+                            </div>
+                        ) : (
+                            <p>No thumbnail image uploaded.</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <h3 className="text-lg font-semibold">Current Event Video:</h3>
+                        {this.state.eventVideo ? (
+                            <div className="flex items-center justify-between mb-4">
+                                <span>{this.state.eventVideo}</span>
+                                <button type="button" onClick={this.handleDeleteVideo} className="text-red-600 ml-2">Delete</button>
+                            </div>
+                        ) : (
+                            <p>No video uploaded.</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block mb-2">Upload Images:</label>
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             onChange={this.handleImageChange}
+                            className="border rounded p-2"
                         />
                     </div>
                     <div>
-                        <label>Event Video:</label>
+                        <label className="block mb-2">Upload Thumbnail Image:</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={this.handleThumbnailChange}
+                            className="border rounded p-2"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-2">Upload Video:</label>
                         <input
                             type="file"
                             accept="video/*"
                             onChange={this.handleVideoChange}
+                            className="border rounded p-2"
                         />
                     </div>
                     <button type="submit">Submit</button>

@@ -17,7 +17,10 @@ const NavBar = () => {
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-            <Link to="/myprofile">My Profile</Link>
+          {!isOrganization && (
+              <Link to="/myprofile">My Profile</Link>
+            )}
+            
             {isOrganization && (
               <Link to="/my-events">My Events</Link>
             )}

@@ -24,6 +24,8 @@ import UserFeed from './components/UserFeed';
 import RSVPList from './components/RSVPList';
 import MyProfile from './components/MyProfile';
 import { useLocation } from 'react-router-dom';
+import CommentsPage from './components/CommentsPage';
+import RSVPPage from './components/RSVPPage';
 
 function AppContainer() {
   const location = useLocation();
@@ -75,7 +77,7 @@ function App() {
             <Route path="/myprofile" element={<MyProfile />} />
             <Route path="/profile/:userId" element={<UserProfile />} />
             <Route path="/login" element={<Login isPasswordChanged={isPasswordChanged} />} />
-            <Route path="/myprofile" element={<MyProfileCM />} />
+            <Route path="/myposts" element={<MyProfileCM />} />
             <Route path="/reset-password" element={<NewPassword />} />
             <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
             <Route path="/organization-profile" element={<OrganizationProfile />} />
@@ -83,6 +85,9 @@ function App() {
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/feed" element={<UserFeed />} />
             <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
+            <Route path="/comments/:postId" element={<CommentsPage />} />
+            <Route path="/rsvp-page" element={<RSVPPage />} />
+
           </Routes>
         </div>
       </div>

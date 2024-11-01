@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 //fetch post comments
 const fetchComments = async (postId) => {
-  const response = await fetch(`http://localhost:3000/comments/${postId}`);
+  const response = await fetch(`http://localhost:5010/comments/${postId}`);
   const data = await response.json();
   return data;
 };
 
 //add comment to post
 const addComment = async (postId, username, commentText) => {
-  const response = await fetch(`http://localhost:3000/comments/add`, {
+  const response = await fetch(`http://localhost:5010/comments/add`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ postId, username, commentText })

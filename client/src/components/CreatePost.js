@@ -9,7 +9,7 @@ const mapContainerStyle = {
 
 const defaultCenter = {
   lat: 40.43057607697865,  // default location
-  lng: -86.93598751743909,
+  lng: -86.93598751743909,              
 };
 
 const CreatePost = () => {  
@@ -78,10 +78,10 @@ const CreatePost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  /*if (postData.files.length === 0) {
+  if (postData.files.length === 0) {
     setError('Please upload at least one image or video.');
     return;
-  }*/ //media not sent to backend for now
+  } //at least one image must be uploaded
 
   const postId = Date.now().toString(); //unique id using timestamp
   const timestamp = new Date().toISOString(); //current time as timestamp
@@ -93,12 +93,10 @@ const CreatePost = () => {
   formData.append('location', postData.location);
   formData.append('event', postData.event);
   formData.append('timestamp', timestamp);
-  formData.append('likeCount', 0);
-  formData.append('likes', []);
 
-  /*postData.files.forEach((file, index) => {
+  postData.files.forEach((file, index) => {
     formData.append('files', file);  // Append each file to the FormData object
-  });*/
+  });
 
   //logging for debugging
   console.log([...formData.entries()]);

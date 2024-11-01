@@ -17,6 +17,7 @@ const User = require('./user.js'); // import the user model
 const UserProfile = require('./userprofile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
+const commentRoutes = require('./commentRoutes.js'); //import comment routes
 
 // mongo db stuff
 const connectDB = require('./db');
@@ -38,7 +39,8 @@ const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -402,6 +404,9 @@ app.use('/api/events', eventRoutes); // Integrate event routes
 
 //using post routes
 app.use('/api/PostRoutes', postRoutes);
+
+//using comment routes
+app.use('/api/comments', commentRoutes);
 
 app.use("/api", recommendationsRouter);
 

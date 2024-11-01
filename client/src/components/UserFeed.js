@@ -8,15 +8,77 @@ const UserFeed = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
   const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [transportationFilter, setTransportationFilter] = useState("");
+  const [profileData, setProfileData] = useState(null);
+  const [recommendedKeywords, setRecommendedKeywords] = useState([]);
 
-  // fetch all events
-  const fetchAllEvents = async () => {
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  useEffect(() => {
+    if (profileData) {
+      fetchRecommendationsAndEvents();
+    }
+  }, [profileData]);
+
+  // fetch user profile data
+  const fetchUserProfile = async () => {
+    const username = localStorage.getItem("userId");
+    try {
+      const res = await fetch(`http://localhost:5010/api/users/${username}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.userProfile) {
+          setProfileData(data.userProfile);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
+  // fetch recommendations based on user profile and then fetch events
+  const fetchRecommendationsAndEvents = async () => {
+    try {
+      const res = await fetch("http://localhost:5010/api/recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileData),
+      });
+
+      if (res.ok) {
+        const { keywords } = await res.json();
+        setRecommendedKeywords(keywords);
+        fetchAllEvents(keywords);
+      } else {
+        setErrorMessage("Error fetching recommendations");
+      }
+    } catch (error) {
+      setErrorMessage("Error fetching recommendations");
+    }
+  };
+
+  // fetch all events and filter based on recommended keywords
+  const fetchAllEvents = async (keywords) => {
     try {
       const res = await fetch("http://localhost:5010/api/events");
 
       if (res.ok) {
-        const data = await res.json();
-        setFeedData(data);
+        let data = await res.json();
+
+        // Filter events based on recommended keywords
+        if (keywords && keywords.length > 0) {
+          data = data.filter((event) => {
+            const combinedText =
+              `${event.name} ${event.type} ${event.description}`.toLowerCase();
+            return keywords.some((keyword) =>
+              combinedText.includes(keyword.toLowerCase())
+            );
+          });
+        }
+
+        setFeedData(filterEventsByTransportation(data));
       } else {
         setErrorMessage("Error fetching events data");
       }
@@ -25,31 +87,44 @@ const UserFeed = () => {
     }
   };
 
-  // fetch user's bookmarks on component mount
-  useEffect(() => {
-    fetchAllEvents();
-    fetchUserBookmarks();
-  }, []);
+  // fetch user's existing bookmarks to highlight them on load
+  const fetchUserBookmarks = async () => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/profiles/${username}/bookmarks`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedEvents(data.bookmarks.map((event) => event._id)); // Store only event IDs
+      }
+    } catch (error) {
+      console.error("Error fetching user bookmarks:", error);
+    }
+  };
 
+  // filter events by transportation preference
+  const filterEventsByTransportation = (events) => {
+    if (!transportationFilter) return events;
+    return events.filter((event) => {
+      if (transportationFilter === "walking") {
+        return parseInt(event.zipcode, 10) === parseInt(profileData.location);
+      } else if (transportationFilter === "flying") {
+        return parseInt(event.zipcode, 10) !== parseInt(profileData.location);
+      }
+      return true;
+    });
+  };
+
+  // handle transportation filter changes
+  const handleTransportationFilterChange = (e) => {
+    setTransportationFilter(e.target.value);
+  };
 
   // format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
-  // fetch user's existing bookmarks to highlight them on load
-  const fetchUserBookmarks = async () => {
-    const username = localStorage.getItem("username");
-    try {
-      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
-      if (res.ok) {
-        const data = await res.json();
-        setBookmarkedEvents(data.bookmarks.map(event => event._id)); // Store only event IDs
-      }
-    } catch (error) {
-      console.error("Error fetching user bookmarks:", error);
-    }
   };
 
   // Handle RSVP for an event
@@ -70,7 +145,7 @@ const UserFeed = () => {
       );
 
       if (res.ok) {
-        fetchAllEvents(); // refresh events after RSVP
+        fetchAllEvents(recommendedKeywords); // refresh events after RSVP
       } else {
         setErrorMessage("Error RSVPing to the event");
       }
@@ -79,46 +154,45 @@ const UserFeed = () => {
     }
   };
 
-/ handle bookmarking/unbookmarking of an event
-  const handleBookmark = async (eventId, eventName) => {
-    const username = localStorage.getItem("username");
-    try {
-      const res = await fetch(
-        `http://localhost:5010/api/profiles/bookmark`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, eventId }),
-        }
-      );
+  // handle bookmarking/unbookmarking of an event
+  const handleBookmark = async (eventId, eventName) => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/bookmark`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, eventId }),
+      });
 
-      if (res.ok) {
-        const isRemoving = bookmarkedEvents.includes(eventId);
-        setBookmarkedEvents((prev) =>
-          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
-        );
+      if (res.ok) {
+        const isRemoving = bookmarkedEvents.includes(eventId);
+        setBookmarkedEvents((prev) =>
+          isRemoving ? prev.filter((id) => id !== eventId) : [...prev, eventId]
+        );
 
-        // show confirmation message based on action
-        if (isRemoving) {
-          setConfirmationMessage(`"${eventName}" has been removed from your bookmarks.`);
-        } else {
-          setConfirmationMessage(`"${eventName}" has been added to your bookmarks.`);
-        }
-        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 3 seconds
-      } else {
-        setErrorMessage("Error updating bookmark status.");
-      }
-    } catch (error) {
-      setErrorMessage("Error updating bookmark status.");
-    }
-  };
-  
-  
+        // show confirmation message based on action
+        if (isRemoving) {
+          setConfirmationMessage(
+            `"${eventName}" has been removed from your bookmarks.`
+          );
+        } else {
+          setConfirmationMessage(
+            `"${eventName}" has been added to your bookmarks.`
+          );
+        }
+        setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 5 seconds
+      } else {
+        setErrorMessage("Error updating bookmark status.");
+      }
+    } catch (error) {
+      setErrorMessage("Error updating bookmark status.");
+    }
+  };
+
   const handleRemoveRSVP = async (eventId) => {
     const username = localStorage.getItem("username");
-    console.log("Remove RSVP clicked with Event ID:", eventId);
     if (!username) {
       setErrorMessage("User is not logged in");
       return;
@@ -139,8 +213,7 @@ const UserFeed = () => {
       );
 
       if (res.ok) {
-        fetchAllEvents();
-        console.log("aysu");
+        fetchAllEvents(recommendedKeywords);
       } else {
         setErrorMessage("Error removing RSVP from the event");
       }
@@ -162,10 +235,25 @@ const UserFeed = () => {
         )}
         <button
           className="btn btn-outline btn-primary mb-4 self-center"
-          onClick={fetchAllEvents}
+          onClick={() => fetchAllEvents(recommendedKeywords)}
         >
           Refresh Feed
         </button>
+
+        <div className="flex gap-4 mb-4">
+          <label className="flex items-center gap-2">
+            <span>Transportation Preference:</span>
+            <select
+              className="select select-primary"
+              value={transportationFilter}
+              onChange={handleTransportationFilterChange}
+            >
+              <option value="">None</option>
+              <option value="walking">Walking</option>
+              <option value="flying">Flying</option>
+            </select>
+          </label>
+        </div>
 
         {feedData.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[600px]">
@@ -177,7 +265,9 @@ const UserFeed = () => {
                 {/* Bookmark Button */}
                 <button
                   className={`absolute top-2 right-2 ${
-                    bookmarkedEvents.includes(event._id) ? "text-blue-500" : "text-gray-500"
+                    bookmarkedEvents.includes(event._id)
+                      ? "text-blue-500"
+                      : "text-gray-500"
                   } hover:text-primary focus:outline-none`}
                   onClick={() => handleBookmark(event._id, event.name)}
                   aria-label="Bookmark"
@@ -194,8 +284,10 @@ const UserFeed = () => {
                     Date: {formatDate(event.date)}
                   </p>
                   <p className="text-sm text-gray-600 mb-3">
-                    Location: {event.location}
+                    Location: {event.address}
                   </p>
+                  <p>{event.type}</p>
+                  <p>{event.description}</p>
                 </div>
 
                 {/* Event Image */}
@@ -217,14 +309,20 @@ const UserFeed = () => {
                     </button>
                   </Link>
                   <button
-                    className={`btn btn-outline btn-sm ml-2 ${event.rsvpUsers.includes(localStorage.getItem('userId')) ? 'btn-danger' : 'btn-success'}`}
+                    className={`btn btn-outline btn-sm ml-2 ${
+                      event.rsvpUsers.includes(localStorage.getItem("userId"))
+                        ? "btn-danger"
+                        : "btn-success"
+                    }`}
                     onClick={() =>
-                      event.rsvpUsers.includes(localStorage.getItem('userId'))
+                      event.rsvpUsers.includes(localStorage.getItem("userId"))
                         ? handleRemoveRSVP(event._id)
                         : handleRSVP(event._id)
                     }
                   >
-                    {event.rsvpUsers.includes(localStorage.getItem('userId')) ? 'Un-RSVP' : 'RSVP'}
+                    {event.rsvpUsers.includes(localStorage.getItem("userId"))
+                      ? "Un-RSVP"
+                      : "RSVP"}
                   </button>
                 </div>
               </div>

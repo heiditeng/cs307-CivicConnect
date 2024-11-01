@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const UserProfile = () => {
-  // Extract userId from the URL using useParams
-  const { userId } = useParams();
+const MyProfile = () => {
   const [userData, setUserData] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [mlSuggestions, setMlSuggestions] = useState("");
+  const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
   const [rsvpEvents, setRsvpEvents] = useState([]);
 
   useEffect(() => {
-    if (!userId) {
-      setErrorMessage("User ID not found. Please check the URL.");
-      return;
-    }
-
-    // Fetch user data and associated profile, and RSVPs on component mount
     const fetchUserData = async () => {
+      const userId = localStorage.getItem("userId");
+      const username = localStorage.getItem("username");
+      if (!userId || !username) {
+        setErrorMessage("No user ID or username found. Please log in again.");
+        return;
+      }
+
       try {
+        // fetch user data including the populated userProfile field
         const userResponse = await fetch(`http://localhost:5010/api/users/${userId}`);
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setUserData(userData);
 
+          // set profile data if it exists
           if (userData.userProfile) {
             setProfileData(userData.userProfile);
+            // fetchMlSuggestions(userData.userProfile);
           }
-          fetchRsvpEvents(userData.username);
+
+          // fetch other associated data
+          fetchBookmarkedEvents(username);
+          fetchRsvpEvents(username);
         } else {
           console.error("User not found");
           setErrorMessage("User not found. Please contact support.");
@@ -38,7 +45,24 @@ const UserProfile = () => {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, []);
+
+  // Function to fetch bookmarked events
+  const fetchBookmarkedEvents = async (username) => {
+    try {
+      const res = await fetch(`http://localhost:5010/api/profiles/${username}/bookmarks`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedEvents(data.bookmarks); // Assume response returns an array of event objects
+      } else {
+        console.error("Error fetching bookmarked events");
+      }
+    } catch (error) {
+      console.error("Error fetching bookmarked events:", error);
+    }
+  };
+
+  // Function to fetch RSVP'd events
   const fetchRsvpEvents = async (username) => {
     try {
       const res = await fetch(`http://localhost:5010/api/profiles/${username}/rsvpEvents`);
@@ -52,6 +76,33 @@ const UserProfile = () => {
       console.error("Error fetching RSVP'd events:", error);
     }
   };
+
+  /*const fetchMlSuggestions = async (profileData) => {
+    console.log("Sending profile data:", profileData); // Log the data being sent
+    try {
+      const res = await fetch("http://localhost:5020/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          availability: profileData.availability,
+          location: profileData.location,
+          occupation: profileData.occupation,
+          interests: profileData.interests,
+          hobbies: profileData.hobbies,
+        }),
+      });
+  
+      if (res.ok) {
+        const result = await res.json();
+        console.log("ML suggestion received:", result.prediction); // Log the received prediction
+        setMlSuggestions(result.prediction);
+      } else {
+        console.error("Error fetching ML suggestions");
+      }
+    } catch (error) {
+      console.error("Error fetching ML suggestions:", error);
+    }
+  };*/
 
   return (
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
@@ -96,6 +147,9 @@ const UserProfile = () => {
                   <input type="radio" name="rating-3" className="mask mask-heart bg-green-400" />
                 </div>
               </div>
+              <Link to="/info-form">
+                <button className="btn btn-outline btn-accent">Edit Profile</button>
+              </Link>
             </div>
           ) : (
             <div className="text-center">
@@ -109,6 +163,8 @@ const UserProfile = () => {
         </div>
 
         <div className="w-full md:w-2/3 flex flex-col gap-4">
+         
+
           {/* RSVP'd Events Section */}
           <div className="p-6 bg-base-100 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">RSVP'd Events</h2>
@@ -126,10 +182,28 @@ const UserProfile = () => {
               <p className="text-gray-500">No RSVP'd events found.</p>
             )}
           </div>
+
+          {/* Bookmarked Events Section */}
+          <div className="p-6 bg-base-100 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Bookmarked Events</h2>
+            {bookmarkedEvents.length > 0 ? (
+              <ul>
+                {bookmarkedEvents.map((event) => (
+                  <li key={event._id} className="mb-2">
+                    <Link to={`/event-details/${event._id}`} className="text-primary hover:underline">
+                      {event.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No bookmarked events found.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default UserProfile;
+export default MyProfile;

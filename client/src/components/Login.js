@@ -53,7 +53,11 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
           setShowSaveCredsPrompt(true);
         } else {
           // If credentials match, proceed to feed
-          navigate('/feed');
+          if (localStorage.getItem('isOrganization')) {
+            navigate('/my-events');
+          } else {
+            navigate('/feed');
+          }
         }
       } else {
         // Clear saved credentials if login fails due to mismatch

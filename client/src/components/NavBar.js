@@ -4,7 +4,6 @@ import './NavBar.css';
 
 const NavBar = () => {
   const isOrganization = localStorage.getItem('isOrganization') === 'true';
-  const username = localStorage.getItem('username');
   // get curr location
   const location = useLocation(); 
 
@@ -18,7 +17,7 @@ const NavBar = () => {
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-            {!isOrganization && (
+          {!isOrganization && (
               <Link to="/myprofile">My Profile</Link>
             )}
             
@@ -35,18 +34,16 @@ const NavBar = () => {
         <p className="navbar-title">CivicConnect</p>
       </div>
 
-      {/* either create event or go to feed */}
+      {/*either create even or go to feed */}
       <div className="navbar-end">
         {isOrganization ? (
           <Link to="/create-event" className="btn glass">
             Create an Event
           </Link>
         ) : (
-          username && (
-            <Link to="/feed" className="btn glass">
-              Go to Feed
-            </Link>
-          )
+          <Link to="/feed" className="btn glass">
+            Go to Feed
+          </Link>
         )}
       </div>
     </nav>

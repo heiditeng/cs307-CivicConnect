@@ -23,6 +23,21 @@ import CreatePost from './components/CreatePost';
 import UserFeed from './components/UserFeed';
 import RSVPList from './components/RSVPList';
 import MyProfile from './components/MyProfile';
+import { useLocation } from 'react-router-dom';
+
+function AppContainer() {
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log('Clearing login-related localStorage items...');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('sessionID');
+    localStorage.removeItem('isOrganization');
+    localStorage.removeItem('username');
+  }, [location]);
+
+  return null;
+}
 
 function App() {
   const title = "Welcome to CivicConnect!";
@@ -38,19 +53,12 @@ function App() {
     }
   };
 
-  // Clear only login-related localStorage items
-  useEffect(() => {
-    console.log('Clearing login-related localStorage items...');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('sessionID');
-  }, []);
-
-
   return (
     <Router>
       <div className="App">
         <NavBar />
         <div className="content">
+          <AppContainer />
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', marginBottom: '30px' }}>
             <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
           </div>
@@ -78,7 +86,6 @@ function App() {
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/feed" element={<UserFeed />} />
             <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
-
           </Routes>
         </div>
       </div>

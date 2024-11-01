@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
@@ -11,11 +11,6 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false);
   const [credsLoaded, setCredsLoaded] = useState(false);
   const navigate = useNavigate();
-
-  // Load saved credentials on component mount
-  useEffect(() => {
-    handleLoadSavedCreds();
-  }, []);
 
   // Handle login form submission
   const handleLogin = async (e) => {
@@ -42,7 +37,6 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('isOrganization', data.isOrganization);
-        console.log(localStorage.getItem('isOrganization'));
 
         // Check if credentials have changed
         const savedUsername = localStorage.getItem('savedUsername');
@@ -107,7 +101,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
     window.location.href = 'http://localhost:5010/auth/google';
   };
 
-  // Handle loading saved credentials
+  // Handle loading saved credentials when the button is clicked
   const handleLoadSavedCreds = () => {
     const savedUsername = localStorage.getItem('savedUsername');
     const savedPassword = localStorage.getItem('savedPassword');
@@ -193,7 +187,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
             className="load-creds-button"
             type="button"
             onClick={handleLoadSavedCreds}
-            disabled={credsLoaded}
+            disabled={credsLoaded || (username && password)}
           >
             Load Saved Credentials
           </button>

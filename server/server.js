@@ -17,7 +17,7 @@ const User = require('./user.js'); // import the user model
 const UserProfile = require('./userprofile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
-const commentRoutes = require('./commentRoutes.js'); //import comment routes
+const subscribers = require('./subscribers.js');
 
 // mongo db stuff
 const connectDB = require('./db');
@@ -400,7 +400,10 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/organizations', organizationRoutes);
 
 // Using the event routes
-app.use('/api/events', eventRoutes); // Integrate event routes
+app.use('/api/events', eventRoutes);
+
+// Use the subscriber routes
+app.use('/api/newsletter', subscribers);
 
 //using post routes
 app.use('/api/PostRoutes', postRoutes);

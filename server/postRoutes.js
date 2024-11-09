@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const Post = require('./post.js'); // Import post model
-const fileUpload = require('./fileUpload.js'); //import upload model
+// const fileUpload = require('./fileUpload.js'); //import upload model
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Comment = require('./comment'); 
+const Comment = require('./comments'); 
 
 // Route to fetch comments for a specific post
 router.get('/:postId', async (req, res) => {

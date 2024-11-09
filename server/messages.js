@@ -13,6 +13,20 @@ const emailTemplates = {
       subject: 'Test Email',
       text: 'This is a test email from CivicConnect.',
     },
+    eventModification: (username, eventName, updatedEvent, eventLink) => `
+        <h2>Event Update Notification</h2>
+        <p>Dear ${username},</p>
+        <p>The event <strong>${eventName}</strong> that you RSVP'd to has been updated. Here are the latest details:</p>
+        <ul>
+            <li>Date: ${updatedEvent.date}</li>
+            <li>Time: ${updatedEvent.startTime} - ${updatedEvent.endTime}</li>
+            <li>Location: ${updatedEvent.address}, ${updatedEvent.zipcode}</li>
+            <li>Description: ${updatedEvent.description}</li>
+        </ul>
+        <p>You can view the full event details here: <a href="${eventLink}">View Event</a></p>
+        <p>Thank you for staying engaged with us!</p>
+        <p>Best regards,<br>CivicConnect Team</p>
+    `,
   };
   
   const errorMessages = {

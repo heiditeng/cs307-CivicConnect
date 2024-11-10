@@ -26,7 +26,7 @@ const NavBar = () => {
             )}
 
             {isOrganization && (
-              <Link to="/organization-profile/:userId">My Profile</Link>
+              <Link to="/organization-profile">My Profile</Link>
             )}
             <Link to="/">Log Out</Link>
           </div>

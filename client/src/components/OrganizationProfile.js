@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const OrganizationProfile = () => {
   const userId = localStorage.getItem("userId"); // Get userId from localStorage
+  const username = localStorage.getItem("username");
   const [orgData, setOrgData] = useState(null);  // Holds organization data
   const [errorMessage, setErrorMessage] = useState("");  // Holds error messages
   const navigate = useNavigate();
@@ -41,16 +42,14 @@ const OrganizationProfile = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
-      <div className="flex flex-col md:flex-row w-full max-w-5xl gap-4">
+    <div className="flex justify-center items-center min-h-screen p-4 bg-gray-100">
+      <div className="flex flex-col md:flex-row w-full max-w-4xl gap-6">
         
         {/* Left side with organization details */}
-        <div className="w-full md:w-1/3 p-6 bg-base-200 rounded-lg shadow-lg">
-          <h2 className="flex items-center text-2xl font-bold mb-4">
-            <span className="mr-4">
-              {orgData ? orgData.name : "Organization Profile"}
-            </span>
-          </h2>
+        <div className="w-full md:w-1/4 p-4 bg-base-200 rounded-lg shadow-md">
+        <h2 className="text-4xl font-semibold mb-4 text-lg">
+          {username ? username : "Organization Profile"}
+        </h2>
 
           {orgData ? (
             <div>
@@ -94,8 +93,8 @@ const OrganizationProfile = () => {
         </div>
 
         {/* Right side with organization events */}
-        <div className="w-full md:w-2/3 flex flex-col gap-4">
-          <div className="p-6 bg-base-100 rounded-lg shadow-lg">
+        <div className="w-full md:w-3/4 flex flex-col gap-6">
+          <div className="p-4 bg-base-100 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
             
             {orgData ? (

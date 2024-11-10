@@ -20,6 +20,8 @@ const postRoutes = require('./postRoutes.js'); //import post routes
 const subscribers = require('./subscribers.js');
 const commentRoutes = require('./commentRoutes.js'); 
 const notificationRoutes = require('./notificationRoutes');
+const mongoose = require('mongoose');
+const Event = require('./event.js'); 
 
 
 // mongo db stuff
@@ -124,15 +126,21 @@ app.post('/api/profiles/bookmark', async (req, res) => {
         const user = await User.findOne({ username });
         if (!user) return res.status(404).json({ error: "User not found" });
 
+        const event = await Event.findById(eventId);
+        if (!event) return res.status(404).json({ error: "Event not found" });
+
         const isBookmarked = user.bookmarks.includes(eventId);
 
         if (isBookmarked) {
             user.bookmarks = user.bookmarks.filter((id) => id.toString() !== eventId);
+            event.bookmarkUsers = event.bookmarkUsers.filter((id) => id.toString() !== user._id.toString());
         } else {
             user.bookmarks.push(eventId);
+            event.bookmarkUsers.push(user._id);
         }
 
         await user.save();
+        await event.save();
 
         res.status(200).json({
             message: isBookmarked ? "Bookmark removed" : "Bookmark added",

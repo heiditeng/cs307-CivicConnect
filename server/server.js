@@ -18,6 +18,9 @@ const UserProfile = require('./userprofile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
 const subscribers = require('./subscribers.js');
+const commentRoutes = require('./commentRoutes.js'); 
+const notificationRoutes = require('./notificationRoutes');
+
 
 // mongo db stuff
 const connectDB = require('./db');
@@ -39,7 +42,8 @@ const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -407,7 +411,13 @@ app.use('/api/newsletter', subscribers);
 //using post routes
 app.use('/api/PostRoutes', postRoutes);
 
+//using comment routes
+app.use('/api/comments', commentRoutes);
+
 app.use("/api", recommendationsRouter);
+
+app.use('/api/notifications', notificationRoutes);
+
 
 // using port 5010 bc 5000 taken
 // app.listen(5010, () => {console.log("Server has started on port 5010")})

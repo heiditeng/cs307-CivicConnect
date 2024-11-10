@@ -4,6 +4,20 @@ const router = express.Router();
 const path = require("path");
 const Event = require("./event");
 const User = require("./user");
+const { emailTemplates } = require('./messages');
+const Notification = require('./notification');
+
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'civicconnect075@gmail.com',
+    pass: 'qsdg tgcs azwy duqa',
+  },
+});
 
 const app = express();
 
@@ -126,9 +140,14 @@ router.delete("/events/:id", async (req, res) => {
 });
 
 // Route to modify an event
+// Route to modify an event and send notification
 router.put(
   "/events/:id",
-  upload.fields([{ name: "eventImages" }, { name: "eventVideo" }, { name: "thumbnailImage" }]),
+  upload.fields([
+    { name: "eventImages" },
+    { name: "eventVideo" },
+    { name: "thumbnailImage" },
+  ]),
   async (req, res) => {
     const { id } = req.params;
     const {
@@ -155,14 +174,13 @@ router.put(
       !type ||
       !userId
     ) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Name, date, address, zipcode, maxCapacity, type, description, and userId are required",
-        });
+      return res.status(400).json({
+        error:
+          "Name, date, address, zipcode, maxCapacity, type, description, and userId are required",
+      });
     }
 
+    // Construct updated data object
     const updatedData = {
       name,
       date,
@@ -173,19 +191,65 @@ router.put(
       maxCapacity,
       type,
       description,
-      image: req.files.eventImages ? req.files.eventImages.map(file => file.originalname) : [],
-      thumbnailImage: req.files.thumbnailImage ? req.files.thumbnailImage[0].originalname : null,
-      video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
+      image: req.files.eventImages
+        ? req.files.eventImages.map((file) => file.originalname)
+        : [],
+      thumbnailImage: req.files.thumbnailImage
+        ? req.files.thumbnailImage[0].originalname
+        : null,
+      video: req.files.eventVideo
+        ? req.files.eventVideo[0].originalname
+        : null,
       userId,
     };
 
     try {
+      // Update the event in the database
       const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, {
-        new: true,
+        new: true, lastModified: new Date(),
       });
       if (!updatedEvent) {
         return res.status(404).json({ error: "Event not found" });
       }
+
+      console.log("Event updated successfully:", updatedEvent);
+
+      // Fetch RSVP’d users and send notifications
+      const rsvpUsers = await User.find({
+        _id: { $in: updatedEvent.rsvpUsers },
+      });
+
+      await Promise.all(
+        rsvpUsers.map(async (user) => {
+          const mailOptions = {
+            from: "civicconnect075@gmail.com",
+            to: user.email,
+            subject: `Update on Event: ${updatedEvent.name}`,
+            html: emailTemplates.eventModification(
+              user.username,
+              updatedEvent.name,
+              updatedEvent,
+              `http://localhost:3000/modify-events/${updatedEvent._id}`
+            ),
+          };
+
+          await transporter.sendMail(mailOptions);
+          console.log(`Notification sent to ${user.email}`);
+
+          // save the notification in the database
+          const notification = new Notification({
+            userId: user._id,
+            eventId: updatedEvent._id,
+            eventName: updatedEvent.name,
+            changes: `Updated details: Date - ${updatedEvent.date}, Time - ${updatedEvent.startTime} to ${updatedEvent.endTime}, Location - ${updatedEvent.address}, ${updatedEvent.zipcode}`,
+          });
+
+          await notification.save();
+          console.log(`Notification sent and saved for ${user.email} for event ${updatedEvent.name}`);
+        })
+      );
+
+      // Send the updated event as the response
       res.json(updatedEvent);
     } catch (error) {
       console.error("Error updating event:", error.message);

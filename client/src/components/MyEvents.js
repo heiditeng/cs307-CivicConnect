@@ -71,7 +71,7 @@ const MyEvents = () => {
                   </h3>
                   <p className="text-sm text-gray-600">
                     <strong>Organization:</strong>{" "}
-                    <Link to={`/organization-profile`}>
+                    <Link to={`/organization-profile/:userId`}>
                       <strong className="text-blue-600 hover:underline">
                         {event.userId}
                       </strong>

@@ -3,7 +3,7 @@ const router = express.Router();
 const OrganizationProfile = require('./organizationProfile');
 
 // Route to fetch organization profile by userId
-router.get('/organization/:id', async (req, res) => {
+router.get('/organization/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {

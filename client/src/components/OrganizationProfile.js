@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import MyEvents from "./MyEvents";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const OrganizationProfile = () => {
-  const { userId } = useParams();  // Extract userId from URL
+  const userId = localStorage.getItem("userId"); // Get userId from localStorage
   const [orgData, setOrgData] = useState(null);  // Holds organization data
   const [errorMessage, setErrorMessage] = useState("");  // Holds error messages
   const navigate = useNavigate();
 
-  // Fetch organization data
+  // Fetch organization data on mount
   useEffect(() => {
-    console.log("userId:", userId);  // Log the userId to verify it's correct
+    console.log("checking userId:", userId);
 
     if (!userId) {
       setErrorMessage("User ID not found. Please check the URL.");
@@ -32,9 +32,8 @@ const OrganizationProfile = () => {
       }
     };
 
-    fetchOrgData();  // Call function to fetch data
-
-  }, [userId]);  // Re-run effect if userId changes
+    fetchOrgData();  // Fetch organization data on component mount
+  }, [userId]);
 
   // Handle newsletter signup
   const handleNewsletterSignup = () => {
@@ -45,10 +44,12 @@ const OrganizationProfile = () => {
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col md:flex-row w-full max-w-5xl gap-4">
         
-        {/* Left side with organization bio */}
+        {/* Left side with organization details */}
         <div className="w-full md:w-1/3 p-6 bg-base-200 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-4">
-            {orgData ? orgData.name : "Organization Profile"}
+          <h2 className="flex items-center text-2xl font-bold mb-4">
+            <span className="mr-4">
+              {orgData ? orgData.name : "Organization Profile"}
+            </span>
           </h2>
 
           {orgData ? (
@@ -70,10 +71,10 @@ const OrganizationProfile = () => {
                 </button>
               </div>
 
-              {/* Link to View Subscribers */}
+              {/* View Subscribers Section */}
               <div className="mb-4">
                 <p className="text-lg font-semibold">View Newsletter Subscribers:</p>
-                <button 
+                <button
                   onClick={() => navigate('/subscribers')}
                   className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 >
@@ -98,7 +99,7 @@ const OrganizationProfile = () => {
             <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
             
             {orgData ? (
-              <MyEvents organizationId={orgData._id} />
+              <MyEvents organizationId={orgData._id} /> // Pass organization ID to MyEvents
             ) : (
               <p className="text-gray-500">No events available.</p>
             )}

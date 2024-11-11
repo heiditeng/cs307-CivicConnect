@@ -351,4 +351,66 @@ router.get("/rsvp-list/:id", async (req, res) => {
   }
 });
 
+//event feedback
+router.get("/events/:id/feedback", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const event = await Event.findById(id).populate('userRatings.username', 'name');
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.json(event.userRatings); // Return the userRatings array
+  } catch (error) {
+    console.error("Error fetching feedback:", error.message);
+    res.status(500).json({ error: "Error fetching feedback" });
+  }
+});
+
+//add event feedback
+router.post("/events/:id/feedback", async (req, res) => {
+  const { id } = req.params;
+  const { username, rating, feedback } = req.body;
+
+  try {
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // Push new feedback into the userRatings array
+    event.userRatings.push({ username, rating, feedback });
+    await event.save();
+
+    res.status(201).json({ message: "Feedback added successfully" });
+  } catch (error) {
+    console.error("Error adding feedback:", error.message);
+    res.status(500).json({ error: "Error adding feedback" });
+  }
+});
+
+// Calculate average rating for a user
+router.get("/user/:userId/average-rating", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    //get username
+    const events = await Event.find({ "userRatings.username": userId });
+
+    //collect ratings
+    const ratings = events
+      .flatMap(event => event.userRatings)
+      .filter(rating => rating.username.toString() === userId)
+      .map(rating => rating.rating);
+
+    //calculate average
+    const averageRating = ratings.length > 0
+      ? (ratings.reduce((acc, val) => acc + val, 0) / ratings.length).toFixed(2)
+      : null;
+
+    res.json({ averageRating });
+  } catch (error) {
+    console.error("Error fetching average rating:", error.message);
+    res.status(500).json({ error: "Error fetching average rating" });
+  }
+});
+
 module.exports = router;

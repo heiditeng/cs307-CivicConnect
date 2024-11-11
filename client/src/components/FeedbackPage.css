@@ -1,0 +1,51 @@
+/* FeedbackPage.css */
+.ratings-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .ratings-list {
+    margin-bottom: 20px;
+  }
+  
+  .rating-item {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .rating-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .rating-form label {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .rating-form select, .rating-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .rating-form button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .rating-form button:hover {
+    background-color: #45a049;
+  }
+  

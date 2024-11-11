@@ -15,7 +15,10 @@ const EventSchema = new mongoose.Schema({
   video: { type: String },
   userId: { type: String, required: true },
   rsvpUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  bookmarkUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  bookmarkUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  userRatings: [{username: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    feedback: { type: String }}]
 });
 
 module.exports = mongoose.model('Event', EventSchema);

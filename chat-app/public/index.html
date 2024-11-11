@@ -51,6 +51,8 @@
             <button onclick="viewProfile('user123')">View user123's Profile</button>
             <div id="notification-feed"></div>
             <button onclick="clearNotifications()">Clear Notifications</button>
+            <button id="incrementEventButton">Increment Event Views</button>
+            <span id="eventViewsCount">Views: 0</span>
           </div>
           <div id="blank-tab" class="tab" style="display: none;">
             <button onclick="sendUnreadEmail()">Send Email with Unread Messages</button>
@@ -77,6 +79,7 @@
     let room;
     let notificationsEnabled = true;
     let timer1, timer2; // To store timer IDs
+    const eventLink = 'https://google.com';
 
     document.addEventListener('DOMContentLoaded', () => {
       // Show the initial views
@@ -530,25 +533,54 @@
     }
 
     // Back button handler
-  function showRoomList() {
-    // Disconnect from the room
-    if (socket) {
-      socket.emit('leaveRoom', { room_id: room });
-      socket.disconnect();
-      socket = null;
+    function showRoomList() {
+      // Disconnect from the room
+      if (socket) {
+        socket.emit('leaveRoom', { room_id: room });
+        socket.disconnect();
+        socket = null;
+      }
+      room = null;
+      // Fetch and display the room list
+      fetch(`/users/${user}/rooms`)
+        .then(response => response.json())
+        .then(rooms => {
+          displayRoomList(rooms);
+        })
+        .catch(error => {
+          console.error('Error fetching user rooms:', error);
+          alert('Error fetching your rooms. Please try again.');
+        });
     }
-    room = null;
-    // Fetch and display the room list
-    fetch(`/users/${user}/rooms`)
+
+    function updateEventViews(views) {
+      document.getElementById('eventViewsCount').textContent = `Views: ${views}`;
+    }
+
+    // Handle the button click to increment views
+    document.getElementById('incrementEventButton').addEventListener('click', () => {
+      fetch('/event/increment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ link: eventLink })
+      })
       .then(response => response.json())
-      .then(rooms => {
-        displayRoomList(rooms);
+      .then(data => {
+        updateEventViews(data.views);
       })
       .catch(error => {
-        console.error('Error fetching user rooms:', error);
-        alert('Error fetching your rooms. Please try again.');
+        console.error('Error incrementing event views:', error);
       });
-  }
+    });
+
+    // Listen for live updates via Socket.IO
+    socket.on('eventUpdated', (data) => {
+      if (data.link === eventLink) {
+        updateEventViews(data.views);
+      }
+    });
   </script>
 </body>
 </html>

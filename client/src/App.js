@@ -25,6 +25,7 @@ import RSVPList from './components/RSVPList';
 import MyProfile from './components/MyProfile';
 import NewsletterSignup from './components/NewsletterSignup';
 import Subscribers from './components/Subscribers';
+import EditProfile from './components/EditProfile';
 import { useLocation } from 'react-router-dom';
 
 function AppContainer() {
@@ -87,6 +88,7 @@ function App() {
             <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
             <Route path="/newsletter" element={<NewsletterSignup />} /> 
             <Route path="/subscribers" element={<Subscribers />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
           </Routes>
         </div>
       </div>

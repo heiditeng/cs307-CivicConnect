@@ -41,15 +41,20 @@ const OrganizationProfile = () => {
     navigate('/newsletter');  // Navigate to newsletter signup page
   };
 
+  // Handle Edit Profile
+  const handleEditProfile = () => {
+    navigate('/edit-profile'); // Navigate to edit profile page (you need to create this route)
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen p-4 bg-gray-100">
       <div className="flex flex-col md:flex-row w-full max-w-4xl gap-6">
         
         {/* Left side with organization details */}
         <div className="w-full md:w-1/4 p-4 bg-base-200 rounded-lg shadow-md">
-        <h2 className="text-4xl font-semibold mb-4 text-lg">
-          {username ? username : "Organization Profile"}
-        </h2>
+          <h2 className="text-4xl font-semibold mb-4 text-l">
+            {username ? username : "Organization Profile"}
+          </h2>
 
           {orgData ? (
             <div>
@@ -78,6 +83,16 @@ const OrganizationProfile = () => {
                   className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 >
                   View Subscribers
+                </button>
+              </div>
+
+              {/* Edit Profile Button */}
+              <div className="mb-4">
+                <button
+                  onClick={handleEditProfile}
+                  className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                >
+                  Edit Profile
                 </button>
               </div>
             </div>

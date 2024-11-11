@@ -53,6 +53,8 @@
             <button onclick="clearNotifications()">Clear Notifications</button>
             <button id="incrementEventButton">Increment Event Views</button>
             <span id="eventViewsCount">Views: 0</span>
+            <button onclick="saveUserPost('user123')">Save user123's Post</button>
+            <button onclick="unsaveUserPost('user123')">Unsave user123's Post</button>
           </div>
           <div id="blank-tab" class="tab" style="display: none;">
             <button onclick="sendUnreadEmail()">Send Email with Unread Messages</button>
@@ -469,6 +471,28 @@
       } else {
         console.log('Not enough unread messages to send a notification.');
       }
+    }
+
+    function saveUserPost(targetUser) {
+      const message = `${user} saved ${targetUser}'s post`;
+      if (notificationsEnabled) {
+        socket.emit('sendNotification', {
+          targetUser: targetUser,
+          message: message
+        });
+      }
+      console.log(message); // For debugging purposes
+    }
+
+    function unsaveUserPost(targetUser) {
+      const message = `${user} unsaved ${targetUser}'s post`;
+      if (notificationsEnabled) {
+        socket.emit('sendNotification', {
+          targetUser: targetUser,
+          message: message
+        });
+      }
+      console.log(message); // For debugging purposes
     }
 
     function startTimerNotifications() {

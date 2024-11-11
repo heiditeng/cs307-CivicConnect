@@ -381,3 +381,27 @@ input:checked + .slider::before {
   font-size: 12px;
   color: #999;
 }
+
+#event-container {
+  margin-top: 20px;
+}
+
+#event-container p,
+#event-container button,
+#event-container span {
+  font-size: 16px;
+}
+
+#event-container button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+#event-container button:hover {
+  background-color: #218838;
+}

@@ -164,6 +164,7 @@ class ModifyEvent extends Component {
                     addressError: '',
                     zipcodeError: '',
                 });
+                console.log("Event modification successful, email trigger should be sent.");
             } else {
                 const errorData = await res.json();
                 this.setState({ errorMessage: errorData.error || 'Error modifying event', successMessage: '' });

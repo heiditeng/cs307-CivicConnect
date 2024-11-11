@@ -86,6 +86,9 @@ const MyEvents = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     <strong>RSVPs:</strong> {event.rsvpUsers ? event.rsvpUsers.length : 0}
                   </p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    <strong>Bookmarks:</strong> {event.bookmarkUsers ? event.bookmarkUsers.length : 0}
+                  </p>
                   <Link
                     to={`/event/${event._id}/rsvp-list`}
                     className="text-blue-600 hover:underline mb-2 block"

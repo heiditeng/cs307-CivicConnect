@@ -19,6 +19,11 @@ const OrganizationProfile = require('./organizationProfile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
 const subscribers = require('./subscribers.js');
+const commentRoutes = require('./commentRoutes.js'); 
+const notificationRoutes = require('./notificationRoutes');
+const mongoose = require('mongoose');
+const Event = require('./event.js'); 
+
 
 // mongo db stuff
 const connectDB = require('./db');
@@ -40,7 +45,8 @@ const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -121,15 +127,21 @@ app.post('/api/profiles/bookmark', async (req, res) => {
         const user = await User.findOne({ username });
         if (!user) return res.status(404).json({ error: "User not found" });
 
+        const event = await Event.findById(eventId);
+        if (!event) return res.status(404).json({ error: "Event not found" });
+
         const isBookmarked = user.bookmarks.includes(eventId);
 
         if (isBookmarked) {
             user.bookmarks = user.bookmarks.filter((id) => id.toString() !== eventId);
+            event.bookmarkUsers = event.bookmarkUsers.filter((id) => id.toString() !== user._id.toString());
         } else {
             user.bookmarks.push(eventId);
+            event.bookmarkUsers.push(user._id);
         }
 
         await user.save();
+        await event.save();
 
         res.status(200).json({
             message: isBookmarked ? "Bookmark removed" : "Bookmark added",
@@ -427,7 +439,13 @@ app.use('/api/newsletter', subscribers);
 //using post routes
 app.use('/api/PostRoutes', postRoutes);
 
+//using comment routes
+app.use('/api/comments', commentRoutes);
+
 app.use("/api", recommendationsRouter);
+
+app.use('/api/notifications', notificationRoutes);
+
 
 // using port 5010 bc 5000 taken
 // app.listen(5010, () => {console.log("Server has started on port 5010")})

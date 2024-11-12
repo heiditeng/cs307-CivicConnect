@@ -5,6 +5,8 @@ import "./InAppCalendar.css";
 
 const InAppCalendar = () => {
   const [bookedEvents, setBookedEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [filter, setFilter] = useState("Upcoming");
   const [errorMessage, setErrorMessage] = useState("");
   const username = localStorage.getItem("username"); // Retrieve username from localStorage
 
@@ -18,11 +20,7 @@ const InAppCalendar = () => {
       console.log("Fetching RSVP events for user:", username);
 
       try {
-        // Fetch RSVP events specific to the user
-        const res = await fetch(
-          `http://localhost:5010/api/events/rsvp-events/${username}`
-        );
-
+        const res = await fetch(`http://localhost:5010/api/events/rsvp-events/${username}`);
         console.log("Response status:", res.status);
 
         if (res.ok) {
@@ -34,6 +32,7 @@ const InAppCalendar = () => {
             endTime: event.endTime,
           }));
           setBookedEvents(eventDates);
+          applyFilter("Upcoming", eventDates); // Default to Upcoming events
         } else {
           setErrorMessage("Error fetching RSVP events data");
         }
@@ -45,15 +44,61 @@ const InAppCalendar = () => {
     fetchRSVPEvents();
   }, [username]);
 
+  const applyFilter = (filterType, events = bookedEvents) => {
+    const now = new Date();
+    let filtered;
+
+    if (filterType === "Upcoming") {
+      filtered = events.filter(event => event.date >= now);
+    } else if (filterType === "Past") {
+      filtered = events.filter(event => event.date < now);
+    } else if (filterType === "RSVP'd") {
+      filtered = events;
+    } else {
+      filtered = events;
+    }
+
+    setFilteredEvents(filtered);
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    applyFilter(newFilter);
+  };
+
   return (
     <div className="in-app-calendar-container">
+      <h2 className="calendar-title">Your RSVP'd Events</h2>
+
+      {/* Filter Buttons */}
+      <div className="filter-buttons">
+        <button
+          onClick={() => handleFilterChange("Upcoming")}
+          className={filter === "Upcoming" ? "active" : ""}
+        >
+          Upcoming
+        </button>
+        <button
+          onClick={() => handleFilterChange("Past")}
+          className={filter === "Past" ? "active" : ""}
+        >
+          Past
+        </button>
+        <button
+          onClick={() => handleFilterChange("RSVP'd")}
+          className={filter === "RSVP'd" ? "active" : ""}
+        >
+          RSVP'd
+        </button>
+      </div>
+
+      {/* Calendar Component */}
+      {errorMessage && <p className="error">{errorMessage}</p>}
       <div className="calendar-wrapper">
-        <h2 className="text-center">Your RSVP'd Events</h2>
-        {errorMessage && <p className="error">{errorMessage}</p>}
         <Calendar
           tileClassName={({ date, view }) => {
             if (view === "month") {
-              return bookedEvents.some(
+              return filteredEvents.some(
                 (event) => event.date.toDateString() === date.toDateString()
               )
                 ? "booked"
@@ -61,7 +106,7 @@ const InAppCalendar = () => {
             }
           }}
           onClickDay={(date) => {
-            const eventsOnDate = bookedEvents.filter(
+            const eventsOnDate = filteredEvents.filter(
               (event) => event.date.toDateString() === date.toDateString()
             );
             if (eventsOnDate.length > 0) {

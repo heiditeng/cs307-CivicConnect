@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from './UserContext';
+
 import './Login.css';
 
 const Login = ({ onSwitchToSignup, isOrganization }) => {
@@ -11,6 +13,7 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
   const [showSaveCredsPrompt, setShowSaveCredsPrompt] = useState(false);
   const [credsLoaded, setCredsLoaded] = useState(false);
   const navigate = useNavigate();
+  const { setUsername: setContextUsername } = useUser();
 
   // Handle login form submission
   const handleLogin = async (e) => {
@@ -37,6 +40,8 @@ const Login = ({ onSwitchToSignup, isOrganization }) => {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('isOrganization', data.isOrganization);
+
+        setContextUsername(data.username);
 
         // Check if credentials have changed
         const savedUsername = localStorage.getItem('savedUsername');

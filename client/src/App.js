@@ -28,6 +28,7 @@ import Subscribers from './components/Subscribers';
 import { useLocation } from 'react-router-dom';
 import CommentsPage from './components/CommentsPage';
 import RSVPPage from './components/RSVPPage';
+import InAppCalendar from './components/InAppCalendar';
 
 function AppContainer() {
   const location = useLocation();
@@ -91,6 +92,7 @@ function App() {
             <Route path="/subscribers" element={<Subscribers />} />
             <Route path="/comments/:postId" element={<CommentsPage />} />
             <Route path="/rsvp-page" element={<RSVPPage />} />
+            <Route path="/calendar" element={<InAppCalendar />} />
           </Routes>
         </div>
       </div>

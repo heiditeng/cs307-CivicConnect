@@ -8,7 +8,9 @@ const InAppCalendar = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [filter, setFilter] = useState("Upcoming");
   const [errorMessage, setErrorMessage] = useState("");
-  const username = localStorage.getItem("username"); // Retrieve username from localStorage
+  const [selectedDateEvents, setSelectedDateEvents] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null); // Store the selected date for expanded view
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
     if (!username) {
@@ -32,7 +34,7 @@ const InAppCalendar = () => {
             endTime: event.endTime,
           }));
           setBookedEvents(eventDates);
-          applyFilter("Upcoming", eventDates); // Default to Upcoming events
+          applyFilter("Upcoming", eventDates);
         } else {
           setErrorMessage("Error fetching RSVP events data");
         }
@@ -52,8 +54,6 @@ const InAppCalendar = () => {
       filtered = events.filter(event => event.date >= now);
     } else if (filterType === "Past") {
       filtered = events.filter(event => event.date < now);
-    } else if (filterType === "RSVP'd") {
-      filtered = events;
     } else {
       filtered = events;
     }
@@ -64,6 +64,30 @@ const InAppCalendar = () => {
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
     applyFilter(newFilter);
+  };
+
+  const handleDateClick = (date) => {
+    setSelectedDate(date);
+    const eventsOnDate = filteredEvents.filter(
+      (event) => event.date.toDateString() === date.toDateString()
+    );
+    setSelectedDateEvents(eventsOnDate);
+  };
+
+  const generateTimeSlots = () => {
+    const times = [];
+    for (let hour = 0; hour < 24; hour++) {
+      const time = `${hour.toString().padStart(2, "0")}:00 - ${hour.toString().padStart(2, "0")}:59`;
+      const eventAtTime = selectedDateEvents.find(event => {
+        const eventStartHour = new Date(`1970-01-01T${event.startTime}`).getHours();
+        return eventStartHour === hour;
+      });
+      times.push({
+        time,
+        event: eventAtTime ? `${eventAtTime.name} (${eventAtTime.startTime} - ${eventAtTime.endTime})` : "Available"
+      });
+    }
+    return times;
   };
 
   return (
@@ -105,25 +129,23 @@ const InAppCalendar = () => {
                 : null;
             }
           }}
-          onClickDay={(date) => {
-            const eventsOnDate = filteredEvents.filter(
-              (event) => event.date.toDateString() === date.toDateString()
-            );
-            if (eventsOnDate.length > 0) {
-              alert(
-                eventsOnDate
-                  .map(
-                    (event) =>
-                      `${event.name}: ${event.startTime} - ${event.endTime}`
-                  )
-                  .join("\n")
-              );
-            } else {
-              alert("No events on this date");
-            }
-          }}
+          onClickDay={handleDateClick}
         />
       </div>
+
+      {/* Expanded View for Selected Date */}
+      {selectedDate && (
+        <div className="expanded-view">
+          <h3>Events for {selectedDate.toDateString()}</h3>
+          <div className="time-slots">
+            {generateTimeSlots().map((slot, index) => (
+              <div key={index} className="time-slot">
+                <strong>{slot.time}</strong>: {slot.event}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

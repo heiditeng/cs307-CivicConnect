@@ -71,7 +71,7 @@ const MyEvents = () => {
                   </h3>
                   <p className="text-sm text-gray-600">
                     <strong>Organization:</strong>{" "}
-                    <Link to={`/organization-profile/:userId`}>
+                    <Link to={`/organization-profile/${event.userId}`}>
                       <strong className="text-blue-600 hover:underline">
                         {event.userId}
                       </strong>
@@ -95,19 +95,16 @@ const MyEvents = () => {
                   >
                     View RSVP List
                   </Link>
-                  <div className="flex justify-between">
+                  {/* Button Section with Flexbox Layout */}
+                  <div className="flex justify-between items-center space-x-2">
                     <Link to={`/event-details/${event._id}`}>
                       <button className="btn btn-primary btn-sm">Details</button>
                     </Link>
                     <Link to={`/modify-event/${event._id}`}>
-                      <button className="btn btn-secondary btn-sm ml-2">
-                        Modify
-                      </button>
+                      <button className="btn btn-secondary btn-sm">Modify</button>
                     </Link>
                     <Link to={`/delete-confirmation/${event._id}/${event.name}`}>
-                      <button className="btn btn-error btn-sm ml-2">
-                        Delete
-                      </button>
+                      <button className="btn btn-error btn-sm">Delete</button>
                     </Link>
                   </div>
                 </div>

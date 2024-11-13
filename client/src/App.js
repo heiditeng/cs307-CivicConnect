@@ -86,7 +86,7 @@ function App() {
               <Route path="/myposts" element={<MyProfileCM />} />
               <Route path="/reset-password" element={<NewPassword />} />
               <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
-              <Route path="/organization-profile" element={<OrganizationProfile />} />
+              <Route path="/organization-profile/:userId" element={<OrganizationProfile />} />
               <Route path="/save-credentials" element={<SaveCredentials />} />
               <Route path="/create-post" element={<CreatePost />} />
               <Route path="/feed" element={<UserFeed />} />

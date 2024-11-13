@@ -47,8 +47,8 @@ const OrganizationProfile = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-4 bg-gray-100">
-      <div className="flex flex-col md:flex-row w-full max-w-4xl gap-6">
+    <div className="flex justify-center items-start min-h-screen p-4 bg-gray-100">
+      <div className="flex flex-col md:flex-row w-full max-w-6xl gap-6">
         
         {/* Left side with organization details */}
         <div className="w-full md:w-1/4 p-4 bg-base-200 rounded-lg shadow-md">
@@ -108,12 +108,11 @@ const OrganizationProfile = () => {
         </div>
 
         {/* Right side with organization events */}
-        <div className="w-full md:w-3/4 flex flex-col gap-6">
-          <div className="p-4 bg-base-100 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
+        <div className="w-full md:w-3/4 p-4 bg-base-100 rounded-lg shadow-md">
+          <div className="p-4">
             
             {orgData ? (
-              <MyEvents organizationId={orgData._id} /> // Pass organization ID to MyEvents
+              <MyEvents organizationId={orgData._id} />
             ) : (
               <p className="text-gray-500">No events available.</p>
             )}

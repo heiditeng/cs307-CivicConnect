@@ -29,6 +29,8 @@ import EditProfile from './components/EditProfile';
 import { useLocation } from 'react-router-dom';
 import CommentsPage from './components/CommentsPage';
 import RSVPPage from './components/RSVPPage';
+import InAppCalendar from './components/InAppCalendar';
+import { UserProvider } from './components/UserContext';
 
 function AppContainer() {
   const location = useLocation();
@@ -56,47 +58,50 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="App">
-        <NavBar />
-        <div className="content">
-          <AppContainer />
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', marginBottom: '30px' }}>
-            <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
-          </div>
-          <h1 style={{ textAlign: 'center', marginTop: '30px', marginBottom: '10px', fontWeight: 'bold', fontSize: '2em' }}>
-            {title}
-          </h1>
-          <Routes>
-            <Route path="/" element={<UserTypeSelectionPage onContinue={handleContinue} />} />
-            <Route path="/user-auth" element={<AuthPage isOrganization={false} />} />
-            <Route path="/organization-auth" element={<AuthPage isOrganization={true} />} />
-            <Route path="/forgot-password" element={<ResetPassword onPasswordReset={() => setIsPasswordChanged(true)} />} />
-            <Route path="/create-event" element={<CreateEvent />} />
-            <Route path="/my-events" element={<MyEvents />} />
-            <Route path="/modify-event/:id" element={<ModifyEvent />} /> 
-            <Route path="/event-details/:id" element={<EventDetails />} />
-            <Route path="/info-form" element={<UserInformationForm />} />
-            <Route path="/myprofile" element={<MyProfile />} />
-            <Route path="/profile/:userId" element={<UserProfile />} />
-            <Route path="/login" element={<Login isPasswordChanged={isPasswordChanged} />} />
-            <Route path="/myposts" element={<MyProfileCM />} />
-            <Route path="/reset-password" element={<NewPassword />} />
-            <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
-            <Route path="/organization-profile" element={<OrganizationProfile />} />
-            <Route path="/save-credentials" element={<SaveCredentials />} />
-            <Route path="/create-post" element={<CreatePost />} />
-            <Route path="/feed" element={<UserFeed />} />
-            <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
-            <Route path="/newsletter" element={<NewsletterSignup />} /> 
-            <Route path="/subscribers" element={<Subscribers />} />
-            <Route path="/comments/:postId" element={<CommentsPage />} />
-            <Route path="/rsvp-page" element={<RSVPPage />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
+    <UserProvider> {/* Wrap everything in UserProvider */}
+      <Router>
+        <div className="App">
+          <NavBar />
+          <div className="content">
+            <AppContainer />
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px', marginBottom: '30px' }}>
+              <img src={ccLogo} alt="CivicConnect Logo" style={{ height: '100px' }} />
+            </div>
+            <h1 style={{ textAlign: 'center', marginTop: '30px', marginBottom: '10px', fontWeight: 'bold', fontSize: '2em' }}>
+              {title}
+            </h1>
+            <Routes>
+              <Route path="/" element={<UserTypeSelectionPage onContinue={handleContinue} />} />
+              <Route path="/user-auth" element={<AuthPage isOrganization={false} />} />
+              <Route path="/organization-auth" element={<AuthPage isOrganization={true} />} />
+              <Route path="/forgot-password" element={<ResetPassword onPasswordReset={() => setIsPasswordChanged(true)} />} />
+              <Route path="/create-event" element={<CreateEvent />} />
+              <Route path="/my-events" element={<MyEvents />} />
+              <Route path="/modify-event/:id" element={<ModifyEvent />} /> 
+              <Route path="/event-details/:id" element={<EventDetails />} />
+              <Route path="/info-form" element={<UserInformationForm />} />
+              <Route path="/myprofile" element={<MyProfile />} />
+              <Route path="/profile/:userId" element={<UserProfile />} />
+              <Route path="/login" element={<Login isPasswordChanged={isPasswordChanged} />} />
+              <Route path="/myposts" element={<MyProfileCM />} />
+              <Route path="/reset-password" element={<NewPassword />} />
+              <Route path="/delete-confirmation/:id/:eventName" element={<DeleteConfirmation />} />
+              <Route path="/organization-profile" element={<OrganizationProfile />} />
+              <Route path="/save-credentials" element={<SaveCredentials />} />
+              <Route path="/create-post" element={<CreatePost />} />
+              <Route path="/feed" element={<UserFeed />} />
+              <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
+              <Route path="/newsletter" element={<NewsletterSignup />} /> 
+              <Route path="/subscribers" element={<Subscribers />} />
+              <Route path="/comments/:postId" element={<CommentsPage />} />
+              <Route path="/rsvp-page" element={<RSVPPage />} />
+              <Route path="/calendar" element={<InAppCalendar />} />
+              <Route path="/edit-profile" element={<EditProfile />} />
           </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </UserProvider>
   );
 }
 

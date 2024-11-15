@@ -30,12 +30,15 @@ const InAppCalendar = () => {
 
         if (res.ok) {
           const data = await res.json();
+          
+          // Adjust event dates to local time
           const eventDates = data.rsvpEvents.map((event) => ({
-            date: new Date(event.date),
+            date: new Date(event.date), // Converts to local time zone automatically
             name: event.name,
-            startTime: event.startTime,
-            endTime: event.endTime,
+            startTime: adjustToUserTimeZone(event.startTime),
+            endTime: adjustToUserTimeZone(event.endTime),
           }));
+
           setBookedEvents(eventDates);
           applyFilter("RSVP'd", eventDates);
         } else {
@@ -48,6 +51,12 @@ const InAppCalendar = () => {
 
     fetchRSVPEvents();
   }, [username]);
+
+  const adjustToUserTimeZone = (timeString) => {
+    const eventTime = new Date(`1970-01-01T${timeString}Z`);
+    const localTimeOffset = new Date().getTimezoneOffset() * 60000;
+    return new Date(eventTime.getTime() - localTimeOffset).toISOString().substring(11, 16);
+  };
 
   const applyFilter = (filterType, events = bookedEvents) => {
     const now = new Date();

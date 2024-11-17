@@ -68,8 +68,8 @@ const UserFeed = () => {
       if (res.ok) {
         let data = await res.json();
 
-        // filter events based on recommended keywords
-        if (keywords && keywords.length > 0) {
+        // filter events based on recommended keywords -- currently commented out for testing purposes
+        /*if (keywords && keywords.length > 0) {
           data = data.filter((event) => {
             const combinedText =
               `${event.name} ${event.type} ${event.description}`.toLowerCase();
@@ -77,7 +77,10 @@ const UserFeed = () => {
               combinedText.includes(keyword.toLowerCase())
             );
           });
-        }
+        }*/
+
+        // filter out FULL events.
+        data = data.filter((event) => event.rsvpUsers.length < event.maxCapacity);
 
         setFeedData(filterEventsByTransportation(data));
       } else {
@@ -159,7 +162,7 @@ const UserFeed = () => {
   const handleBookmark = async (eventId, eventName) => {
     const username = localStorage.getItem("username");
     try {
-      const res = await fetch(`http://localhost:5010/api/profiles/bookmark`, {
+      const res = await fetch("http://localhost:5010/api/profiles/bookmark", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -175,13 +178,9 @@ const UserFeed = () => {
 
         // show confirmation message based on action
         if (isRemoving) {
-          setConfirmationMessage(
-            `"${eventName}" has been removed from your bookmarks.`
-          );
+          setConfirmationMessage(`${eventName} has been removed from your bookmarks.`);
         } else {
-          setConfirmationMessage(
-            `"${eventName}" has been added to your bookmarks.`
-          );
+          setConfirmationMessage(`${eventName} has been added to your bookmarks.`);
         }
         setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 5 seconds
       } else {
@@ -289,6 +288,9 @@ const UserFeed = () => {
                   </p>
                   <p>{event.type}</p>
                   <p>{event.description}</p>
+                  {event.rsvpUsers.length >= event.maxCapacity * 0.75 ? (
+                    <p className="text-yellow-300 font-bold">Almost full!</p>
+                  ) : null}
                 </div>
 
                 {/* Event Image */}

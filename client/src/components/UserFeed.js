@@ -11,6 +11,7 @@ const UserFeed = () => {
   const [transportationFilter, setTransportationFilter] = useState("");
   const [profileData, setProfileData] = useState(null);
   const [recommendedKeywords, setRecommendedKeywords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // search query state var
 
   useEffect(() => {
     fetchUserProfile();
@@ -68,6 +69,16 @@ const UserFeed = () => {
       if (res.ok) {
         let data = await res.json();
 
+        // fetching events based on search query (if query made)
+        if (searchQuery) {
+          const searchLower = searchQuery.toLowerCase();
+          data = data.filter((event) =>
+            `${event.name} ${event.type} ${event.description} ${event.address} ${event.zipcode} ${event.date}`
+              .toLowerCase()
+              .includes(searchLower)
+          );
+        }
+
         // filter events based on recommended keywords -- currently commented out for testing purposes
         /*if (keywords && keywords.length > 0) {
           data = data.filter((event) => {
@@ -80,7 +91,9 @@ const UserFeed = () => {
         }*/
 
         // filter out FULL events.
-        data = data.filter((event) => event.rsvpUsers.length < event.maxCapacity);
+        data = data.filter(
+          (event) => event.rsvpUsers.length < event.maxCapacity
+        );
 
         setFeedData(filterEventsByTransportation(data));
       } else {
@@ -123,6 +136,20 @@ const UserFeed = () => {
   // handle transportation filter changes
   const handleTransportationFilterChange = (e) => {
     setTransportationFilter(e.target.value);
+  };
+
+  // search related functions
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearch = () => {
+    fetchAllEvents(recommendedKeywords);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    fetchAllEvents(recommendedKeywords);
   };
 
   // format date for display
@@ -178,9 +205,13 @@ const UserFeed = () => {
 
         // show confirmation message based on action
         if (isRemoving) {
-          setConfirmationMessage(`${eventName} has been removed from your bookmarks.`);
+          setConfirmationMessage(
+            `${eventName} has been removed from your bookmarks.`
+          );
         } else {
-          setConfirmationMessage(`${eventName} has been added to your bookmarks.`);
+          setConfirmationMessage(
+            `${eventName} has been added to your bookmarks.`
+          );
         }
         setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 5 seconds
       } else {
@@ -233,6 +264,21 @@ const UserFeed = () => {
             {confirmationMessage}
           </div>
         )}
+        <div className="flex gap-4 mb-4 items-center">
+          <input
+            type="text"
+            className="input input-accent"
+            placeholder="Search by Type, Keyword, or Location"
+            value={searchQuery}
+            onChange={handleSearchInputChange}
+          />
+          <button className="btn btn-primary" onClick={handleSearch}>
+            Search
+          </button>
+          <button className="btn btn-secondary" onClick={handleClearSearch}>
+            Clear
+          </button>
+        </div>
         <button
           className="btn btn-outline btn-primary mb-4 self-center"
           onClick={() => fetchAllEvents(recommendedKeywords)}

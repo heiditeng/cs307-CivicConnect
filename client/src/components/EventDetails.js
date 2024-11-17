@@ -52,6 +52,11 @@ const EventDetails = () => {
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
+        {eventData.rsvpUsers.length >= eventData.maxCapacity ? (
+                    <p className="text-red-500 font-bold">FULL</p>
+                  ) : eventData.rsvpUsers.length >= eventData.maxCapacity * 0.75 ? (
+                    <p className="text-yellow-300 font-bold">Almost full!</p>
+                  ) : null}
         <p>
           <strong>Organization:</strong>{" "}
           <Link to={`/organization-profile`}>

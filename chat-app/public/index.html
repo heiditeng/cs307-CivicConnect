@@ -312,7 +312,9 @@
 
       const senderName = (data.user && data.user.user_id) || data.sender || 'Unknown';
 
+      // Add classes for styling and positioning
       messageDiv.classList.add('message', senderName === user ? 'right' : 'left');
+      messageDiv.style.position = 'relative'; // Ensure the reaction container is positioned relative to the message
 
       const senderDiv = document.createElement('div');
       senderDiv.classList.add('sender');
@@ -341,6 +343,49 @@
         anchor.target = '_blank';
         messageDiv.appendChild(anchor);
       }
+
+      // Add reaction container
+      const reactionContainer = document.createElement('div');
+      reactionContainer.classList.add('reaction-container');
+      reactionContainer.innerHTML = '+'; // Plus icon
+      messageDiv.appendChild(reactionContainer);
+
+      // Add reactions display
+      const reactionsDiv = document.createElement('div');
+      reactionsDiv.classList.add('reactions');
+      messageDiv.appendChild(reactionsDiv);
+
+      // Click event for reaction container
+      reactionContainer.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering the message click event
+        const picker = new window.EmojiButton({ position: 'bottom-start', theme: 'auto' });
+        picker.togglePicker(reactionContainer);
+
+        // Add selected emoji to the reactions
+        picker.on('emoji', (selection) => {
+          const emoji = selection.emoji;
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = emoji;
+          reactionsDiv.appendChild(emojiSpan);
+        });
+      });
+
+      // Double-tap (dblclick) event for auto heart reaction
+      messageDiv.addEventListener('dblclick', (e) => {
+        e.stopPropagation(); // Prevent triggering other click events
+        console.log('Message double-tapped:', data);
+
+        // Add a heart emoji reaction
+        const heartEmoji = '❤️';
+        const existingReactions = Array.from(reactionsDiv.childNodes).map((node) => node.textContent);
+
+        // Avoid duplicating the heart emoji - uncomment if you want to prevent duplicates
+        //if (!existingReactions.includes(heartEmoji)) {
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = heartEmoji;
+          reactionsDiv.appendChild(emojiSpan);
+        //}
+      });
 
       messagesDiv.appendChild(messageDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;

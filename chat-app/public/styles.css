@@ -405,3 +405,16 @@ input:checked + .slider::before {
 #event-container button:hover {
   background-color: #218838;
 }
+
+.emoji-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 0;
+}
+
+.emoji-button img {
+  width: 24px;
+  height: 24px;
+}

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Chat Room</title>
+  <script src="/emoji-button.min.js"></script>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -62,6 +63,9 @@
         </div>
         <div id="inputs" class="message-inputs" style="display: none;">
           <input id="messageInput" type="text" placeholder="Type a message or paste a link">
+          <button id="emoji-button" class="emoji-button">
+            <img src="emoji-icon.png" alt="Emoji Picker" width="24" height="24">
+          </button>
           <label for="imageInput" class="upload-icon">
             <img src="upload-icon.png" alt="Upload">
           </label>
@@ -440,7 +444,6 @@
         });
     }
 
-
     function clearNotifications() {
       unreadMessages = 0;
       updateUnreadCount();
@@ -597,6 +600,26 @@
       .catch(error => {
         console.error('Error incrementing event views:', error);
       });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const emojiButton = document.getElementById('emoji-button');
+      const messageInput = document.getElementById('messageInput');
+
+      if (emojiButton && messageInput) {
+        const picker = new window.EmojiButton(); 
+        
+        emojiButton.addEventListener('click', () => {
+          console.log('Emoji button clicked!');
+          picker.togglePicker(emojiButton);
+        });
+        picker.on('emoji', selection => {
+          messageInput.value += selection.emoji;
+          messageInput.focus();
+        });
+      } else {
+        console.error('Emoji button or message input not found.');
+      }
     });
 
     // Listen for live updates via Socket.IO

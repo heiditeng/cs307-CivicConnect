@@ -38,8 +38,8 @@ const MyEvents = () => {
 
   // Format date for display
   const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const date = new Date(dateString);
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   return (
@@ -71,7 +71,7 @@ const MyEvents = () => {
                   </h3>
                   <p className="text-sm text-gray-600">
                     <strong>Organization:</strong>{" "}
-                    <Link to={`/organization-profile`}>
+                    <Link to={`/organization-profile/:userId`}>
                       <strong className="text-blue-600 hover:underline">
                         {event.userId}
                       </strong>

@@ -58,6 +58,12 @@ const NotificationSchema = new mongoose.Schema({
 });
 const Notification = mongoose.model('Notification', NotificationSchema);
 
+const EventSchema = new mongoose.Schema({
+  link: String,
+  views: { type: Number, default: 0 }
+});
+const Event = mongoose.model('Event', EventSchema);
+
 // Middleware for serving static files
 app.use(express.static('public'));
 app.use(bodyParser.json());
@@ -203,6 +209,35 @@ app.post('/rooms/:room_id/add-member', async (req, res) => {
     res.status(200).json({ message: 'User added to room successfully' });
   } catch (err) {
     console.error('Error adding user to room:', err.message);
+    res.status(500).send(err.message);
+  }
+});
+
+(async function createEventIfNotExists() {
+  const eventLink = 'https://google.com';
+  let event = await Event.findOne({ link: eventLink });
+  if (!event) {
+    event = new Event({ link: eventLink });
+    await event.save();
+    console.log('Event created:', event);
+  }
+})();
+
+app.post('/event/increment', async (req, res) => {
+  try {
+    const { link } = req.body;
+    const event = await Event.findOne({ link });
+    if (!event) {
+      return res.status(404).send('Event not found');
+    }
+    event.views += 1;
+    await event.save();
+
+    // Emit the updated views count via Socket.IO
+    io.emit('eventUpdated', { link: event.link, views: event.views });
+
+    res.json({ views: event.views });
+  } catch (err) {
     res.status(500).send(err.message);
   }
 });

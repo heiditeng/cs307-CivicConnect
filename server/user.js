@@ -14,7 +14,8 @@ const UserSchema = new mongoose.Schema({
   isOrganization: { type: Boolean, default: false },
   rsvpEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
   bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
-  userProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'UserProfile' } // Reference to user profile
+  userProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'UserProfile' }, // Reference to UserProfile
+  organizationProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'OrganizationProfile', default: null },
 });
 
 module.exports = mongoose.model('User', UserSchema);

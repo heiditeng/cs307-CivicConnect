@@ -351,4 +351,21 @@ router.get("/rsvp-list/:id", async (req, res) => {
   }
 });
 
+// route to fetch all RSVP'd events for a specific user
+router.get("/rsvp-events/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await User.findOne({ username }).populate('rsvpEvents');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ rsvpEvents: user.rsvpEvents });
+  } catch (error) {
+    console.error("Error fetching RSVP'd events:", error);
+    res.status(500).json({ error: "Error fetching RSVP'd events" });
+  }
+});
+
 module.exports = router;

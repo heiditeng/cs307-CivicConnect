@@ -17,12 +17,19 @@ const NavBar = () => {
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-          {!isOrganization && (
-              <Link to="/myprofile">My Profile</Link>
+            {!isOrganization && (
+              <>
+                <Link to="/myprofile">My Profile</Link>
+                <Link to="/calendar">My Calendar</Link>
+              </>
             )}
             
             {isOrganization && (
               <Link to="/my-events">My Events</Link>
+            )}
+
+            {isOrganization && (
+              <Link to="/organization-profile">My Profile</Link>
             )}
             <Link to="/">Log Out</Link>
           </div>

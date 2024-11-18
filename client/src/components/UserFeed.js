@@ -11,6 +11,10 @@ const UserFeed = () => {
   const [transportationFilter, setTransportationFilter] = useState("");
   const [profileData, setProfileData] = useState(null);
   const [recommendedKeywords, setRecommendedKeywords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // search query state var
+  const [dateQuery, setDateQuery] = useState(""); // date query 
+  const [startTimeQuery, setStartTimeQuery] = useState(""); // start time
+  const [endTimeQuery, setEndTimeQuery] = useState(""); // end time
 
   useEffect(() => {
     fetchUserProfile();
@@ -68,8 +72,36 @@ const UserFeed = () => {
       if (res.ok) {
         let data = await res.json();
 
-        // filter events based on recommended keywords
-        if (keywords && keywords.length > 0) {
+        // fetching events based on search query (if query made)
+        if (searchQuery) {
+          const searchLower = searchQuery.toLowerCase();
+          data = data.filter((event) =>
+            `${event.name} ${event.type} ${event.description} ${event.address} ${event.zipcode} ${event.date}`
+              .toLowerCase()
+              .includes(searchLower)
+          );
+        }
+
+        // filtering events based on date, start time, and end time queries
+        if (dateQuery) {
+          console.log(dateQuery);
+          data = data.filter((event) => event.date.startsWith(dateQuery));
+        }
+        if (startTimeQuery && endTimeQuery) {
+          data = data.filter((event) => {
+            const eventStart = event.startTime;
+            const eventEnd = event.endTime;
+        
+            // all events in this range
+            return eventStart <= endTimeQuery && eventEnd >= startTimeQuery;
+          });
+        } else if (startTimeQuery) {
+          data = data.filter((event) => event.startTime >= startTimeQuery);
+        } else if (endTimeQuery) {
+          data = data.filter((event) => event.endTime <= endTimeQuery);
+        }
+        // filter events based on recommended keywords -- currently commented out for testing purposes
+        /*if (keywords && keywords.length > 0) {
           data = data.filter((event) => {
             const combinedText =
               `${event.name} ${event.type} ${event.description}`.toLowerCase();
@@ -77,7 +109,12 @@ const UserFeed = () => {
               combinedText.includes(keyword.toLowerCase())
             );
           });
-        }
+        }*/
+
+        // filter out FULL events.
+        data = data.filter(
+          (event) => event.rsvpUsers.length < event.maxCapacity
+        );
 
         setFeedData(filterEventsByTransportation(data));
       } else {
@@ -122,10 +159,39 @@ const UserFeed = () => {
     setTransportationFilter(e.target.value);
   };
 
+  // search related functions
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleDateInputChange = (e) => {
+    setDateQuery(e.target.value);
+  };
+
+  const handleStartTimeInputChange = (e) => {
+    setStartTimeQuery(e.target.value);
+  };
+
+  const handleEndTimeInputChange = (e) => {
+    setEndTimeQuery(e.target.value);
+  };
+
+  const handleSearch = () => {
+    fetchAllEvents(recommendedKeywords);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setDateQuery("");
+    setStartTimeQuery("");
+    setEndTimeQuery("");
+    fetchAllEvents(recommendedKeywords);
+  };
+
   // format date for display
   const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const options = { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" };
+    return new Intl.DateTimeFormat(undefined, options).format(new Date(dateString));
   };
 
   // Handle RSVP for an event
@@ -159,7 +225,7 @@ const UserFeed = () => {
   const handleBookmark = async (eventId, eventName) => {
     const username = localStorage.getItem("username");
     try {
-      const res = await fetch(`http://localhost:5010/api/profiles/bookmark`, {
+      const res = await fetch("http://localhost:5010/api/profiles/bookmark", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -176,11 +242,11 @@ const UserFeed = () => {
         // show confirmation message based on action
         if (isRemoving) {
           setConfirmationMessage(
-            `"${eventName}" has been removed from your bookmarks.`
+            `${eventName} has been removed from your bookmarks.`
           );
         } else {
           setConfirmationMessage(
-            `"${eventName}" has been added to your bookmarks.`
+            `${eventName} has been added to your bookmarks.`
           );
         }
         setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 5 seconds
@@ -234,6 +300,39 @@ const UserFeed = () => {
             {confirmationMessage}
           </div>
         )}
+        <div className="flex gap-4 mb-4 items-center">
+          <input
+            type="text"
+            className="input input-accent"
+            placeholder="Search by Type, Keyword, or Location"
+            value={searchQuery}
+            onChange={handleSearchInputChange}
+          />
+          <input
+            type="date"
+            className="input input-accent"
+            value={dateQuery}
+            onChange={handleDateInputChange}
+          />
+          <input
+            type="time"
+            className="input input-accent"
+            value={startTimeQuery}
+            onChange={handleStartTimeInputChange}
+          />
+          <input
+            type="time"
+            className="input input-accent"
+            value={endTimeQuery}
+            onChange={handleEndTimeInputChange}
+          />
+          <button className="btn btn-primary" onClick={handleSearch}>
+            Search
+          </button>
+          <button className="btn btn-secondary" onClick={handleClearSearch}>
+            Clear
+          </button>
+        </div>
         <button
           className="btn btn-outline btn-primary mb-4 self-center"
           onClick={() => fetchAllEvents(recommendedKeywords)}
@@ -287,8 +386,13 @@ const UserFeed = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     Location: {event.address}
                   </p>
+                  <p>Start Time: {event.startTime}</p>
+                  <p>End Time: {event.endTime}</p>
                   <p>{event.type}</p>
                   <p>{event.description}</p>
+                  {event.rsvpUsers.length >= event.maxCapacity * 0.75 ? (
+                    <p className="text-yellow-300 font-bold">Almost full!</p>
+                  ) : null}
                 </div>
 
                 {/* Event Image */}

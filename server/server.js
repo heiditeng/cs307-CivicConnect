@@ -15,6 +15,7 @@ const path = require('path');
 const eventRoutes = require('./eventRoutes'); // import event routes
 const User = require('./user.js'); // import the user model
 const UserProfile = require('./userprofile.js');
+const OrganizationProfile = require('./organizationProfile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
 const subscribers = require('./subscribers.js');
@@ -220,23 +221,42 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
     try {
         console.log('1');
         await user.save(); // save user record in mongo
-    
-        console.log('2');
-        // create associated user profile with default values
-        const userProfile = new UserProfile({
-            userId: user._id,
-            availability: null,
-            location: null,
-            occupation: null,
-            interests: null,
-            hobbies: null
-        });
-        
-        await userProfile.save(); // save user profile in mongo
-    
-        // update user to reference the created profile
-        user.userProfile = userProfile._id;
-        await user.save();
+
+        if (isOrganization) {
+            // Create organization profile
+            console.log('org profile');
+            const orgProfile = new OrganizationProfile({
+                userId: user._id,
+                bio: null
+            });
+
+            console.log("org", orgProfile);
+
+            await orgProfile.save();  // save organization profile in MongoDB
+            
+            console.log("done");
+
+            // Update user to reference the organization profile
+            user.organizationProfile = orgProfile._id;
+            await user.save();
+        } else {
+            console.log('2');
+            // create associated user profile with default values
+            const userProfile = new UserProfile({
+                userId: user._id,
+                availability: null,
+                location: null,
+                occupation: null,
+                interests: null,
+                hobbies: null
+            });
+            
+            await userProfile.save(); // save user profile in mongo
+
+            // update user to reference the created profile
+            user.userProfile = userProfile._id;
+            await user.save();
+        }
     
         return 'User registered successfully.';
     } catch (error) {

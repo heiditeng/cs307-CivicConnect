@@ -1,57 +1,76 @@
 const express = require('express');
 const router = express.Router();
+const OrganizationProfile = require('./organizationProfile');
 
+// Route to fetch organization profile by userId
+router.get('/organization/:userId', async (req, res) => {
+    const { userId } = req.params;
 
-// mock data for organizations — to be replaced with a database later
-let organizations = [
-    {
-        name: 'Community Helpers',
-        bio: 'A non-profit organization focused on helping the local community.',
-        socials: {
-            facebook: 'https://facebook.com/communityhelpers',
-            twitter: 'https://twitter.com/communityhelpers'
-        },
-        events: [
-            { title: 'Food Drive', date: '2024-12-01' },
-            { title: 'Beach Cleanup', date: '2024-11-15' }
-        ]
+    try {
+        // Find the organization profile by userId
+        const organization = await OrganizationProfile.findOne({ userId });
+        if (!organization) {
+            return res.status(404).json({ error: 'Organization not found' });
+        }
+
+        // Return the organization profile data
+        res.status(200).json(organization);
+    } catch (error) {
+        console.error('Error fetching organization:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the organization.' });
     }
-];
-
-// fetching org info
-router.get('/organization/:name', (req, res) => {
-    const { name } = req.params;
-
-    // finding org by name
-    const organization = organizations.find(org => org.name === name);
-    if (!organization) {
-        return res.status(404).json({ error: 'Organization not found' });
-    }
-
-    res.json(organization);
 });
 
-// updating orf
-router.post('/update-organization', (req, res) => {
-    const { name, bio, socials, events } = req.body;
+// Route to update organization profile
+router.post('/update-organization', async (req, res) => {
+    const { userId, bio } = req.body; // The body must contain userId and bio
 
-    // valid request data?
-    if (!name || !bio || !socials || !events) {
-        return res.status(400).json({ error: 'All fields are required' });
+    // Validate request data
+    if (!userId || !bio) {
+        return res.status(400).json({ error: 'User ID and bio are required' });
     }
 
-    // finding by name
-    const organization = organizations.find(org => org.name === name);
-    if (!organization) {
-        return res.status(404).json({ error: 'Organization not found' });
+    try {
+        // Find the organization profile by userId and update it
+        const updatedOrganization = await OrganizationProfile.findOneAndUpdate(
+            { userId }, // Find by userId
+            { bio }, // Update bio
+            { new: true, runValidators: true } // Return updated profile and validate the data
+        );
+
+        if (!updatedOrganization) {
+            return res.status(404).json({ error: 'Organization not found' });
+        }
+
+        res.status(200).json({ message: 'Organization profile updated successfully!', organization: updatedOrganization });
+    } catch (error) {
+        console.error('Error updating organization:', error);
+        res.status(500).json({ error: 'An error occurred while updating the organization profile.' });
+    }
+});
+
+// Route to add a new organization profile (on signup or creation)
+router.post('/add-organization', async (req, res) => {
+    const { userId, bio } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
     }
 
-    // update data
-    organization.bio = bio;
-    organization.socials = socials;
-    organization.events = events;
+    try {
+        // Create a new organization profile with the provided data
+        const newOrganization = new OrganizationProfile({
+            userId,
+            bio: null
+        });
 
-    return res.status(200).json({ message: 'Organization profile updated successfully!' });
+        await newOrganization.save();
+
+        return res.status(201).json({ message: 'Organization profile added successfully!', organization: newOrganization });
+    } catch (error) {
+        console.error('Error adding new organization:', error);
+        res.status(500).json({ error: 'An error occurred while adding the organization.' });
+    }
 });
 
 module.exports = router;

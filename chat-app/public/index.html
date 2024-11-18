@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Chat Room</title>
+  <script src="/emoji-button.min.js"></script>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -51,6 +52,10 @@
             <button onclick="viewProfile('user123')">View user123's Profile</button>
             <div id="notification-feed"></div>
             <button onclick="clearNotifications()">Clear Notifications</button>
+            <button id="incrementEventButton">Increment Event Views</button>
+            <span id="eventViewsCount">Views: 0</span>
+            <button onclick="saveUserPost('user123')">Save user123's Post</button>
+            <button onclick="unsaveUserPost('user123')">Unsave user123's Post</button>
           </div>
           <div id="blank-tab" class="tab" style="display: none;">
             <button onclick="sendUnreadEmail()">Send Email with Unread Messages</button>
@@ -58,6 +63,9 @@
         </div>
         <div id="inputs" class="message-inputs" style="display: none;">
           <input id="messageInput" type="text" placeholder="Type a message or paste a link">
+          <button id="emoji-button" class="emoji-button">
+            <img src="emoji-icon.png" alt="Emoji Picker" width="24" height="24">
+          </button>
           <label for="imageInput" class="upload-icon">
             <img src="upload-icon.png" alt="Upload">
           </label>
@@ -77,6 +85,7 @@
     let room;
     let notificationsEnabled = true;
     let timer1, timer2; // To store timer IDs
+    const eventLink = 'https://google.com';
 
     document.addEventListener('DOMContentLoaded', () => {
       // Show the initial views
@@ -303,7 +312,9 @@
 
       const senderName = (data.user && data.user.user_id) || data.sender || 'Unknown';
 
+      // Add classes for styling and positioning
       messageDiv.classList.add('message', senderName === user ? 'right' : 'left');
+      messageDiv.style.position = 'relative'; // Ensure the reaction container is positioned relative to the message
 
       const senderDiv = document.createElement('div');
       senderDiv.classList.add('sender');
@@ -332,6 +343,49 @@
         anchor.target = '_blank';
         messageDiv.appendChild(anchor);
       }
+
+      // Add reaction container
+      const reactionContainer = document.createElement('div');
+      reactionContainer.classList.add('reaction-container');
+      reactionContainer.innerHTML = '+'; // Plus icon
+      messageDiv.appendChild(reactionContainer);
+
+      // Add reactions display
+      const reactionsDiv = document.createElement('div');
+      reactionsDiv.classList.add('reactions');
+      messageDiv.appendChild(reactionsDiv);
+
+      // Click event for reaction container
+      reactionContainer.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering the message click event
+        const picker = new window.EmojiButton({ position: 'bottom-start', theme: 'auto' });
+        picker.togglePicker(reactionContainer);
+
+        // Add selected emoji to the reactions
+        picker.on('emoji', (selection) => {
+          const emoji = selection.emoji;
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = emoji;
+          reactionsDiv.appendChild(emojiSpan);
+        });
+      });
+
+      // Double-tap (dblclick) event for auto heart reaction
+      messageDiv.addEventListener('dblclick', (e) => {
+        e.stopPropagation(); // Prevent triggering other click events
+        console.log('Message double-tapped:', data);
+
+        // Add a heart emoji reaction
+        const heartEmoji = '❤️';
+        const existingReactions = Array.from(reactionsDiv.childNodes).map((node) => node.textContent);
+
+        // Avoid duplicating the heart emoji - uncomment if you want to prevent duplicates
+        //if (!existingReactions.includes(heartEmoji)) {
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = heartEmoji;
+          reactionsDiv.appendChild(emojiSpan);
+        //}
+      });
 
       messagesDiv.appendChild(messageDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -435,7 +489,6 @@
         });
     }
 
-
     function clearNotifications() {
       unreadMessages = 0;
       updateUnreadCount();
@@ -466,6 +519,28 @@
       } else {
         console.log('Not enough unread messages to send a notification.');
       }
+    }
+
+    function saveUserPost(targetUser) {
+      const message = `${user} saved ${targetUser}'s post`;
+      if (notificationsEnabled) {
+        socket.emit('sendNotification', {
+          targetUser: targetUser,
+          message: message
+        });
+      }
+      console.log(message); // For debugging purposes
+    }
+
+    function unsaveUserPost(targetUser) {
+      const message = `${user} unsaved ${targetUser}'s post`;
+      if (notificationsEnabled) {
+        socket.emit('sendNotification', {
+          targetUser: targetUser,
+          message: message
+        });
+      }
+      console.log(message); // For debugging purposes
     }
 
     function startTimerNotifications() {
@@ -530,25 +605,74 @@
     }
 
     // Back button handler
-  function showRoomList() {
-    // Disconnect from the room
-    if (socket) {
-      socket.emit('leaveRoom', { room_id: room });
-      socket.disconnect();
-      socket = null;
+    function showRoomList() {
+      // Disconnect from the room
+      if (socket) {
+        socket.emit('leaveRoom', { room_id: room });
+        socket.disconnect();
+        socket = null;
+      }
+      room = null;
+      // Fetch and display the room list
+      fetch(`/users/${user}/rooms`)
+        .then(response => response.json())
+        .then(rooms => {
+          displayRoomList(rooms);
+        })
+        .catch(error => {
+          console.error('Error fetching user rooms:', error);
+          alert('Error fetching your rooms. Please try again.');
+        });
     }
-    room = null;
-    // Fetch and display the room list
-    fetch(`/users/${user}/rooms`)
+
+    function updateEventViews(views) {
+      document.getElementById('eventViewsCount').textContent = `Views: ${views}`;
+    }
+
+    // Handle the button click to increment views
+    document.getElementById('incrementEventButton').addEventListener('click', () => {
+      fetch('/event/increment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ link: eventLink })
+      })
       .then(response => response.json())
-      .then(rooms => {
-        displayRoomList(rooms);
+      .then(data => {
+        updateEventViews(data.views);
       })
       .catch(error => {
-        console.error('Error fetching user rooms:', error);
-        alert('Error fetching your rooms. Please try again.');
+        console.error('Error incrementing event views:', error);
       });
-  }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const emojiButton = document.getElementById('emoji-button');
+      const messageInput = document.getElementById('messageInput');
+
+      if (emojiButton && messageInput) {
+        const picker = new window.EmojiButton(); 
+        
+        emojiButton.addEventListener('click', () => {
+          console.log('Emoji button clicked!');
+          picker.togglePicker(emojiButton);
+        });
+        picker.on('emoji', selection => {
+          messageInput.value += selection.emoji;
+          messageInput.focus();
+        });
+      } else {
+        console.error('Emoji button or message input not found.');
+      }
+    });
+
+    // Listen for live updates via Socket.IO
+    socket.on('eventUpdated', (data) => {
+      if (data.link === eventLink) {
+        updateEventViews(data.views);
+      }
+    });
   </script>
 </body>
 </html>

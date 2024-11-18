@@ -23,6 +23,8 @@ const CreateEvent = () => {
         zipcodeError: '',
         redirectToMyEvents: false,
         userId: '',
+        isRecurring: false,
+        recurrenceInterval: '',
     });
 
     const autocompleteRef = useRef(null);
@@ -105,6 +107,10 @@ const CreateEvent = () => {
         formData.append('type', eventData.eventType);
         formData.append('description', eventData.eventDescription);
         formData.append('userId', eventData.userId);
+        formData.append('isRecurring', eventData.isRecurring);
+        if (eventData.isRecurring) {
+            formData.append('recurrenceInterval', eventData.recurrenceInterval);
+        }
 
         eventData.eventImages.forEach((image) => {
             formData.append('eventImages', image);
@@ -307,6 +313,44 @@ const CreateEvent = () => {
                         onChange={handleVideoChange}
                     />
                 </div>
+                <div className='form-group'>
+                    <label>
+                        <input
+                            type="checkbox"
+                            onChange={(e) =>
+                                setEventData((prev) => ({
+                                    ...prev,
+                                    isRecurring: e.target.checked,
+                                    recurrenceInterval: e.target.checked ? prev.recurrenceInterval : '', // Clear interval if unchecked
+                                }))
+                            }
+                        />
+                      Recurring Event
+                    </label>
+                </div>
+                {eventData.isRecurring && (
+                    <div className="form-group">
+                        <label>Event takes place:</label>
+                        <select
+                            name="recurrenceInterval"
+                            value={eventData.recurrenceInterval}
+                            onChange={(e) =>
+                                setEventData((prev) => ({
+                                    ...prev,
+                                    recurrenceInterval: e.target.value,
+                                }))
+                            }
+                            required
+                        >
+                            <option value="">Select an interval</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="biweekly">Once in Two Weeks</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="annually">Annually</option>
+                        </select>
+                    </div>
+                )}
                 <button type="submit" className="submit-button">Create Event</button>
             </form>
 

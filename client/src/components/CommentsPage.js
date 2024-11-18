@@ -21,10 +21,14 @@ const CommentsPage = ({ postId, username }) => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
 
+  console.log("before fetching comments");
+
   useEffect(() => {
     fetchComments(postId).then(data => setComments(data));
   }, [postId]);
 
+  console.log("after fetching comments, handle comment");
+  
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (commentText.trim()) {

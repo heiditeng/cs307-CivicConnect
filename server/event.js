@@ -18,7 +18,14 @@ const EventSchema = new mongoose.Schema({
   bookmarkUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   userRatings: [{username: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
     rating: { type: Number, required: true, min: 1, max: 5 },
-    feedback: { type: String }}]
+    feedback: { type: String }}],
+  isRecurring: { type: Boolean, default: false }, 
+  recurrenceInterval: { 
+    type: String, 
+    enum: ['daily', 'weekly', 'biweekly', 'monthly', 'annually'], 
+    required: function () { return this.isRecurring; } //only required if event is recurring
+  },
+  recurrenceRule: { type: String }, //recurrence rule to implement recurrence
 });
 
 module.exports = mongoose.model('Event', EventSchema);

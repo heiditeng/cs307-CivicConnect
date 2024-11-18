@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom'; // If organizationId is part of the URL
 
 const NewsletterSignup = () => {
   const [name, setName] = useState('');
@@ -6,15 +7,27 @@ const NewsletterSignup = () => {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [message, setMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const userId = localStorage.getItem("userId"); // Get userId from localStorage
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    
+
+    // Ensure the user confirmed the checkbox
+    if (!isConfirmed) {
+      setMessage("You must agree to share your details with the organization.");
+      return;
+    }
+
     // Prepare the data to be sent to the server
     const subscriberData = { name, email };
 
+    // Start loading state
+    setLoading(true);
+
     try {
-      const response = await fetch('http://localhost:5010/api/newsletter/subscribers', {
+      const response = await fetch(`http://localhost:5010/api/organizations/add-subscriber/${userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,7 +40,7 @@ const NewsletterSignup = () => {
       }
 
       const data = await response.json();
-      console.log("Subscriber added:", data);
+      console.log('Subscriber added:', data);
 
       setMessage("Thank you for signing up for our newsletter!");
       setIsSubmitted(true);
@@ -36,6 +49,8 @@ const NewsletterSignup = () => {
       setIsConfirmed(false);
     } catch (error) {
       setMessage("There was an error signing up. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,11 +95,16 @@ const NewsletterSignup = () => {
               I agree to share my account details (name and email) with the organization.
             </label>
           </div>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Sign Up
+          <button
+            type="submit"
+            className={`px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={loading}
+          >
+            {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
       )}
+      {message && !isSubmitted && <p className="mt-4 text-center text-red-600">{message}</p>}
     </div>
   );
 };

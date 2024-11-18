@@ -18,7 +18,6 @@ const UserProfile = require('./userprofile.js');
 const OrganizationProfile = require('./organizationProfile.js');
 const recommendationsRouter = require("./routes/recommendations");
 const postRoutes = require('./postRoutes.js'); //import post routes
-const subscribers = require('./subscribers.js');
 const commentRoutes = require('./commentRoutes.js'); 
 const notificationRoutes = require('./notificationRoutes');
 const mongoose = require('mongoose');
@@ -227,7 +226,8 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
             console.log('org profile');
             const orgProfile = new OrganizationProfile({
                 userId: user._id,
-                bio: null
+                bio: null,
+                subscribers: []
             });
 
             console.log("org", orgProfile);
@@ -432,9 +432,6 @@ app.use('/api/organizations', organizationRoutes);
 
 // Using the event routes
 app.use('/api/events', eventRoutes);
-
-// Use the subscriber routes
-app.use('/api/newsletter', subscribers);
 
 //using post routes
 app.use('/api/PostRoutes', postRoutes);

@@ -249,7 +249,8 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
                 location: null,
                 occupation: null,
                 interests: null,
-                hobbies: null
+                hobbies: null,
+                subscriptions: []
             });
             
             await userProfile.save(); // save user profile in mongo

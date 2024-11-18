@@ -50,7 +50,7 @@ const OrganizationProfile = () => {
 
   // Handle newsletter signup
   const handleNewsletterSignup = () => {
-    navigate('/newsletter');  // Navigate to newsletter signup page
+    navigate(`/newsletter/${userId}`);  // Navigate to newsletter signup page
   };
 
   // Handle Edit Profile

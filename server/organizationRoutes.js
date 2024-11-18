@@ -16,12 +16,14 @@ const transporter = nodemailer.createTransport({
 });
 
 // Send welcome email to new subscriber
-async function sendWelcomeEmail(toEmail, name) {
+async function sendWelcomeEmail(toEmail, name, orgName) {
   const mailOptions = {
-    from: '"Community Helpers" <civicconnect075@gmail.com>',
+    from: `${orgName} <civicconnect075@gmail.com>`,
     to: toEmail,
     subject: 'Welcome!',
-    html: `<p>Hi ${name},</p><p>Thank you for signing up for our newsletter!</p>`,
+    html: `<p>Hi ${name},</p>
+           <p>Thank you for signing up for our newsletter!</p>
+           <p>We're happy to have you on board with <strong>${orgName}</strong>!</p>`,
   };
 
   try {
@@ -147,7 +149,7 @@ router.post('/add-subscriber/:userId', async (req, res) => {
     await organization.save();  // Save the updated organization
 
     // Send the welcome email to the new subscriber
-    await sendWelcomeEmail(email, name);
+    await sendWelcomeEmail(email, name, organization.username);
 
     res.status(201).json({
       message: 'Subscriber added successfully!',

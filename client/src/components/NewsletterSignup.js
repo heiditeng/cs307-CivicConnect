@@ -9,7 +9,7 @@ const NewsletterSignup = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const userId = localStorage.getItem("userId"); // Get userId from localStorage
+  const { userId } = useParams(); // Get userId from localStorage
 
   const handleSignup = async (e) => {
     e.preventDefault();

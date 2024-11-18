@@ -24,7 +24,6 @@ import UserFeed from './components/UserFeed';
 import RSVPList from './components/RSVPList';
 import MyProfile from './components/MyProfile';
 import NewsletterSignup from './components/NewsletterSignup';
-import Subscribers from './components/Subscribers';
 import EditProfile from './components/EditProfile';
 import { useLocation } from 'react-router-dom';
 import CommentsPage from './components/CommentsPage';
@@ -91,8 +90,7 @@ function App() {
               <Route path="/create-post" element={<CreatePost />} />
               <Route path="/feed" element={<UserFeed />} />
               <Route path="/event/:eventId/rsvp-list" element={<RSVPList />} />
-              <Route path="/newsletter" element={<NewsletterSignup />} /> 
-              <Route path="/subscribers" element={<Subscribers />} />
+              <Route path="/newsletter/:userId" element={<NewsletterSignup />} /> 
               <Route path="/comments/:postId" element={<CommentsPage />} />
               <Route path="/rsvp-page" element={<RSVPPage />} />
               <Route path="/calendar" element={<InAppCalendar />} />

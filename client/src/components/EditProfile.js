@@ -7,6 +7,7 @@ const EditProfile = () => {
   const [newBio, setNewBio] = useState("");  // State to track the updated bio
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
     if (!userId) {
@@ -47,6 +48,7 @@ const EditProfile = () => {
         },
         body: JSON.stringify({
           userId,
+          username,
           bio: newBio, // The updated bio
         }),
       });
@@ -55,7 +57,7 @@ const EditProfile = () => {
 
       if (res.ok) {
         // On success, redirect to the organization profile page
-        navigate('/organization-profile');
+        navigate(`/organization-profile/${userId}`);
       } else {
         setErrorMessage(data.error || "Failed to update the profile.");
       }

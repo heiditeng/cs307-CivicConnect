@@ -13,6 +13,7 @@ const OrganizationProfile = () => {
   // Fetch organization data on mount
   useEffect(() => {
     console.log("checking userId:", userId);
+    console.log("checking org status: ", isOrganization);
 
     if (!userId) {
       setErrorMessage("User ID not found. Please check the URL.");

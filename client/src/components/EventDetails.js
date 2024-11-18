@@ -4,19 +4,29 @@ import { useParams, Link } from "react-router-dom";
 const EventDetails = () => {
   const { id } = useParams();
   const [eventData, setEventData] = useState(null);
+  const [organizationData, setOrganizationData] = useState(null); // Added state for organization
   const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch individual event data by ID
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5010/api/events/events/${id}`
-        );
+        const res = await fetch(`http://localhost:5010/api/events/events/${id}`);
 
         if (res.ok) {
           const data = await res.json();
           setEventData(data);
+
+          // Fetch organization data using userId from eventData
+          const orgRes = await fetch(
+            `http://localhost:5010/api/organizations/organization/${data.userId}`
+          );
+          if (orgRes.ok) {
+            const orgData = await orgRes.json();
+            setOrganizationData(orgData);
+          } else {
+            setErrorMessage("Error fetching organization data");
+          }
         } else {
           setErrorMessage("Error fetching event data");
         }
@@ -32,13 +42,17 @@ const EventDetails = () => {
     return <div className="text-error">{errorMessage}</div>;
   }
 
-  if (!eventData) {
-    return <div className="text-gray-500">Loading event data...</div>;
+  if (!eventData || !organizationData) {
+    return <div className="text-gray-500">Loading event and organization data...</div>;
   }
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   };
 
   const formatTime = (timeString) => {
@@ -53,15 +67,15 @@ const EventDetails = () => {
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">{eventData.name}</h2>
         {eventData.rsvpUsers.length >= eventData.maxCapacity ? (
-                    <p className="text-red-500 font-bold">FULL</p>
-                  ) : eventData.rsvpUsers.length >= eventData.maxCapacity * 0.75 ? (
-                    <p className="text-yellow-300 font-bold">Almost full!</p>
-                  ) : null}
+          <p className="text-red-500 font-bold">FULL</p>
+        ) : eventData.rsvpUsers.length >= eventData.maxCapacity * 0.75 ? (
+          <p className="text-yellow-300 font-bold">Almost full!</p>
+        ) : null}
         <p>
           <strong>Organization:</strong>{" "}
           <Link to={`/organization-profile/${eventData.userId}`}>
             <span className="text-blue-600 hover:underline">
-              {eventData.userId}
+              {organizationData.username}
             </span>
           </Link>
         </p>

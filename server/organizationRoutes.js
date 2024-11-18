@@ -1,9 +1,10 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 const OrganizationProfile = require('./organizationProfile');
 
-// // Email transport setup
+// Email transport setup
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
@@ -17,7 +18,7 @@ const transporter = nodemailer.createTransport({
 // Send welcome email to new subscriber
 async function sendWelcomeEmail(toEmail, name) {
   const mailOptions = {
-    from: '"Community Helpers" <civicconnect075@gmail.com>', // Hardcoded for now but can be dynamic
+    from: '"Community Helpers" <civicconnect075@gmail.com>',
     to: toEmail,
     subject: 'Welcome!',
     html: `<p>Hi ${name},</p><p>Thank you for signing up for our newsletter!</p>`,
@@ -36,15 +37,29 @@ async function sendWelcomeEmail(toEmail, name) {
 router.get('/organization/:userId', async (req, res) => {
   const { userId } = req.params;
 
+  // Check if userId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: 'Invalid userId format' });
+  }
+
   try {
+    // Convert userId to ObjectId
+    const objectId = new mongoose.Types.ObjectId(userId);
+
     // Find the organization profile by userId
-    const organization = await OrganizationProfile.findOne({ userId }).populate('subscribers', 'name email');
+    const organization = await OrganizationProfile.findOne({ userId: objectId }).populate('subscribers', 'name email');
+    
     if (!organization) {
       return res.status(404).json({ error: 'Organization not found' });
     }
 
     // Return the organization profile data with subscribers
-    res.status(200).json(organization);
+    res.status(200).json({
+      userId: organization.userId,
+      username: organization.username,
+      bio: organization.bio,
+      subscribers: organization.subscribers
+    });
   } catch (error) {
     console.error('Error fetching organization:', error);
     res.status(500).json({ error: 'An error occurred while fetching the organization.' });
@@ -53,19 +68,17 @@ router.get('/organization/:userId', async (req, res) => {
 
 // Route to update organization profile
 router.post('/update-organization', async (req, res) => {
-  const { userId, bio } = req.body; // The body must contain userId and bio
+  const { userId, bio, username } = req.body;
 
-  // Validate request data
-  if (!userId || !bio) {
-    return res.status(400).json({ error: 'User ID and bio are required' });
+  if (!userId || !bio || !username) {
+    return res.status(400).json({ error: 'User ID, bio, and username are required' });
   }
 
   try {
-    // Find the organization profile by userId and update it
     const updatedOrganization = await OrganizationProfile.findOneAndUpdate(
-      { userId }, // Find by userId
-      { bio }, // Update bio
-      { new: true, runValidators: true } // Return updated profile and validate the data
+      { userId }, 
+      { bio },
+      { new: true, runValidators: true } 
     );
 
     if (!updatedOrganization) {
@@ -81,22 +94,30 @@ router.post('/update-organization', async (req, res) => {
 
 // Route to add a new organization profile (on signup or creation)
 router.post('/add-organization', async (req, res) => {
-  const { userId, bio } = req.body;
+  const { userId, bio, username } = req.body;
 
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
+  if (!userId || !username) {
+    return res.status(400).json({ error: 'User ID and username are required' });
+  }
+
+  // Check if userId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: 'Invalid userId format' });
   }
 
   try {
-    // Create a new organization profile with the provided data
+    // Convert userId to ObjectId
+    const objectId = new mongoose.Types.ObjectId(userId);
+
     const newOrganization = new OrganizationProfile({
-      userId,
-      bio: null
+      userId: objectId,
+      bio: bio || null, 
+      username 
     });
 
     await newOrganization.save();
 
-    return res.status(201).json({ message: 'Organization profile added successfully!', organization: newOrganization });
+    res.status(201).json({ message: 'Organization profile added successfully!', organization: newOrganization });
   } catch (error) {
     console.error('Error adding new organization:', error);
     res.status(500).json({ error: 'An error occurred while adding the organization.' });
@@ -109,7 +130,7 @@ router.post('/add-subscriber/:userId', async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    const organization = await OrganizationProfile.findOne({ userId });  // Find organization by userId
+    const organization = await OrganizationProfile.findOne({ userId });
     if (!organization) {
       return res.status(404).json({ error: 'Organization not found' });
     }
@@ -128,7 +149,13 @@ router.post('/add-subscriber/:userId', async (req, res) => {
     // Send the welcome email to the new subscriber
     await sendWelcomeEmail(email, name);
 
-    res.status(201).json({ message: 'Subscriber added successfully!', organization });
+    res.status(201).json({
+      message: 'Subscriber added successfully!',
+      organization: {
+        username: organization.username, 
+        subscribers: organization.subscribers
+      }
+    });
   } catch (error) {
     console.error('Error adding subscriber:', error);
     res.status(500).json({ error: 'An error occurred while adding the subscriber.' });
@@ -136,16 +163,19 @@ router.post('/add-subscriber/:userId', async (req, res) => {
 });
 
 // Route to get all subscribers of an organization
-router.get('/subscribers/:organizationId', async (req, res) => {
-  const { organizationId } = req.params;
+router.get('/subscribers/:userId', async (req, res) => {
+  const { userId } = req.params;
 
   try {
-    const organization = await OrganizationProfile.findById(organizationId).populate('subscribers', 'name email');
+    const organization = await OrganizationProfile.findOne({ userId }).populate('subscribers', 'name email');
     if (!organization) {
       return res.status(404).json({ error: 'Organization not found' });
     }
 
-    res.status(200).json({ subscribers: organization.subscribers });
+    res.status(200).json({
+      username: organization.username,
+      subscribers: organization.subscribers
+    });
   } catch (error) {
     console.error('Error fetching subscribers:', error);
     res.status(500).json({ error: 'An error occurred while fetching subscribers.' });

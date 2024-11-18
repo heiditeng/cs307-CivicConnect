@@ -89,6 +89,11 @@ const MyEvents = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     <strong>Bookmarks:</strong> {event.bookmarkUsers ? event.bookmarkUsers.length : 0}
                   </p>
+                  {event.rsvpUsers.length >= event.maxCapacity ? (
+                    <p className="text-red-500 font-bold">FULL</p>
+                  ) : event.rsvpUsers.length >= event.maxCapacity * 0.75 ? (
+                    <p className="text-yellow-300 font-bold">Almost full!</p>
+                  ) : null}
                   <Link
                     to={`/event/${event._id}/rsvp-list`}
                     className="text-blue-600 hover:underline mb-2 block"

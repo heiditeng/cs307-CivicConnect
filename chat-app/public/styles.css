@@ -96,6 +96,7 @@ body {
   display: inline-block;
   position: relative;
   margin: 2px 0;
+  transition: background-color 0.3s ease;
 }
 
 .message::after {
@@ -104,6 +105,11 @@ body {
   bottom: 0;
   width: 0;
   height: 0;
+}
+
+.message:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Slightly darker background on hover */
+  cursor: pointer; /* Indicate that the message is clickable */
 }
 
 .right {
@@ -404,4 +410,67 @@ input:checked + .slider::before {
 
 #event-container button:hover {
   background-color: #218838;
+}
+
+.emoji-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 0;
+}
+
+.emoji-button img {
+  width: 24px;
+  height: 24px;
+}
+/* Reaction container, hidden by default */
+.reaction-container {
+  display: none; /* Hidden by default */
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Positioning for others' messages */
+.message.left .reaction-container {
+  bottom: 0;
+  right: 0;
+  transform: translate(50%, 50%); /* Center the icon at the corner */
+}
+
+/* Positioning for your own messages */
+.message.right .reaction-container {
+  bottom: 0;
+  left: 0;
+  transform: translate(-50%, 50%); /* Center the icon at the corner */
+}
+
+/* Show the reaction container on hover */
+.message:hover .reaction-container {
+  display: flex; /* Make it visible */
+  opacity: 1;
+}
+
+.reactions {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #555;
+  display: flex;
+  gap: 5px; /* Space between emojis */
+}
+
+.message.right .reactions {
+  justify-content: flex-start; /* Your own messages: Start reactions from the left */
+}
+
+.message.left .reactions {
+  justify-content: flex-end; /* Others' messages: Start reactions from the right */
 }

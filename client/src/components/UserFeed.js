@@ -11,6 +11,7 @@ const UserFeed = () => {
   const [transportationFilter, setTransportationFilter] = useState("");
   const [profileData, setProfileData] = useState(null);
   const [recommendedKeywords, setRecommendedKeywords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // search query state var
 
   useEffect(() => {
     fetchUserProfile();
@@ -68,8 +69,18 @@ const UserFeed = () => {
       if (res.ok) {
         let data = await res.json();
 
-        // filter events based on recommended keywords
-        if (keywords && keywords.length > 0) {
+        // fetching events based on search query (if query made)
+        if (searchQuery) {
+          const searchLower = searchQuery.toLowerCase();
+          data = data.filter((event) =>
+            `${event.name} ${event.type} ${event.description} ${event.address} ${event.zipcode} ${event.date}`
+              .toLowerCase()
+              .includes(searchLower)
+          );
+        }
+
+        // filter events based on recommended keywords -- currently commented out for testing purposes
+        /*if (keywords && keywords.length > 0) {
           data = data.filter((event) => {
             const combinedText =
               `${event.name} ${event.type} ${event.description}`.toLowerCase();
@@ -77,7 +88,12 @@ const UserFeed = () => {
               combinedText.includes(keyword.toLowerCase())
             );
           });
-        }
+        }*/
+
+        // filter out FULL events.
+        data = data.filter(
+          (event) => event.rsvpUsers.length < event.maxCapacity
+        );
 
         setFeedData(filterEventsByTransportation(data));
       } else {
@@ -122,6 +138,20 @@ const UserFeed = () => {
     setTransportationFilter(e.target.value);
   };
 
+  // search related functions
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearch = () => {
+    fetchAllEvents(recommendedKeywords);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    fetchAllEvents(recommendedKeywords);
+  };
+
   // format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -159,7 +189,7 @@ const UserFeed = () => {
   const handleBookmark = async (eventId, eventName) => {
     const username = localStorage.getItem("username");
     try {
-      const res = await fetch(`http://localhost:5010/api/profiles/bookmark`, {
+      const res = await fetch("http://localhost:5010/api/profiles/bookmark", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -176,11 +206,11 @@ const UserFeed = () => {
         // show confirmation message based on action
         if (isRemoving) {
           setConfirmationMessage(
-            `"${eventName}" has been removed from your bookmarks.`
+            `${eventName} has been removed from your bookmarks.`
           );
         } else {
           setConfirmationMessage(
-            `"${eventName}" has been added to your bookmarks.`
+            `${eventName} has been added to your bookmarks.`
           );
         }
         setTimeout(() => setConfirmationMessage(""), 5000); // hide message after 5 seconds
@@ -234,6 +264,21 @@ const UserFeed = () => {
             {confirmationMessage}
           </div>
         )}
+        <div className="flex gap-4 mb-4 items-center">
+          <input
+            type="text"
+            className="input input-accent"
+            placeholder="Search by Type, Keyword, or Location"
+            value={searchQuery}
+            onChange={handleSearchInputChange}
+          />
+          <button className="btn btn-primary" onClick={handleSearch}>
+            Search
+          </button>
+          <button className="btn btn-secondary" onClick={handleClearSearch}>
+            Clear
+          </button>
+        </div>
         <button
           className="btn btn-outline btn-primary mb-4 self-center"
           onClick={() => fetchAllEvents(recommendedKeywords)}
@@ -289,6 +334,9 @@ const UserFeed = () => {
                   </p>
                   <p>{event.type}</p>
                   <p>{event.description}</p>
+                  {event.rsvpUsers.length >= event.maxCapacity * 0.75 ? (
+                    <p className="text-yellow-300 font-bold">Almost full!</p>
+                  ) : null}
                 </div>
 
                 {/* Event Image */}

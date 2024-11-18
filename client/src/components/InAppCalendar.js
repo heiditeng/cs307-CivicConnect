@@ -6,10 +6,13 @@ import "./InAppCalendar.css";
 const InAppCalendar = () => {
   const [bookedEvents, setBookedEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [filter, setFilter] = useState("Upcoming");
+  const [filter, setFilter] = useState("RSVP'd");
+  const [searchQuery, setSearchQuery] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchResultMessage, setSearchResultMessage] = useState("");
   const [selectedDateEvents, setSelectedDateEvents] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null); // Store the selected date for expanded view
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [foundEventDate, setFoundEventDate] = useState(null);
   const username = localStorage.getItem("username");
 
   useEffect(() => {
@@ -27,14 +30,17 @@ const InAppCalendar = () => {
 
         if (res.ok) {
           const data = await res.json();
+          
+          // Adjust event dates to local time
           const eventDates = data.rsvpEvents.map((event) => ({
-            date: new Date(event.date),
+            date: new Date(event.date), // Converts to local time zone automatically
             name: event.name,
-            startTime: event.startTime,
-            endTime: event.endTime,
+            startTime: adjustToUserTimeZone(event.startTime),
+            endTime: adjustToUserTimeZone(event.endTime),
           }));
+
           setBookedEvents(eventDates);
-          applyFilter("Upcoming", eventDates);
+          applyFilter("RSVP'd", eventDates);
         } else {
           setErrorMessage("Error fetching RSVP events data");
         }
@@ -45,6 +51,12 @@ const InAppCalendar = () => {
 
     fetchRSVPEvents();
   }, [username]);
+
+  const adjustToUserTimeZone = (timeString) => {
+    const eventTime = new Date(`1970-01-01T${timeString}Z`);
+    const localTimeOffset = new Date().getTimezoneOffset() * 60000;
+    return new Date(eventTime.getTime() - localTimeOffset).toISOString().substring(11, 16);
+  };
 
   const applyFilter = (filterType, events = bookedEvents) => {
     const now = new Date();
@@ -66,6 +78,38 @@ const InAppCalendar = () => {
     applyFilter(newFilter);
   };
 
+  const handleSearch = () => {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    const dateQuery = new Date(searchQuery);
+    const isValidDate = !isNaN(dateQuery.getTime());
+
+    const searchedEvents = bookedEvents.filter(event => {
+      if (isValidDate) {
+        return event.date.toDateString() === dateQuery.toDateString();
+      } else {
+        return event.name.toLowerCase().includes(lowerCaseQuery);
+      }
+    });
+
+    setFilteredEvents(searchedEvents);
+
+    if (searchedEvents.length > 0) {
+      setSearchResultMessage("Event found!");
+      setFoundEventDate(isValidDate ? dateQuery : searchedEvents[0].date);
+    } else {
+      setSearchResultMessage("No event found!");
+      setFoundEventDate(null);
+    }
+
+    if (isValidDate && searchedEvents.length > 0) {
+      setSelectedDate(dateQuery);
+      setSelectedDateEvents(searchedEvents);
+    } else {
+      setSelectedDate(null);
+      setSelectedDateEvents([]);
+    }
+  };
+
   const handleDateClick = (date) => {
     setSelectedDate(date);
     const eventsOnDate = filteredEvents.filter(
@@ -84,7 +128,9 @@ const InAppCalendar = () => {
       });
       times.push({
         time,
-        event: eventAtTime ? `${eventAtTime.name} (${eventAtTime.startTime} - ${eventAtTime.endTime})` : "Available"
+        event: eventAtTime
+          ? <span className="event">{eventAtTime.name} ({eventAtTime.startTime} - {eventAtTime.endTime})</span>
+          : <span className="event-available">Available</span>
       });
     }
     return times;
@@ -94,7 +140,24 @@ const InAppCalendar = () => {
     <div className="in-app-calendar-container">
       <h2 className="calendar-title">Your RSVP'd Events</h2>
 
-      {/* Filter Buttons */}
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search by event name or date (e.g., '2024-11-12')"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          className="search-input"
+        />
+        <button onClick={handleSearch} className="search-button">Search</button>
+      </div>
+
+      {searchResultMessage && (
+        <div className={`search-result-message ${searchResultMessage === "Event found!" ? 'success' : 'error'}`}>
+          {searchResultMessage}
+        </div>
+      )}
+
       <div className="filter-buttons">
         <button
           onClick={() => handleFilterChange("Upcoming")}
@@ -116,7 +179,6 @@ const InAppCalendar = () => {
         </button>
       </div>
 
-      {/* Calendar Component */}
       {errorMessage && <p className="error">{errorMessage}</p>}
       <div className="calendar-wrapper">
         <Calendar
@@ -133,14 +195,14 @@ const InAppCalendar = () => {
         />
       </div>
 
-      {/* Expanded View for Selected Date */}
       {selectedDate && (
         <div className="expanded-view">
           <h3>Events for {selectedDate.toDateString()}</h3>
           <div className="time-slots">
             {generateTimeSlots().map((slot, index) => (
               <div key={index} className="time-slot">
-                <strong>{slot.time}</strong>: {slot.event}
+                <span className="time">{slot.time}</span>
+                <span>{slot.event}</span>
               </div>
             ))}
           </div>

@@ -4,6 +4,7 @@ import './NavBar.css';
 
 const NavBar = () => {
   const isOrganization = localStorage.getItem('isOrganization') === 'true';
+  const userId = localStorage.getItem('userId');
   // get curr location
   const location = useLocation(); 
 
@@ -29,7 +30,7 @@ const NavBar = () => {
             )}
 
             {isOrganization && (
-              <Link to="/organization-profile/${userId}">My Profile</Link>
+              <Link to={`/organization-profile/${userId}`}>My Profile</Link>
             )}
             <Link to="/">Log Out</Link>
           </div>

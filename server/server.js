@@ -226,6 +226,7 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
             console.log('org profile');
             const orgProfile = new OrganizationProfile({
                 userId: user._id,
+                username: username,
                 bio: null,
                 subscribers: []
             });

@@ -59,7 +59,7 @@ const EventDetails = () => {
                   ) : null}
         <p>
           <strong>Organization:</strong>{" "}
-          <Link to={`/organization-profile`}>
+          <Link to={`/organization-profile/${eventData.userId}`}>
             <span className="text-blue-600 hover:underline">
               {eventData.userId}
             </span>

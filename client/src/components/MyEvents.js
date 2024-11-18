@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const MyEvents = () => {
   const [eventsData, setEventsData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const userId = localStorage.getItem("username");
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     if (!userId) {
@@ -71,11 +71,11 @@ const MyEvents = () => {
                   </h3>
                   <p className="text-sm text-gray-600">
                     <strong>Organization:</strong>{" "}
-                    <Link to={`/organization-profile/${event.userId}`}>
+                    {/* <Link to={`/organization-profile/${event.userId}`}>
                       <strong className="text-blue-600 hover:underline">
                         {event.userId}
                       </strong>
-                    </Link>
+                    </Link> */}
                   </p>
                   <p className="text-sm text-gray-600">
                     <strong>Date:</strong> {formatDate(event.date)}

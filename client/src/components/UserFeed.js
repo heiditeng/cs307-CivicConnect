@@ -12,6 +12,9 @@ const UserFeed = () => {
   const [profileData, setProfileData] = useState(null);
   const [recommendedKeywords, setRecommendedKeywords] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // search query state var
+  const [dateQuery, setDateQuery] = useState(""); // date query 
+  const [startTimeQuery, setStartTimeQuery] = useState(""); // start time
+  const [endTimeQuery, setEndTimeQuery] = useState(""); // end time
 
   useEffect(() => {
     fetchUserProfile();
@@ -79,6 +82,24 @@ const UserFeed = () => {
           );
         }
 
+        // filtering events based on date, start time, and end time queries
+        if (dateQuery) {
+          console.log(dateQuery);
+          data = data.filter((event) => event.date.startsWith(dateQuery));
+        }
+        if (startTimeQuery && endTimeQuery) {
+          data = data.filter((event) => {
+            const eventStart = event.startTime;
+            const eventEnd = event.endTime;
+        
+            // all events in this range
+            return eventStart <= endTimeQuery && eventEnd >= startTimeQuery;
+          });
+        } else if (startTimeQuery) {
+          data = data.filter((event) => event.startTime >= startTimeQuery);
+        } else if (endTimeQuery) {
+          data = data.filter((event) => event.endTime <= endTimeQuery);
+        }
         // filter events based on recommended keywords -- currently commented out for testing purposes
         /*if (keywords && keywords.length > 0) {
           data = data.filter((event) => {
@@ -143,19 +164,34 @@ const UserFeed = () => {
     setSearchQuery(e.target.value);
   };
 
+  const handleDateInputChange = (e) => {
+    setDateQuery(e.target.value);
+  };
+
+  const handleStartTimeInputChange = (e) => {
+    setStartTimeQuery(e.target.value);
+  };
+
+  const handleEndTimeInputChange = (e) => {
+    setEndTimeQuery(e.target.value);
+  };
+
   const handleSearch = () => {
     fetchAllEvents(recommendedKeywords);
   };
 
   const handleClearSearch = () => {
     setSearchQuery("");
+    setDateQuery("");
+    setStartTimeQuery("");
+    setEndTimeQuery("");
     fetchAllEvents(recommendedKeywords);
   };
 
   // format date for display
   const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const options = { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" };
+    return new Intl.DateTimeFormat(undefined, options).format(new Date(dateString));
   };
 
   // Handle RSVP for an event
@@ -272,6 +308,24 @@ const UserFeed = () => {
             value={searchQuery}
             onChange={handleSearchInputChange}
           />
+          <input
+            type="date"
+            className="input input-accent"
+            value={dateQuery}
+            onChange={handleDateInputChange}
+          />
+          <input
+            type="time"
+            className="input input-accent"
+            value={startTimeQuery}
+            onChange={handleStartTimeInputChange}
+          />
+          <input
+            type="time"
+            className="input input-accent"
+            value={endTimeQuery}
+            onChange={handleEndTimeInputChange}
+          />
           <button className="btn btn-primary" onClick={handleSearch}>
             Search
           </button>
@@ -332,6 +386,8 @@ const UserFeed = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     Location: {event.address}
                   </p>
+                  <p>Start Time: {event.startTime}</p>
+                  <p>End Time: {event.endTime}</p>
                   <p>{event.type}</p>
                   <p>{event.description}</p>
                   {event.rsvpUsers.length >= event.maxCapacity * 0.75 ? (

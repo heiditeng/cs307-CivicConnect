@@ -13,7 +13,7 @@ const EventSchema = new mongoose.Schema({
   image: [{ type: String }],
   thumbnailImage: { type: String },
   video: { type: String },
-  userId: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
   rsvpUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   bookmarkUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });

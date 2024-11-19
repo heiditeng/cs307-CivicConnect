@@ -7,7 +7,8 @@ const UserProfileSchema = new mongoose.Schema({
   location: { type: String, default: null },
   occupation: { type: String, default: null },
   interests: { type: String, default: null },
-  hobbies: { type: String, default: null }
+  hobbies: { type: String, default: null },
+  subscriptions: { type: [String], default: [] }
 });
 
 module.exports = mongoose.model('UserProfile', UserProfileSchema);

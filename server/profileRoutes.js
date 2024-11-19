@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const UserProfile = require('./userprofile'); 
@@ -19,7 +20,8 @@ router.post('/update-profile', async (req, res) => {
                 location, 
                 occupation, 
                 interests, 
-                hobbies 
+                hobbies,
+                subscriptions: [] 
             },
             { new: true, runValidators: true } // Return the updated document and run validation checks
         );
@@ -34,6 +36,7 @@ router.post('/update-profile', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while updating the profile.' });
     }
 });
+
 // route to fetch community member profile data by userId
 router.get('/profile/:userId', async (req, res) => {
     const { userId } = req.params;
@@ -69,7 +72,8 @@ router.post('/add-member', async (req, res) => {
             location: null,
             occupation: null,
             interests: null,
-            hobbies: null
+            hobbies: null,
+            subscriptions: []
         });
 
         await newMember.save();
@@ -78,6 +82,47 @@ router.post('/add-member', async (req, res) => {
     } catch (error) {
         console.error('Error adding new member:', error);
         res.status(500).json({ error: 'An error occurred while adding the member.' });
+    }
+});
+
+// Route to add a subscription to a user's profile
+router.post('/add-subscription/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { subscription } = req.body;
+
+    console.log("subsciption:", subscription);
+
+    if (!subscription) {
+        return res.status(400).json({ error: 'Subscription is required.' });
+    }
+
+    try {
+        const objectId = new mongoose.Types.ObjectId(userId);
+
+        // Find the user's profile by userId and ensure subscriptions is an array
+        const updatedProfile = await UserProfile.findOne( { userId: objectId } );
+
+        if (!updatedProfile) {
+            return res.status(404).json({ error: 'User profile not found.' });
+        }
+
+        // console.log("userprofile:", updatedProfile);
+        
+        // Check if subscriptions is null or not an array, initialize it as an empty array if needed
+        if (!Array.isArray(updatedProfile.subscriptions)) {
+            updatedProfile.subscriptions = []; // Initialize as an empty array
+        }
+
+        updatedProfile.subscriptions.push(subscription);
+        
+        await updatedProfile.save();
+
+        // console.log("updated:", updatedProfile); 
+
+        res.status(200).json({ message: 'Subscription added successfully!', profile: updatedProfile });
+    } catch (error) {
+        console.error('Error adding subscription:', error);
+        res.status(500).json({ error: 'An error occurred while adding the subscription.' });
     }
 });
 

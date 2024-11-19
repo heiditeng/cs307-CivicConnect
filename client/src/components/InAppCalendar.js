@@ -136,37 +136,46 @@ const InAppCalendar = () => {
   };
 
   const handleSearch = () => {
-    const lowerCaseQuery = searchQuery.toLowerCase();
+    const lowerCaseQuery = searchQuery.toLowerCase().trim();
+  
     const dateQuery = new Date(searchQuery);
     const isValidDate = !isNaN(dateQuery.getTime());
-
+  
+    const normalizedQuery = isValidDate
+      ? dateQuery.toISOString().split("T")[0]
+      : null;
+  
     const searchedEvents = bookedEvents.filter(event => {
+      const eventDate = event.date.toISOString().split("T")[0];
+      const eventName = event.name.toLowerCase().trim();
+  
       if (isValidDate) {
-        return event.date.toDateString() === dateQuery.toDateString();
+        return eventDate === normalizedQuery;
       } else {
-        return event.name.toLowerCase().includes(lowerCaseQuery);
+        return eventName.includes(lowerCaseQuery);
       }
     });
-
-    setFilteredEvents(searchedEvents);
-
+  
     if (searchedEvents.length > 0) {
+      setFilteredEvents(searchedEvents);
       setSearchResultMessage("Event found!");
-      setFoundEventDate(isValidDate ? dateQuery : searchedEvents[0].date);
+  
+      const foundDate = isValidDate
+        ? dateQuery
+        : new Date(searchedEvents[0].date); 
+  
+      setSelectedDate(foundDate);
+      setSelectedDateEvents(searchedEvents.filter(event => {
+        return event.date.toISOString().split("T")[0] === foundDate.toISOString().split("T")[0];
+      }));
     } else {
       setSearchResultMessage("No event found!");
-      setFoundEventDate(null);
-    }
-
-    if (isValidDate && searchedEvents.length > 0) {
-      setSelectedDate(dateQuery);
-      setSelectedDateEvents(searchedEvents);
-    } else {
+      setFilteredEvents([]);
       setSelectedDate(null);
       setSelectedDateEvents([]);
     }
   };
-
+  
   const handleDateClick = (date) => {
     setSelectedDate(date);
     

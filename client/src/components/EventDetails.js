@@ -62,6 +62,16 @@ const EventDetails = () => {
     return `${hoursIn12Format}:${minutes} ${amPm}`;
   };
 
+  // Calculate time difference and determine if within 24 hours
+  const eventDateTime = new Date(`${formatDate(eventData.date)} ${eventData.startTime}`);
+  const currentTime = new Date();
+  const timeDifference = eventDateTime - currentTime;
+
+  const cancelByDate = new Date(eventDateTime);
+  cancelByDate.setHours(cancelByDate.getHours() - 24); // 24 hours before event start time
+
+  const formatCancelByDate = cancelByDate.toLocaleString(); // Format cancel time
+
   return (
     <div className="flex justify-center items-center h-screen p-4 bg-gray-100">
       <div className="flex flex-col w-full max-w-5xl gap-4 p-6 bg-base-200 rounded-lg shadow-lg">
@@ -122,6 +132,13 @@ const EventDetails = () => {
             </div>
           </div>
         )}
+
+        {/* Cancellable Until Message */}
+        <div className="mt-4 text-red-500">
+          <p>
+            You can cancel your participation until {formatCancelByDate}.
+          </p>
+        </div>
 
         <div className="mt-4 flex gap-4">
           <Link to="/my-events">

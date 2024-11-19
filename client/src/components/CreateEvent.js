@@ -34,7 +34,7 @@ const CreateEvent = () => {
     });
 
     useEffect(() => {
-        const userId = localStorage.getItem("username");
+        const userId = localStorage.getItem("userId");
         setEventData((prev) => ({ ...prev, userId }));
     }, []);
 

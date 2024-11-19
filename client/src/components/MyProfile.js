@@ -9,6 +9,7 @@ const MyProfile = () => {
   const [rsvpEvents, setRsvpEvents] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [expandedNotifications, setExpandedNotifications] = useState({});
+  const [newsletterSubscriptions, setNewsletterSubscriptions] = useState([]); 
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -24,9 +25,14 @@ const MyProfile = () => {
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setUserData(userData);
+
           if (userData.userProfile) {
             setProfileData(userData.userProfile);
+            if (userData.userProfile.subscriptions) {
+              setNewsletterSubscriptions(userData.userProfile.subscriptions); 
+            }
           }
+
           fetchBookmarkedEvents(username);
           fetchRsvpEvents(username);
           fetchNotifications(userId);
@@ -202,6 +208,25 @@ const MyProfile = () => {
             ) : (
               <p className="text-gray-500">No notifications found.</p>
             )}
+          </div>
+
+          {/* Newsletter Subscription Section */}
+          <div className="p-6 bg-base-100 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Newsletter Subscriptions</h2>
+            <div>
+              {newsletterSubscriptions.length > 0 ? (
+                <ul>
+                  {newsletterSubscriptions.map((sub, index) => (
+                    <li key={index} className="mb-2">
+                      <span>{sub}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">Not subscribed to any newsletters yet.</p>
+              )}
+            </div>
+            {errorMessage && <p className="text-error mt-2">{errorMessage}</p>}
           </div>
 
           <div className="p-6 bg-base-100 rounded-lg shadow-lg">

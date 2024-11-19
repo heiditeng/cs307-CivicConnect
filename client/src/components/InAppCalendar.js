@@ -35,8 +35,10 @@ const InAppCalendar = () => {
             const { date, time: startTime } = adjustToESTIfNeeded(event.date, event.startTime, event.address);
             const { time: endTime } = adjustToESTIfNeeded(event.date, event.endTime, event.address);
     
+            const normalizedDate = new Date(`${date}T00:00:00Z`);
+    
             return {
-              date: new Date(date),
+              date: normalizedDate,
               name: event.name,
               startTime,
               endTime,
@@ -54,7 +56,7 @@ const InAppCalendar = () => {
         console.error("Fetch error:", error.message);
         setErrorMessage("Error fetching RSVP events data");
       }
-    };
+    };    
     fetchRSVPEvents();
   }, [username]);
 
@@ -73,12 +75,23 @@ const InAppCalendar = () => {
     console.log("Original Address:", address);
   
     try {
-      const timeZone = timeZoneMap[address] || "America/Los_Angeles"; 
+      const timeZone = timeZoneMap[address] || "America/Los_Angeles";
       console.log("Mapped TimeZone:", timeZone);
   
-      const localDateTime = DateTime.fromISO(`${dateString.split("T")[0]}T${timeString}`, {
-        zone: timeZone,
-      });
+      // Parse the date as UTC first if it has a `Z` or is ISO
+      const baseDate = DateTime.fromISO(dateString, { zone: "utc" });
+  
+      if (!baseDate.isValid) {
+        throw new Error(`Invalid Base Date: ${baseDate}`);
+      }
+  
+      console.log("Base Date (UTC):", baseDate.toString());
+  
+      // combine the base date with the time string in the specified time zone
+      const localDateTime = DateTime.fromISO(
+        `${baseDate.toISODate()}T${timeString}`,
+        { zone: timeZone }
+      );
   
       if (!localDateTime.isValid) {
         throw new Error(`Invalid Local DateTime: ${localDateTime}`);
@@ -88,24 +101,19 @@ const InAppCalendar = () => {
   
       // convert to EST
       const estDateTime = localDateTime.setZone("America/New_York");
-  
       console.log("Converted to EST DateTime:", estDateTime.toString());
   
-      // add +1 day to the date
-      const correctedDate = estDateTime.plus({ days: 1 });
+      // format the date and time
+      const formattedDate = estDateTime.toISODate(); // YYYY-MM-DD
+      const formattedTime = estDateTime.toFormat("HH:mm"); // HH:mm
   
-      const formattedDate = correctedDate.toISODate(); // YYYY-MM-DD
-      const formattedTime = correctedDate.toFormat("HH:mm"); // HH:mm
-  
-      console.log("Final Corrected to EST (+1 Day):", { formattedDate, formattedTime });
+      console.log("Final Adjusted DateTime:", { formattedDate, formattedTime });
       return { date: formattedDate, time: formattedTime };
     } catch (error) {
       console.error("Error adjusting time:", error.message);
       return { date: "Invalid date", time: "Invalid time" };
     }
-  };
-  
-
+  };  
 
   const applyFilter = (filterType, events = bookedEvents) => {
     const now = new Date();
@@ -161,10 +169,15 @@ const InAppCalendar = () => {
 
   const handleDateClick = (date) => {
     setSelectedDate(date);
-    const eventsOnDate = filteredEvents.filter(
-      (event) => event.date.toDateString() === date.toDateString()
-    );
-    setSelectedDateEvents(eventsOnDate);
+    
+    // match events for the selected date
+    const eventsOnDate = filteredEvents.filter((event) => {
+    const eventDate = event.date.toISOString().split("T")[0];
+    const clickedDate = date.toISOString().split("T")[0];
+    return eventDate === clickedDate;
+    });
+    
+    setSelectedDateEvents(eventsOnDate);  
   };
 
   const generateTimeSlots = () => {
@@ -233,13 +246,16 @@ const InAppCalendar = () => {
         <Calendar
           tileClassName={({ date, view }) => {
             if (view === "month") {
-              return filteredEvents.some(
-                (event) => event.date.toDateString() === date.toDateString()
-              )
-                ? "booked"
-                : null;
+              // check if the `date` matches any event date
+              const isBooked = filteredEvents.some((event) => {
+                const eventDate = event.date.toISOString().split("T")[0];
+                const calendarDate = date.toISOString().split("T")[0];
+                return eventDate === calendarDate;
+              });
+          
+              return isBooked ? "booked" : null;
             }
-          }}
+          }}          
           onClickDay={handleDateClick}
         />
       </div>

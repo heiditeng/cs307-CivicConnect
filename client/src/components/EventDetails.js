@@ -4,8 +4,9 @@ import { useParams, Link } from "react-router-dom";
 const EventDetails = () => {
   const { id } = useParams();
   const [eventData, setEventData] = useState(null);
-  const [organizationData, setOrganizationData] = useState(null); // Added state for organization
+  const [organizationData, setOrganizationData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const isOrganization = localStorage.getItem("isOrganization") === 'true';
 
   // Fetch individual event data by ID
   useEffect(() => {
@@ -136,24 +137,35 @@ const EventDetails = () => {
         {/* Cancellable Until Message */}
         <div className="mt-4 text-red-500">
           <p>
-            You can cancel your participation until {formatCancelByDate}.
+            RSVPs can be cancelled until {formatCancelByDate}.
           </p>
         </div>
 
+        {/* Conditional Buttons */}
         <div className="mt-4 flex gap-4">
-          <Link to="/my-events">
-            <button className="btn btn-outline btn-primary">
-              Back to My Events
-            </button>
-          </Link>
-          <Link to={`/modify-event/${id}`}>
-            <button className="btn btn-outline btn-warning">
-              Modify Event
-            </button>
-          </Link>
-          <Link to={`/delete-confirmation/${id}/${eventData.name}`}>
-            <button className="btn btn-outline btn-danger">Delete Event</button>
-          </Link>
+          {isOrganization ? (
+            <>
+              <Link to="/my-events">
+                <button className="btn btn-outline btn-primary">
+                  Back to My Events
+                </button>
+              </Link>
+              <Link to={`/modify-event/${id}`}>
+                <button className="btn btn-outline btn-warning">
+                  Modify Event
+                </button>
+              </Link>
+              <Link to={`/delete-confirmation/${id}/${eventData.name}`}>
+                <button className="btn btn-outline btn-danger">Delete Event</button>
+              </Link>
+            </>
+          ) : (
+            <Link to="/feed">
+              <button className="btn btn-outline btn-primary">
+                Back to User Feed
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

@@ -6,6 +6,8 @@ const Event = require("./event");
 const User = require("./user");
 const { emailTemplates } = require('./messages');
 const Notification = require('./notification');
+const CapacityNotification = require('./capacityNotifications');
+
 
 const nodemailer = require('nodemailer');
 
@@ -264,7 +266,7 @@ router.post("/:id/rsvp", async (req, res) => {
   const { username } = req.body;
 
   try {
-    // get event by id
+    // get event by ID
     const event = await Event.findById(id);
 
     // get user by username
@@ -278,12 +280,39 @@ router.post("/:id/rsvp", async (req, res) => {
     if (!event.rsvpUsers.includes(user._id.toString())) {
       event.rsvpUsers.push(user._id);
       await event.save();
-      console.log("User added RSVP list");
     }
+
     // check is event in user RSVP list, if not add
     if (!user.rsvpEvents.includes(event._id.toString())) {
       user.rsvpEvents.push(event._id);
       await user.save();
+    }
+
+    // curr capacity
+    const capacityReached = event.rsvpUsers.length / event.maxCapacity;
+
+    if (capacityReached === 1.0) {
+      // notify the event organizer when the event is full
+      const organizerNotification = new CapacityNotification({
+        userId: event.userId, 
+        eventId: event._id,
+        message: `Your event "${event.name}" is now full!`,
+      });
+      await organizerNotification.save();
+    } else if (capacityReached >= 0.75 ){
+      // notify all users who have bookmarked the event
+      const bookmarkUsers = await User.find({ bookmarks: event._id });
+
+      await Promise.all(
+        bookmarkUsers.map(async (bookmarkUser) => {
+          const newNotification = new CapacityNotification({
+            userId: bookmarkUser._id, // all bookmark users
+            eventId: event._id,
+            message: `The event "${event.name}" you bookmarked is now 90% full!`,
+          });
+          await newNotification.save();
+        })
+      );
     }
 
     res.status(200).json({ message: "RSVP successful" });
@@ -365,6 +394,31 @@ router.get("/rsvp-events/:username", async (req, res) => {
   } catch (error) {
     console.error("Error fetching RSVP'd events:", error);
     res.status(500).json({ error: "Error fetching RSVP'd events" });
+  }
+});
+
+
+router.get('/capacityNotifications/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // finding specific notifs for the curr user
+    const notifications = await CapacityNotification.find({ userId });
+
+    res.status(200).json(notifications);
+  } catch (err) {
+    console.error("Error fetching capacity notifications:", err);
+    res.status(500).json({ error: "Error fetching notifications" });
+  }
+});
+
+router.put('/capacityNotifications/mark-seen/:notificationId', async (req, res) => {
+  const { notificationId } = req.params;
+  try {
+    await CapacityNotification.findByIdAndUpdate(notificationId, { seen: true });
+    res.send('marked as seen');
+  } catch (err) {
+    res.status(500).send('err');
   }
 });
 

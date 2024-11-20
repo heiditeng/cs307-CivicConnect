@@ -111,10 +111,10 @@ const UserFeed = () => {
           });
         }*/
 
-        // filter out FULL events.
-        data = data.filter(
+        // filter out FULL events. commenting out for testing
+        /*data = data.filter(
           (event) => event.rsvpUsers.length < event.maxCapacity
-        );
+        );*/
 
         setFeedData(filterEventsByTransportation(data));
       } else {

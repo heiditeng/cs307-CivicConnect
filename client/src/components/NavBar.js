@@ -4,9 +4,13 @@ import "./NavBar.css";
 
 const NavBar = () => {
   const isOrganization = localStorage.getItem('isOrganization') === 'true';
+
   const [notifications, setNotifications] = useState([]);
   const [unreadNotifications, setUnreadNotifications] = useState([]);
-  const location = useLocation();
+
+  const userId = localStorage.getItem('userId');
+  // get curr location
+  const location = useLocation(); 
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -86,9 +90,22 @@ const NavBar = () => {
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-            <Link to="/myprofile">My Profile</Link>
-            <Link to="/calendar">My Calendar</Link>
-            <Link to="/my-events">My Events</Link>
+
+            {!isOrganization && (
+              <>
+                <Link to="/myprofile">My Profile</Link>
+                <Link to="/calendar">My Calendar</Link>
+              </>
+            )}
+            
+            {isOrganization && (
+              <Link to="/my-events">My Events</Link>
+            )}
+
+            {isOrganization && (
+              <Link to={`/organization-profile/${userId}`}>My Profile</Link>
+            )}
+
             <Link to="/">Log Out</Link>
           </div>
         </div>

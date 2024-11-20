@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
+import { DateTime } from "luxon";
 import "react-calendar/dist/Calendar.css";
 import "./InAppCalendar.css";
 
@@ -22,41 +23,97 @@ const InAppCalendar = () => {
     }
 
     const fetchRSVPEvents = async () => {
-      console.log("Fetching RSVP events for user:", username);
-
       try {
         const res = await fetch(`http://localhost:5010/api/events/rsvp-events/${username}`);
-        console.log("Response status:", res.status);
-
         if (res.ok) {
           const data = await res.json();
-          
-          // Adjust event dates to local time
-          const eventDates = data.rsvpEvents.map((event) => ({
-            date: new Date(event.date), // Converts to local time zone automatically
-            name: event.name,
-            startTime: adjustToUserTimeZone(event.startTime),
-            endTime: adjustToUserTimeZone(event.endTime),
-          }));
-
+          console.log("Fetched events:", data);
+    
+          const eventDates = data.rsvpEvents.map((event) => {
+            console.log("Processing event:", event);
+    
+            const { date, time: startTime } = adjustToESTIfNeeded(event.date, event.startTime, event.address);
+            const { time: endTime } = adjustToESTIfNeeded(event.date, event.endTime, event.address);
+    
+            const normalizedDate = new Date(`${date}T00:00:00Z`);
+    
+            return {
+              date: normalizedDate,
+              name: event.name,
+              startTime,
+              endTime,
+              location: event.address,
+            };
+          });
+    
           setBookedEvents(eventDates);
           applyFilter("RSVP'd", eventDates);
         } else {
+          console.error("Failed to fetch events:", await res.text());
           setErrorMessage("Error fetching RSVP events data");
         }
       } catch (error) {
+        console.error("Fetch error:", error.message);
         setErrorMessage("Error fetching RSVP events data");
       }
-    };
-
+    };    
     fetchRSVPEvents();
   }, [username]);
 
-  const adjustToUserTimeZone = (timeString) => {
-    const eventTime = new Date(`1970-01-01T${timeString}Z`);
-    const localTimeOffset = new Date().getTimezoneOffset() * 60000;
-    return new Date(eventTime.getTime() - localTimeOffset).toISOString().substring(11, 16);
+  const timeZoneMap = {
+    "Santa Monica, CA, USA": "America/Los_Angeles",
+    "New York, NY, USA": "America/New_York",
+    "Miami, FL, USA": "America/New_York",
+    "Chicago, IL, USA": "America/Chicago",
+    "Denver, CO, USA": "America/Denver",
+    "Seattle, WA, USA": "America/Los_Angeles",
   };
+
+  const adjustToESTIfNeeded = (dateString, timeString, address) => {
+    console.log("DateString:", dateString);
+    console.log("TimeString:", timeString);
+    console.log("Original Address:", address);
+  
+    try {
+      const timeZone = timeZoneMap[address] || "America/Los_Angeles";
+      console.log("Mapped TimeZone:", timeZone);
+  
+      // Parse the date as UTC first if it has a `Z` or is ISO
+      const baseDate = DateTime.fromISO(dateString, { zone: "utc" });
+  
+      if (!baseDate.isValid) {
+        throw new Error(`Invalid Base Date: ${baseDate}`);
+      }
+  
+      console.log("Base Date (UTC):", baseDate.toString());
+  
+      // combine the base date with the time string in the specified time zone
+      const localDateTime = DateTime.fromISO(
+        `${baseDate.toISODate()}T${timeString}`,
+        { zone: timeZone }
+      );
+  
+      if (!localDateTime.isValid) {
+        throw new Error(`Invalid Local DateTime: ${localDateTime}`);
+      }
+  
+      console.log("Parsed Local DateTime:", localDateTime.toString());
+  
+      // convert to EST
+      const estDateTime = localDateTime.setZone("America/New_York");
+      console.log("Converted to EST DateTime:", estDateTime.toString());
+  
+      // format the date and time
+      const formattedDate = estDateTime.toISODate(); // YYYY-MM-DD
+      const formattedTime = estDateTime.toFormat("HH:mm"); // HH:mm
+  
+      console.log("Final Adjusted DateTime:", { formattedDate, formattedTime });
+      return { date: formattedDate, time: formattedTime };
+    } catch (error) {
+      console.error("Error adjusting time:", error.message);
+      return { date: "Invalid date", time: "Invalid time" };
+    }
+  };  
 
   const applyFilter = (filterType, events = bookedEvents) => {
     const now = new Date();
@@ -79,43 +136,57 @@ const InAppCalendar = () => {
   };
 
   const handleSearch = () => {
-    const lowerCaseQuery = searchQuery.toLowerCase();
+    const lowerCaseQuery = searchQuery.toLowerCase().trim();
+  
     const dateQuery = new Date(searchQuery);
     const isValidDate = !isNaN(dateQuery.getTime());
-
+  
+    const normalizedQuery = isValidDate
+      ? dateQuery.toISOString().split("T")[0]
+      : null;
+  
     const searchedEvents = bookedEvents.filter(event => {
+      const eventDate = event.date.toISOString().split("T")[0];
+      const eventName = event.name.toLowerCase().trim();
+  
       if (isValidDate) {
-        return event.date.toDateString() === dateQuery.toDateString();
+        return eventDate === normalizedQuery;
       } else {
-        return event.name.toLowerCase().includes(lowerCaseQuery);
+        return eventName.includes(lowerCaseQuery);
       }
     });
-
-    setFilteredEvents(searchedEvents);
-
+  
     if (searchedEvents.length > 0) {
+      setFilteredEvents(searchedEvents);
       setSearchResultMessage("Event found!");
-      setFoundEventDate(isValidDate ? dateQuery : searchedEvents[0].date);
+  
+      const foundDate = isValidDate
+        ? dateQuery
+        : new Date(searchedEvents[0].date); 
+  
+      setSelectedDate(foundDate);
+      setSelectedDateEvents(searchedEvents.filter(event => {
+        return event.date.toISOString().split("T")[0] === foundDate.toISOString().split("T")[0];
+      }));
     } else {
       setSearchResultMessage("No event found!");
-      setFoundEventDate(null);
-    }
-
-    if (isValidDate && searchedEvents.length > 0) {
-      setSelectedDate(dateQuery);
-      setSelectedDateEvents(searchedEvents);
-    } else {
+      setFilteredEvents([]);
       setSelectedDate(null);
       setSelectedDateEvents([]);
     }
   };
-
+  
   const handleDateClick = (date) => {
     setSelectedDate(date);
-    const eventsOnDate = filteredEvents.filter(
-      (event) => event.date.toDateString() === date.toDateString()
-    );
-    setSelectedDateEvents(eventsOnDate);
+    
+    // match events for the selected date
+    const eventsOnDate = filteredEvents.filter((event) => {
+    const eventDate = event.date.toISOString().split("T")[0];
+    const clickedDate = date.toISOString().split("T")[0];
+    return eventDate === clickedDate;
+    });
+    
+    setSelectedDateEvents(eventsOnDate);  
   };
 
   const generateTimeSlots = () => {
@@ -184,13 +255,16 @@ const InAppCalendar = () => {
         <Calendar
           tileClassName={({ date, view }) => {
             if (view === "month") {
-              return filteredEvents.some(
-                (event) => event.date.toDateString() === date.toDateString()
-              )
-                ? "booked"
-                : null;
+              // check if the `date` matches any event date
+              const isBooked = filteredEvents.some((event) => {
+                const eventDate = event.date.toISOString().split("T")[0];
+                const calendarDate = date.toISOString().split("T")[0];
+                return eventDate === calendarDate;
+              });
+          
+              return isBooked ? "booked" : null;
             }
-          }}
+          }}          
           onClickDay={handleDateClick}
         />
       </div>

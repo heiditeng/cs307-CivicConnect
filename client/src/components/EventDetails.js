@@ -7,16 +7,21 @@ const EventDetails = () => {
   const [organizationData, setOrganizationData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const isOrganization = localStorage.getItem("isOrganization") === 'true';
+  const [isRSVPed, setIsRSVPed] = useState(false); // Track RSVP status
 
   // Fetch individual event data by ID
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
         const res = await fetch(`http://localhost:5010/api/events/events/${id}`);
-
         if (res.ok) {
           const data = await res.json();
           setEventData(data);
+
+          // Check if the user is already RSVP'd
+          const username = localStorage.getItem("username");
+          const userRSVPed = data.rsvpUsers.includes(username);
+          setIsRSVPed(userRSVPed);
 
           // Fetch organization data using userId from eventData
           const orgRes = await fetch(
@@ -38,6 +43,62 @@ const EventDetails = () => {
 
     fetchEventDetails();
   }, [id]);
+
+  const handleRSVP = async () => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/events/${id}/rsvp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
+
+      if (res.ok) {
+        setIsRSVPed(true); // Mark as RSVP'd
+        setEventData((prevData) => ({
+          ...prevData,
+          rsvpUsers: [...prevData.rsvpUsers, username], // Update RSVP user list
+        }));
+      } else {
+        setErrorMessage("Error RSVPing to the event");
+      }
+    } catch (error) {
+      setErrorMessage("Error RSVPing to the event");
+    }
+  };
+
+  const handleUnRSVP = async () => {
+    const username = localStorage.getItem("username");
+    try {
+      const res = await fetch(
+        `http://localhost:5010/api/events/${id}/remove-rsvp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
+
+      if (res.ok) {
+        setIsRSVPed(false); // Mark as not RSVP'd
+        setEventData((prevData) => ({
+          ...prevData,
+          rsvpUsers: prevData.rsvpUsers.filter((user) => user !== username), // Remove from RSVP list
+        }));
+      } else {
+        setErrorMessage("Error removing RSVP from the event");
+      }
+    } catch (error) {
+      setErrorMessage("Error removing RSVP from the event");
+    }
+  };
 
   if (errorMessage) {
     return <div className="text-error">{errorMessage}</div>;
@@ -97,7 +158,7 @@ const EventDetails = () => {
         <p><strong>End Time:</strong> {formatTime(eventData.endTime)}</p>
         <p><strong>Type:</strong> {eventData.type}</p>
         <p><strong>Description:</strong> {eventData.description}</p>
-        
+
         {/* Images section */}
         {eventData.image && eventData.image.length > 0 && (
           <div className="mb-4">
@@ -141,7 +202,27 @@ const EventDetails = () => {
           </p>
         </div>
 
-        {/* Conditional Buttons */}
+        {/* Conditional RSVP/UnRSVP Button */}
+        <div className="mt-4 flex gap-4">
+          {!isOrganization && (
+            <>
+              <button
+                className={`btn ${isRSVPed ? "btn-danger" : "btn-success"}`}
+                onClick={isRSVPed ? handleUnRSVP : handleRSVP}
+              >
+                {isRSVPed ? "Un-RSVP" : "RSVP"}
+              </button>
+            </>
+          )}
+
+          {isOrganization ? (
+            <Link to={`/create-event/${eventData.id}`}>
+              <button className="btn btn-primary">Edit Event</button>
+            </Link>
+          ) : null}
+        </div>
+
+        {/* Conditional Buttons for Organization */}
         <div className="mt-4 flex gap-4">
           {isOrganization ? (
             <>

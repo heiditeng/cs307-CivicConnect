@@ -8,6 +8,23 @@ const EventDetails = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const isOrganization = localStorage.getItem("isOrganization") === 'true';
   const [isRSVPed, setIsRSVPed] = useState(false); // Track RSVP status
+  const [canCancelRSVP, setCanCancelRSVP] = useState(true); // Track if un-RSVP is allowed
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(":");
+    const hoursIn12Format = hours % 12 || 12;
+    const amPm = hours < 12 ? "AM" : "PM";
+    return `${hoursIn12Format}:${minutes} ${amPm}`;
+  };
 
   // Fetch individual event data by ID
   useEffect(() => {
@@ -18,10 +35,15 @@ const EventDetails = () => {
           const data = await res.json();
           setEventData(data);
 
-          // Check if the user is already RSVP'd
-          const username = localStorage.getItem("username");
-          const userRSVPed = data.rsvpUsers.includes(username);
-          setIsRSVPed(userRSVPed);
+          // Calculate the cancellable time and determine if un-RSVP is allowed
+          const eventDateTime = new Date(`${formatDate(data.date)} ${data.startTime}`);
+          const currentTime = new Date();
+          const timeDifference = eventDateTime - currentTime;
+
+          const cancelByDate = new Date(eventDateTime);
+          cancelByDate.setHours(cancelByDate.getHours() - 24); // 24 hours before event start time
+
+          setCanCancelRSVP(currentTime < cancelByDate); // Allow un-RSVP only if current time is before cancelByDate
 
           // Fetch organization data using userId from eventData
           const orgRes = await fetch(
@@ -108,22 +130,6 @@ const EventDetails = () => {
     return <div className="text-gray-500">Loading event and organization data...</div>;
   }
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(":");
-    const hoursIn12Format = hours % 12 || 12;
-    const amPm = hours < 12 ? "AM" : "PM";
-    return `${hoursIn12Format}:${minutes} ${amPm}`;
-  };
-
   // Calculate time difference and determine if within 24 hours
   const eventDateTime = new Date(`${formatDate(eventData.date)} ${eventData.startTime}`);
   const currentTime = new Date();
@@ -198,7 +204,9 @@ const EventDetails = () => {
         {/* Cancellable Until Message */}
         <div className="mt-4 text-red-500">
           <p>
-            RSVPs can be cancelled until {formatCancelByDate}.
+            {canCancelRSVP
+              ? `RSVPs can be cancelled until ${formatCancelByDate}.`
+              : "RSVPs can no longer be cancelled 24 hours before the event."}
           </p>
         </div>
 
@@ -207,19 +215,14 @@ const EventDetails = () => {
           {!isOrganization && (
             <>
               <button
-                className={`btn ${isRSVPed ? "btn-danger" : "btn-success"}`}
-                onClick={isRSVPed ? handleUnRSVP : handleRSVP}
+                className={`btn ${isRSVPed && canCancelRSVP ? "btn-danger" : "btn-success"}`}
+                onClick={isRSVPed && canCancelRSVP ? handleUnRSVP : handleRSVP}
+                disabled={!canCancelRSVP && isRSVPed} // Disable if un-RSVP is not allowed
               >
-                {isRSVPed ? "Un-RSVP" : "RSVP"}
+                {isRSVPed && canCancelRSVP ? "Un-RSVP" : "RSVP"}
               </button>
             </>
           )}
-
-          {isOrganization ? (
-            <Link to={`/create-event/${eventData.id}`}>
-              <button className="btn btn-primary">Edit Event</button>
-            </Link>
-          ) : null}
         </div>
 
         {/* Conditional Buttons for Organization */}

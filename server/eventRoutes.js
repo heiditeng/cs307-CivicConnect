@@ -139,7 +139,6 @@ router.delete("/events/:id", async (req, res) => {
   }
 });
 
-// Route to modify an event
 // Route to modify an event and send notification
 router.put(
   "/events/:id",
@@ -229,7 +228,7 @@ router.put(
               user.username,
               updatedEvent.name,
               updatedEvent,
-              `http://localhost:3000/modify-events/${updatedEvent._id}`
+              `http://localhost:3000/event-details/${updatedEvent._id}`
             ),
           };
 

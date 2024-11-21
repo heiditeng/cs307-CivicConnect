@@ -137,6 +137,9 @@ const EventDetails = () => {
           <Link to={`/delete-confirmation/${id}/${eventData.name}`}>
             <button className="btn btn-outline btn-danger">Delete Event</button>
           </Link>
+          <Link to={'/feedback-page'}>
+          <button className="btn btn-outline btn-secondary">Event Feedback</button>
+          </Link>
         </div>
       </div>
     </div>

@@ -30,6 +30,7 @@ import CommentsPage from './components/CommentsPage';
 import RSVPPage from './components/RSVPPage';
 import InAppCalendar from './components/InAppCalendar';
 import { UserProvider } from './components/UserContext';
+import FeedbackPage from './components/FeedbackPage';
 
 function AppContainer() {
   const location = useLocation();
@@ -95,6 +96,7 @@ function App() {
               <Route path="/rsvp-page" element={<RSVPPage />} />
               <Route path="/calendar" element={<InAppCalendar />} />
               <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/feedback-page" element={<FeedbackPage />} />
           </Routes>
           </div>
         </div>

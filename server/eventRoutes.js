@@ -7,6 +7,7 @@ const User = require("./user");
 const { emailTemplates } = require('./messages');
 const Notification = require('./notification');
 const CapacityNotification = require('./capacityNotifications');
+const eventNotification = require('./eventNotification');
 
 
 const nodemailer = require('nodemailer');
@@ -41,6 +42,7 @@ const upload = multer({ storage: storage });
 console.log("Serving static files from:", path.join(__dirname, "uploads"));
 
 // Route to create a new event
+// Route to create a new event and notify users 
 router.post(
   "/events",
   upload.fields([{ name: "eventImages" }, { name: "thumbnailImage" }, { name: "eventVideo" }]),
@@ -272,6 +274,9 @@ router.post("/:id/rsvp", async (req, res) => {
     // get user by username
     const user = await User.findOne({ username });
 
+    // get org id to add to interested users list
+    const org = await User.findById(event.userId);
+
     if (!event || !user) {
       return res.status(404).json({ error: "Event or User not found" });
     }
@@ -287,6 +292,12 @@ router.post("/:id/rsvp", async (req, res) => {
       user.rsvpEvents.push(event._id);
       await user.save();
     }
+
+    // add user to interested users list if not already present
+    /*if (!org.interestedUsers.includes(user._id.toString()))  {
+      org.interestedUsers.push(user._id);
+      await org.save();
+    }*/
 
     // curr capacity
     const capacityReached = event.rsvpUsers.length / event.maxCapacity;

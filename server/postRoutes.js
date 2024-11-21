@@ -2,7 +2,8 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const Post = require('./post.js'); // Import post model
-// const fileUpload = require('./fileUpload.js'); //import upload model
+const fileUpload = require('./fileUploads.js');
+
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ router.post('/create', upload.array('files', 5), async (req, res) => {
       for (const file of req.files) {
         // Create a new Upload document for each file
         const upload = new fileUpload({
+          postId,
           data: file.buffer,
           contentType: file.mimetype,
           filename: file.originalname,

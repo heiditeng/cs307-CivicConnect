@@ -210,6 +210,22 @@ const UserInformationForm = () => {
             </select>
           </div>
 
+          <div className="form-group">
+            <label className="label cursor-pointer">
+              <span className="label-text">Allow in-app notifications for recommended events </span>
+              <input type="checkbox" class="toggle" />
+              <span className="circular-slider"></span>
+            </label>
+          </div>
+
+          <div className="form-group">
+            <label className="label cursor-pointer">
+              <span className="label-text">Allow email notifications for recommended events   </span>
+              <input type="checkbox" class="toggle" />
+              <span className="circular-slider"></span>
+            </label>
+          </div>
+
           <div className="form-control mt-6">
             <button type="submit" className="btn btn-primary w-full">
               Update Profile

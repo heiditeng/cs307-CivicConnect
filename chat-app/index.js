@@ -317,6 +317,22 @@ app.patch('/notifications/:id/mark-read', async (req, res) => {
 io.on('connection', (socket) => {
   console.log('New user connected');
 
+  socket.on('joinNotifications', async ({ user_id }) => {
+    try {
+      // Ensure the user exists
+      let user = await User.findOne({ user_id });
+      if (!user) {
+        user = new User({ user_id });
+        await user.save();
+      }
+
+      socket.join(user_id);
+      console.log(`User ${user_id} connected for notifications`);
+    } catch (err) {
+      console.error('Error joining notifications:', err.message);
+    }
+  });
+
   socket.on('joinRoom', async ({ user_id, room_id }) => {
     try {
       await addUserToRoom(user_id, room_id).catch(err => { console.error('Error in addUserToRoom:', err.message); });

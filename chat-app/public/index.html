@@ -19,6 +19,7 @@
       <h2>Connect</h2>
       <input id="connect-user_id" placeholder="User ID">
       <button onclick="connectUser()">Connect</button>
+      <button onclick="connectToNotifications()">Connect to Notifications</button>
     </div>
 
     <div id="room-list-container">
@@ -171,6 +172,49 @@
       // Initialize chat
       initializeChat();
     }
+
+    function setupSocketListeners() {
+      socket.on('notification', (data) => {
+        renderNotification(data);
+      });
+    }
+
+    function connectToNotifications() {
+      user = document.getElementById('connect-user_id').value.trim();
+      if (!user) {
+        alert('Please enter your User ID to connect.');
+        return;
+      }
+
+      // Disconnect existing socket if any
+      if (socket) {
+        socket.disconnect();
+      }
+
+      socket = io.connect('http://localhost:4000');
+      socket.emit('joinNotifications', { user_id: user });
+
+      // Set up socket listeners
+      setupSocketListeners();
+
+      // Hide unnecessary containers
+      document.getElementById('add-user-container').style.display = 'none';
+      document.getElementById('connect-container').style.display = 'none';
+      document.getElementById('room-list-container').style.display = 'none';
+
+      // Show chat container and notifications tab
+      document.getElementById('chat-container').style.display = 'block';
+      document.getElementById('back-button').style.display = 'none';
+      document.getElementById('tabs').style.display = 'flex';
+      document.getElementById('inputs').style.display = 'none';
+
+      // Show notifications tab
+      showTab('notifications');
+
+      // Fetch notifications
+      fetchNotifications();
+    }
+
 
     function initializeChat() {
       // Show the back button

@@ -199,7 +199,7 @@ img {
 #tabs {
   display: flex;
   justify-content: space-around;
-  background-color: #075e54;
+  background-color: #007bff;
   color: white;
   padding: 10px 0;
 }
@@ -219,7 +219,7 @@ img {
 /* Room List Styling */
 #room-list-container h2 {
   padding: 15px;
-  background-color: #075e54;
+  background-color: #007bff;
   color: #fff;
   margin: 0;
 }

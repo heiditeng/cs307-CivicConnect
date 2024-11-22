@@ -54,7 +54,8 @@ const Upload = mongoose.model('Upload', UploadSchema);
 const NotificationSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   message: String,
-  timestamp: { type: Date, default: Date.now }
+  timestamp: { type: Date, default: Date.now },
+  unread: { type: Boolean, default: true }
 });
 const Notification = mongoose.model('Notification', NotificationSchema);
 
@@ -266,7 +267,8 @@ app.post('/notifications', async (req, res) => {
     }
     const notification = new Notification({
       user: user._id,
-      message
+      message,
+      unread: true
     });
     await notification.save();
 
@@ -290,6 +292,22 @@ app.delete('/notifications/:user_id', async (req, res) => {
     }
     await Notification.deleteMany({ user: user._id });
     res.status(200).send('Notifications cleared');
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+app.patch('/notifications/:id/mark-read', async (req, res) => {
+  try {
+    const notification = await Notification.findById(req.params.id);
+    if (!notification) {
+      return res.status(404).send('Notification not found');
+    }
+
+    notification.unread = false; // Mark as read
+    await notification.save();
+
+    res.status(200).json({ message: 'Notification marked as read' });
   } catch (err) {
     res.status(500).send(err.message);
   }

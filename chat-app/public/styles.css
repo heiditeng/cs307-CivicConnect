@@ -58,7 +58,7 @@ body {
 }
 
 #back-button:hover {
-  text-decoration: underline;
+  background-color: #e2e6ea;
 }
 
 .back-icon {

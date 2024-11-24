@@ -7,7 +7,6 @@ const User = require("./user");
 const { emailTemplates } = require('./messages');
 const Notification = require('./notification');
 const CapacityNotification = require('./capacityNotifications');
-const eventNotification = require('./eventNotification');
 
 
 const nodemailer = require('nodemailer');
@@ -42,7 +41,6 @@ const upload = multer({ storage: storage });
 console.log("Serving static files from:", path.join(__dirname, "uploads"));
 
 // Route to create a new event
-// Route to create a new event and notify users 
 router.post(
   "/events",
   upload.fields([{ name: "eventImages" }, { name: "thumbnailImage" }, { name: "eventVideo" }]),
@@ -58,6 +56,8 @@ router.post(
       type,
       description,
       userId,
+      isRecurring,
+      recurrenceInterval,
     } = req.body;
 
     // Validate request data
@@ -79,6 +79,23 @@ router.post(
         });
     }
 
+    let recurrenceDates = [];
+    if (isRecurring === "true") {
+      if (!recurrenceInterval) {
+        return res.status(400).json({ error: "Recurrence interval is required for recurring events." });
+      }
+
+      // Calculate next 10 recurrence dates
+      try {
+        const { calculateRecurrenceDates } = require("./recurrenceCalc");
+        recurrenceDates = calculateRecurrenceDates(date, recurrenceInterval);
+      } catch (error) {
+        console.error("Error calculating recurrence dates:", error.message);
+        return res.status(500).json({ error: "Error calculating recurrence dates" });
+      }
+    }
+
+
     const newEvent = new Event({
       name,
       date,
@@ -93,15 +110,58 @@ router.post(
       thumbnailImage: req.files.thumbnailImage ? req.files.thumbnailImage[0].originalname : null,
       video: req.files.eventVideo ? req.files.eventVideo[0].originalname : null,
       userId,
+      isRecurring: isRecurring === "true",
+      recurrenceInterval: isRecurring === "true" ? recurrenceInterval : null,
+      recurrenceDates: isRecurring === "true" ? recurrenceDates : [],
     });
 
     try {
+      // Save the new event
       const savedEvent = await newEvent.save();
+
+      // Fetch the creator's interestedUsers
+      const creator = await User.findById(userId).populate("interestedUsers");
+      if (creator && creator.interestedUsers.length > 0) {
+        const interestedUsers = creator.interestedUsers;
+
+        // Notify each interested user
+        await Promise.all(
+          interestedUsers.map(async (user) => {
+            if (user.notificationsEnabled) {
+              // Send email notification
+              const mailOptions = {
+                from: "civicconnect075@gmail.com",
+                to: user.email,
+                subject: `New Event by ${creator.username}: ${name}`,
+                html: `
+                  <h1>${name}</h1>
+                  <p>${description}</p>
+                  <p>Date: ${date}</p>
+                  <p>Location: ${address}</p>
+                  <a href="http://localhost:3000/events/${savedEvent._id}">View Event</a>
+                `,
+              };
+              await transporter.sendMail(mailOptions);
+              console.log(`Email notification sent to ${user.email}`);
+
+              // Save app notification in the database
+              const notification = new Notification({
+                userId: user._id,
+                eventId: savedEvent._id,
+                message: `New event "${name}" created by ${creator.username}.`,
+              });
+              await notification.save();
+              console.log(`App notification saved for ${user.username}`);
+            }
+          })
+        );
+      }
+
       res.status(201).json(savedEvent);
     } catch (error) {
       console.error("Error saving event:", error.message);
-      res.status(500).json({ error: "Error saving event" });
     }
+
   }
 );
 
@@ -165,6 +225,8 @@ router.put(
       type,
       description,
       userId,
+      isRecurring,
+      recurrenceInterval,
     } = req.body;
 
     // Validate request data
@@ -205,7 +267,27 @@ router.put(
         ? req.files.eventVideo[0].originalname
         : null,
       userId,
+      isRecurring,
     };
+
+    // Handle recurrence
+    if (isRecurring === "true") {
+      if (!recurrenceInterval) {
+        return res.status(400).json({ error: "Recurrence interval is required for recurring events." });
+      }
+
+      try {
+        const { calculateRecurrenceDates } = require("./recurrenceCalc");
+        updatedData.recurrenceInterval = recurrenceInterval;
+        updatedData.recurrenceDates = calculateRecurrenceDates(date, recurrenceInterval);
+      } catch (error) {
+        console.error("Error calculating recurrence dates:", error.message);
+        return res.status(500).json({ error: "Error calculating recurrence dates" });
+      }
+    } else {
+      updatedData.recurrenceInterval = '';
+      updatedData.recurrenceDates = [];
+    }
 
     try {
       // Update the event in the database
@@ -274,9 +356,6 @@ router.post("/:id/rsvp", async (req, res) => {
     // get user by username
     const user = await User.findOne({ username });
 
-    // get org id to add to interested users list
-    const org = await User.findById(event.userId);
-
     if (!event || !user) {
       return res.status(404).json({ error: "Event or User not found" });
     }
@@ -292,12 +371,6 @@ router.post("/:id/rsvp", async (req, res) => {
       user.rsvpEvents.push(event._id);
       await user.save();
     }
-
-    // add user to interested users list if not already present
-    /*if (!org.interestedUsers.includes(user._id.toString()))  {
-      org.interestedUsers.push(user._id);
-      await org.save();
-    }*/
 
     // curr capacity
     const capacityReached = event.rsvpUsers.length / event.maxCapacity;

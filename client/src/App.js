@@ -96,7 +96,7 @@ function App() {
               <Route path="/rsvp-page" element={<RSVPPage />} />
               <Route path="/calendar" element={<InAppCalendar />} />
               <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/feedback-page" element={<FeedbackPage />} />
+              <Route path="/feedback-page/:eventId" element={<FeedbackPage />} />
           </Routes>
           </div>
         </div>

@@ -25,7 +25,7 @@ const EventSchema = new mongoose.Schema({
     enum: ['daily', 'weekly', 'biweekly', 'monthly', 'annually'], 
     required: function () { return this.isRecurring; } //only required if event is recurring
   },
-  recurrenceRule: { type: String }, //recurrence rule to implement recurrence
+  recurrenceDates: [{ type: Date }], //next 10 occurrences
 });
 
 module.exports = mongoose.model('Event', EventSchema);

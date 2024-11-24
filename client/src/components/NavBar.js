@@ -4,49 +4,35 @@ import "./NavBar.css";
 
 const NavBar = () => {
   const isOrganization = localStorage.getItem('isOrganization') === 'true';
-
-  const [notifications, setNotifications] = useState([]);
-  const [unreadNotifications, setUnreadNotifications] = useState([]);
-
   const userId = localStorage.getItem('userId');
-  // get curr location
   const location = useLocation(); 
+
+  const [capacityNotifications, setCapacityNotifications] = useState([]);
+  const [unreadCapacityNotifications, setUnreadCapacityNotifications] = useState([]);
+  const [eventNotifications, setEventNotifications] = useState([]);
+  const [unreadEventNotifications, setUnreadEventNotifications] = useState([]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      const userId = localStorage.getItem("userId");
       try {
-        // Fetch user data to get bookmarked events
-        const userRes = await fetch(
-          `http://localhost:5010/api/users/${userId}`
+        // Fetch capacity notifications
+        const capacityRes = await fetch(
+          `http://localhost:5010/api/events/capacityNotifications/${userId}`
         );
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          const bookmarkedEventIds = userData.bookmarks;
+        if (capacityRes.ok) {
+          const capacityData = await capacityRes.json();
+          setCapacityNotifications(capacityData);
+          setUnreadCapacityNotifications(capacityData.filter((n) => !n.seen));
+        }
 
-          // Fetch notifications for bookmarked events
-          const notificationsRes = await fetch(
-            `http://localhost:5010/api/events/capacityNotifications/${userId}`
-          );
-          if (notificationsRes.ok) {
-            const allNotifications = await notificationsRes.json();
-            const filteredNotifications = allNotifications.filter(
-              (notification) =>
-                bookmarkedEventIds.includes(
-                  notification.eventId
-                ) /*&& notification.seen === false*/
-            );
-
-            setNotifications(filteredNotifications);
-            const unread = filteredNotifications.filter(
-              (notification) =>
-                bookmarkedEventIds.includes(notification.eventId) &&
-                notification.seen === false
-            );
-            setUnreadNotifications(unread);
-          } else {
-            console.error("Error fetching notifications");
-          }
+        // Fetch event creation notifications
+        const eventRes = await fetch(
+          `http://localhost:5010/api/events/eventCreationNotifications/${userId}`
+        );
+        if (eventRes.ok) {
+          const eventData = await eventRes.json();
+          setEventNotifications(eventData);
+          setUnreadEventNotifications(eventData.filter((n) => !n.seen));
         }
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -54,28 +40,30 @@ const NavBar = () => {
     };
 
     fetchNotifications();
-  }, [location]);
+  }, [location, userId]);
 
-  // handle notification click to mark as seen
-  const handleNotificationClick = async (notificationId) => {
+  const handleNotificationClick = async (notificationId, type) => {
+    const endpoint =
+      type === "capacity"
+        ? `http://localhost:5010/api/events/capacityNotifications/mark-seen/${notificationId}`
+        : `http://localhost:5010/api/events/eventCreationNotifications/mark-seen/${notificationId}`;
+
     try {
-      const response = await fetch(
-        `http://localhost:5010/api/events/capacityNotifications/mark-seen/${notificationId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (response.ok) {
-        // remove seen from notif list
-        setNotifications((prevNotifications) =>
-          prevNotifications.map((notification) =>
-            notification._id === notificationId
-              ? { ...notification, seen: true }
-              : notification
-          )
-        );
+        if (type === "capacity") {
+          setCapacityNotifications((prev) =>
+            prev.map((n) => (n._id === notificationId ? { ...n, seen: true } : n))
+          );
+        } else {
+          setEventNotifications((prev) =>
+            prev.map((n) => (n._id === notificationId ? { ...n, seen: true } : n))
+          );
+        }
       } else {
         console.error("Error marking notification as seen");
       }
@@ -90,22 +78,14 @@ const NavBar = () => {
         <div className="dropdown">
           <button className="dropdown-btn">Menu</button>
           <div className="dropdown-content">
-
             {!isOrganization && (
               <>
                 <Link to="/myprofile">My Profile</Link>
                 <Link to="/calendar">My Calendar</Link>
               </>
             )}
-            
-            {isOrganization && (
-              <Link to="/my-events">My Events</Link>
-            )}
-
-            {isOrganization && (
-              <Link to={`/organization-profile/${userId}`}>My Profile</Link>
-            )}
-
+            {isOrganization && <Link to="/my-events">My Events</Link>}
+            {isOrganization && <Link to={`/organization-profile/${userId}`}>My Profile</Link>}
             <Link to="/">Log Out</Link>
           </div>
         </div>
@@ -116,47 +96,63 @@ const NavBar = () => {
       </div>
 
       <div className="navbar-end">
-      {!isOrganization ? (
-        <div className="dropdown">
-          <button className="btn glass">
-            {" "}
-            Capacity Notifications ({unreadNotifications.length})
-          </button>
-          <div className="dropdown-content max-h-72 overflow-y-auto">
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <div key={notification._id} className="notification-item">
-                  {notification.seen === false ? (
+        {!isOrganization && (
+          <div className="dropdown">
+            <button className="btn glass">
+              Capacity Notifications ({unreadCapacityNotifications.length})
+            </button>
+            <div className="dropdown-content max-h-72 overflow-y-auto">
+              {capacityNotifications.length > 0 ? (
+                capacityNotifications.map((n) => (
+                  <div key={n._id} className="notification-item">
                     <label>
                       <input
                         type="checkbox"
-                        checked={notification.seen}
-                        onChange={() =>
-                          handleNotificationClick(notification._id)
-                        }
+                        checked={n.seen}
+                        onChange={() => handleNotificationClick(n._id, "capacity")}
                       />
-                      {notification.message}
+                      {n.message}
                     </label>
-                  ) : (
-                    <label>
-                      <t>✓ </t>
-                      <t color="red">{notification.message}</t>
-                    </label>
-                  )}
+                  </div>
+                ))
+              ) : (
+                <p>No capacity notifications</p>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="dropdown">
+          <button className="btn glass">
+            Event Notifications ({unreadEventNotifications.length})
+          </button>
+          <div className="dropdown-content max-h-72 overflow-y-auto">
+            {eventNotifications.length > 0 ? (
+              eventNotifications.map((n) => (
+                <div key={n._id} className="notification-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={n.seen}
+                      onChange={() => handleNotificationClick(n._id, "eventCreation")}
+                    />
+                    {n.message}
+                  </label>
                 </div>
               ))
             ) : (
-              <p>No notifications</p>
+              <p>No event notifications</p>
             )}
-          </div> 
-        </div> ): (<p>       </p>)} 
+          </div>
+        </div>
         {isOrganization ? (
           <Link to="/create-event" className="btn glass">
             Create an Event
-          </Link> ) :(
-        <Link to="/feed" className="btn glass">
-          Go to Feed
-        </Link> )}
+          </Link>
+        ) : (
+          <Link to="/feed" className="btn glass">
+            Go to Feed
+          </Link>
+        )}
       </div>
     </nav>
   );

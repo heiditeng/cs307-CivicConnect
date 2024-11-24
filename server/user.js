@@ -16,6 +16,8 @@ const UserSchema = new mongoose.Schema({
   bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
   userProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'UserProfile' }, // Reference to UserProfile
   organizationProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'OrganizationProfile', default: null },
+  notificationsEnabled: { type: Boolean, default: true }, // Unified notifications toggle
+  interestedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = mongoose.model('User', UserSchema);

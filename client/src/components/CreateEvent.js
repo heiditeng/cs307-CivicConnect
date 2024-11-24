@@ -23,8 +23,8 @@ const CreateEvent = () => {
         zipcodeError: '',
         redirectToMyEvents: false,
         userId: '',
-        isRecurring: false,
-        recurrenceInterval: '',
+        isRecurring: false, // Added for recurrence
+        recurrenceInterval: '', 
     });
 
     const autocompleteRef = useRef(null);
@@ -107,9 +107,9 @@ const CreateEvent = () => {
         formData.append('type', eventData.eventType);
         formData.append('description', eventData.eventDescription);
         formData.append('userId', eventData.userId);
-        formData.append('isRecurring', eventData.isRecurring);
+        formData.append('isRecurring', eventData.isRecurring); 
         if (eventData.isRecurring) {
-            formData.append('recurrenceInterval', eventData.recurrenceInterval);
+            formData.append('recurrenceInterval', eventData.recurrenceInterval); // Add recurrenceInterval
         }
 
         eventData.eventImages.forEach((image) => {
@@ -313,39 +313,28 @@ const CreateEvent = () => {
                         onChange={handleVideoChange}
                     />
                 </div>
-                <div className='form-group'>
-                    <label>
-                        <input
-                            type="checkbox"
-                            onChange={(e) =>
-                                setEventData((prev) => ({
-                                    ...prev,
-                                    isRecurring: e.target.checked,
-                                    recurrenceInterval: e.target.checked ? prev.recurrenceInterval : '', // Clear interval if unchecked
-                                }))
-                            }
-                        />
-                      Recurring Event
-                    </label>
+                <div className="form-group">
+                    <label>Recurring Event:</label>
+                    <input
+                        type="checkbox"
+                        name="isRecurring"
+                        checked={eventData.isRecurring}
+                        onChange={handleChange}
+                    />
                 </div>
                 {eventData.isRecurring && (
                     <div className="form-group">
-                        <label>Event takes place:</label>
+                        <label>Recurrence Interval:</label>
                         <select
                             name="recurrenceInterval"
                             value={eventData.recurrenceInterval}
-                            onChange={(e) =>
-                                setEventData((prev) => ({
-                                    ...prev,
-                                    recurrenceInterval: e.target.value,
-                                }))
-                            }
+                            onChange={handleChange}
                             required
                         >
                             <option value="">Select an interval</option>
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
-                            <option value="biweekly">Once in Two Weeks</option>
+                            <option value="biweekly">Biweekly</option>
                             <option value="monthly">Monthly</option>
                             <option value="annually">Annually</option>
                         </select>

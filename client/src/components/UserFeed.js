@@ -15,6 +15,7 @@ const UserFeed = () => {
   const [dateQuery, setDateQuery] = useState(""); // date query 
   const [startTimeQuery, setStartTimeQuery] = useState(""); // start time
   const [endTimeQuery, setEndTimeQuery] = useState(""); // end time
+  const [canCancelRSVP, setCanCancelRSVP] = useState(true);
 
   useEffect(() => {
     fetchUserProfile();
@@ -258,13 +259,28 @@ const UserFeed = () => {
     }
   };
 
-  const handleRemoveRSVP = async (eventId) => {
+  const handleRemoveRSVP = async (eventId, eventDate, eventStartTime) => {
     const username = localStorage.getItem("username");
     if (!username) {
       setErrorMessage("User is not logged in");
       return;
     }
-
+  
+    // Calculate the time difference and check if it's within the 24-hour window
+    const eventDateTime = new Date(`${formatDate(eventDate)} ${eventStartTime}`);
+    const currentTime = new Date();
+    const timeDifference = eventDateTime - currentTime;
+  
+    const cancelByDate = new Date(eventDateTime);
+    cancelByDate.setHours(cancelByDate.getHours() - 24); // 24 hours before event start time
+  
+    if (currentTime >= cancelByDate) {
+      setCanCancelRSVP(false);
+      setErrorMessage("You cannot cancel your RSVP within 24 hours of the event.");
+      return;
+    }
+  
+    // Proceed with the RSVP removal if it's within the cancelable time
     try {
       const res = await fetch(
         `http://localhost:5010/api/events/${eventId}/remove-rsvp`,
@@ -278,9 +294,9 @@ const UserFeed = () => {
           }),
         }
       );
-
+  
       if (res.ok) {
-        fetchAllEvents(recommendedKeywords);
+        fetchAllEvents(recommendedKeywords); // refresh events after RSVP removal
       } else {
         setErrorMessage("Error removing RSVP from the event");
       }
@@ -413,17 +429,22 @@ const UserFeed = () => {
                       Show Details
                     </button>
                   </Link>
+                  
+                  {/* Render RSVP Button */}
                   <button
                     className={`btn btn-outline btn-sm ml-2 ${
                       event.rsvpUsers.includes(localStorage.getItem("userId"))
                         ? "btn-danger"
                         : "btn-success"
-                    }`}
-                    onClick={() =>
-                      event.rsvpUsers.includes(localStorage.getItem("userId"))
-                        ? handleRemoveRSVP(event._id)
-                        : handleRSVP(event._id)
-                    }
+                    } ${canCancelRSVP === false && event.rsvpUsers.includes(localStorage.getItem("userId")) ? 'btn-disabled opacity-50 cursor-not-allowed' : ''}`} // Add "disabled" style
+                    onClick={() => {
+                      if (event.rsvpUsers.includes(localStorage.getItem("userId"))) {
+                        handleRemoveRSVP(event._id, event.date, event.startTime); // Pass date and startTime
+                      } else {
+                        handleRSVP(event._id); // RSVP function as before
+                      }
+                    }}
+                    disabled={canCancelRSVP === false && event.rsvpUsers.includes(localStorage.getItem("userId"))} // Disable the button if RSVP can't be canceled
                   >
                     {event.rsvpUsers.includes(localStorage.getItem("userId"))
                       ? "Un-RSVP"
@@ -432,6 +453,7 @@ const UserFeed = () => {
                 </div>
               </div>
             ))}
+
           </div>
         ) : (
           <div className="text-center py-12">

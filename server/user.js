@@ -10,7 +10,6 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   enableMFAEmail: { type: Boolean, default: false },
-  enableMFAPhone: { type: Boolean, default: false },
   isOrganization: { type: Boolean, default: false },
   rsvpEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
   bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],

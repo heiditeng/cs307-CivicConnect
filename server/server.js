@@ -172,7 +172,7 @@ function isEmailValid(email) {
     return emailRegex.test(email);
 }
 
-async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization) {
+async function signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, isOrganization) {
     if (!username || !password || !confirmPassword || !email || !phoneNumber) {
         throw new Error('Make sure to fill out all fields.');
     }
@@ -213,7 +213,6 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
         email,
         phoneNumber,
         enableMFAEmail,
-        enableMFAPhone,
         isOrganization
     });
     
@@ -273,8 +272,8 @@ async function signupUser(username, password, confirmPassword, email, phoneNumbe
 
 app.post('/signup', async (req, res) => {
     try {
-        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization} = req.body;
-        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, enableMFAPhone, isOrganization);
+        const {username, password, confirmPassword, email, phoneNumber, enableMFAEmail, isOrganization} = req.body;
+        const message = await signupUser(username, password, confirmPassword, email, phoneNumber, enableMFAEmail, isOrganization);
         res.status(201).json({message});
     } catch (error) {
         res.status(400).json({error: error.message});
@@ -327,20 +326,22 @@ app.post('/login', async (req, res) => {
         let otp;
         if (user.enableMFAEmail) {
             const otp = generateOTP();
-            otpStore[user.email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+            otpStore[user.username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // Use username as key
+            console.log(`OTP stored for username ${user.username}:`, otpStore[user.username]);
+        
             await sendOTPEmail(user.email, otp);
-
             res.status(200).json({ message: 'OTP sent to your email.' });
-        } 
-        // check if MFA via phone is enabled
-        else if (user.enableMFAPhone) {
-            otp = generateOTP();
-            otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
-            console.log("sending SMS...");
+        }
+        
+        // // check if MFA via phone is enabled
+        // else if (user.enableMFAPhone) {
+        //     otp = generateOTP();
+        //     otpStore[username] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+        //     console.log("sending SMS...");
            
-            await sendOTPSMS(user.phoneNumber, otp);
-            res.status(200).json({ message: 'OTP sent to your phone.' });
-        } 
+        //     await sendOTPSMS(user.phoneNumber, otp);
+        //     res.status(200).json({ message: 'OTP sent to your phone.' });
+        // } 
         // no MFA enabled
         else {
             // Standard login without MFA
@@ -375,24 +376,35 @@ app.post('/save-credentials', (req, res) => {
 
 // verify OTP (MFA Step)
 app.post('/verify-otp', (req, res) => {
-    const {username, otp} = req.body;
+    const { username, otp } = req.body;
+
+    console.log('OTP verification request:', { username, otp });
+
     try {
+        // Retrieve OTP data from the store
         const otpData = otpStore[username];
+        console.log('OTP data from store:', otpData);
+
+        // Validate the OTP
         if (!otpData || otpData.otp !== otp || Date.now() > otpData.expiresAt) {
             throw new Error('Invalid or expired OTP.');
         }
 
         // OTP is valid, generate JWT token
-        const token = jwt.sign({username}, secretKey, {expiresIn: '1h'});
+        const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' });
 
         // Clear OTP after successful verification
         delete otpStore[username];
+        console.log('OTP verified successfully, token issued.');
 
-        res.status(200).json({message: 'Login successful.', token});
+        res.status(200).json({ message: 'Login successful.', token });
     } catch (error) {
-        res.status(400).json({error: error.message});
+        console.error('OTP verification error:', error.message);
+        res.status(400).json({ error: error.message });
     }
 });
+
+
 
 // route to fetch user profile by userId
 app.get('/api/users/:userId', async (req, res) => {

@@ -1,56 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './NewPassword.js';
+import './NewPassword.css';
 
 const NewPassword = () => {
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // extract token from the URL query parameters
   const token = new URLSearchParams(location.search).get('token');
 
-  // handle form submission
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-
+  
+    console.log("New Password:", newPassword);
+    console.log("Confirm Password:", confirmPassword);
+  
     if (!token) {
-      setMessage('Invalid or expired token.');
-      setLoading(false);
-      return;
+        setMessage('Invalid or expired token.');
+        setLoading(false);
+        return;
     }
-
+  
+    // Trim spaces and check if passwords match
+    if (newPassword.trim() !== confirmPassword.trim()) {
+        setMessage('Passwords do not match.');
+        setLoading(false);
+        return;
+    }
+  
     try {
-      const response = await fetch('http://localhost:5010/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({token, newPassword}),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Password has been reset successfully.');
-        // Redirect to the login page after a short delay
-        setTimeout(() => {
-          navigate('/');
-        }, 2000);
-      } else {
-        setMessage(`Error: ${data.error}`);
-      }
+        const response = await fetch('http://localhost:5010/reset-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token, newPassword, confirmPassword }), // Include confirmPassword here
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+            setMessage('Password has been reset successfully.');
+            // Redirect to the login page after a short delay
+            setTimeout(() => {
+                navigate('/');
+            }, 2000);
+        } else {
+            setMessage(`Error: ${data.error}`);
+        }
     } catch (error) {
-      console.error('Error resetting password:', error);
-      setMessage('Error: Unable to connect to the server.');
+        console.error('Error resetting password:', error);
+        setMessage('Error: Unable to connect to the server.');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
+  
 
   return (
     <div className="new-password">
@@ -63,6 +73,16 @@ const NewPassword = () => {
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+            className="form-input"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Confirm Password:</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="form-input"
             required
           />

@@ -67,7 +67,7 @@ function isPasswordValid(password) {
 
 // Reset password
 router.post('/reset-password', async (req, res) => {
-    const { token, newPassword } = req.body;
+    const { token, newPassword, confirmPassword } = req.body;
     console.log("Received token for password reset:", token);
 
     try {
@@ -75,37 +75,53 @@ router.post('/reset-password', async (req, res) => {
         const decoded = jwt.verify(token, secretKey);
         console.log("Decoded token:", decoded); // Log decoded token
         const userEmail = decoded.email;
-    
-        // find the user by email in the database
+
+        // Find the user by email in the database
         const user = await User.findOne({ email: userEmail.toLowerCase() });
         if (!user) {
             return res.status(400).json({ error: 'Invalid token or user not found.' });
         }
 
-        // check if password meets the complexity requirements
-        if (!isPasswordValid(newPassword)) {
-            throw new Error('Password must include at least one uppercase letter, one symbol, one number, and be at least 8 characters long.');
+        // Ensure newPassword and confirmPassword are provided
+        if (!newPassword || !confirmPassword) {
+            return res.status(400).json({ error: 'Both password fields are required.' });
         }
-        console.log('User object before save:', user); // Log user object
+
+        // Check if passwords match
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ error: 'Passwords do not match.' });
+        }
+
+        // Validate password complexity
+        if (!isPasswordValid(newPassword)) {
+            return res.status(400).json({ 
+                error: 'Password must include at least one uppercase letter, one symbol, one number, and be at least 8 characters long.' 
+            });
+        }
+
+        console.log('Passwords validated successfully.');
 
         // Hash the new password and update it
         user.password = await bcrypt.hash(newPassword, 10);
-        console.log('New hashed password:', user.password); // Log hashed password
-        console.log('User object before save:', user); // Log user object
-       
+        console.log('New hashed password:', user.password);
+
         try {
             await user.save();
+            console.log('Password updated successfully in the database.');
         } catch (error) {
             console.error('Error saving user:', error);
             return res.status(500).json({ error: 'Failed to update password.' });
         }
 
-
+        // Send success email
         await sendPasswordResetSuccessEmail(user.email);
+
         res.status(200).json({ message: 'Password has been reset successfully.' });
     } catch (error) {
+        console.error('Error during password reset:', error);
         res.status(400).json({ error: 'Invalid or expired token.' });
     }
 });
+
 
 module.exports = router;

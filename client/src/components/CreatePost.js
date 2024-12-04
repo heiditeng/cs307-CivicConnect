@@ -42,7 +42,6 @@ const CreatePost = () => {
         'image/jpeg',
         'image/png',
         'image/gif',
-        'image/webp',
         'video/mp4',
         'video/quicktime',
       ];
@@ -65,9 +64,11 @@ const CreatePost = () => {
   };
 
   //getting username from localStorage
-  const username = localStorage.getItem('username'); 
+  const userId = localStorage.getItem('userId'); 
+  const username = localStorage.getItem('username');
   //logging for debugging
   console.log('Username from localStorage:', username);
+  console.log('user id:', userId);
 
   const handleLocationInputChange = (e) => {
     const { value } = e.target;
@@ -88,7 +89,7 @@ const CreatePost = () => {
 
   const formData = new FormData();
   formData.append('postId', postId);
-  formData.append('username', username);
+  formData.append('userId', userId);
   formData.append('caption', postData.caption);
   formData.append('location', postData.location);
   formData.append('event', postData.event);
@@ -102,7 +103,7 @@ const CreatePost = () => {
   console.log([...formData.entries()]);
 
   try {
-    const response = await fetch('/api/PostRoutes/create', {
+    const response = await fetch('http://localhost:5010/api/posts/create', {
       method: 'POST',
       body: formData,
     });

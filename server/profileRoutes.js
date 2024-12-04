@@ -5,6 +5,8 @@ const UserProfile = require('./userprofile');
 
 router.post('/update-profile', async (req, res) => {
     const { userId, availability, location, occupation, interests, hobbies } = req.body;
+    console.log('Current userId:', userId);
+
 
     // Validate request data
     if (!userId) {

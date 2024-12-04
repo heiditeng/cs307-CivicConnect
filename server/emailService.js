@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 // one time password to email
 async function sendOTPEmail(toEmail, otp) {
     const mailOptions = {
-      from: '"Your App" <your-email@gmail.com>',
+      from: '"CivicConnect" <civicconnect075@gmail.com>',
       to: toEmail,
       subject: 'Your Login OTP',
       html: `<p>Your one-time login code is: <b>${otp}</b></p>`,

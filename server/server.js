@@ -393,6 +393,9 @@ app.post('/verify-otp', (req, res) => {
         // OTP is valid, generate JWT token
         const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' });
 
+        req.session.user = username;
+        console.log("username.", req.session.user)
+
         // Clear OTP after successful verification
         delete otpStore[username];
         console.log('OTP verified successfully, token issued.');
